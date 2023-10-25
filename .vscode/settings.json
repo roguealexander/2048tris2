@@ -9,9 +9,11 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "cSpell.words": [
     "falso",
+    "leaderboard",
     "legendapp",
     "ngneat",
     "NOSSR",
-    "supabase"
+    "supabase",
+    "tris"
   ]
 }

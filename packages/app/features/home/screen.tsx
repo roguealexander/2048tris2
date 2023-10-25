@@ -7,6 +7,7 @@ import { HighEfficiencyPanel } from 'app/components/high-efficiency-panel'
 import { Hold } from 'app/components/hold'
 import { HoldListener } from 'app/components/hold-listener'
 import { Queue } from 'app/components/queue'
+import { RulesTab } from 'app/components/rules-tab'
 import { Efficiency, Score } from 'app/components/stats'
 import { Tile } from 'app/components/tile'
 import { TopOutPanel } from 'app/components/top-out-panel'
@@ -35,7 +36,7 @@ const ActiveRightPanel = observer(() => {
 
 export function HomeScreen() {
   return (
-    <XStack maw={1480} als="center" f={1} gap={64} pt={64}>
+    <XStack w='100%' als="center" jc='center' f={1} gap={64} pt={24}>
       <HoldListener />
 
       {/* LEFT */}
@@ -48,6 +49,9 @@ export function HomeScreen() {
 
       {/* RIGHT */}
       <ActiveRightPanel />
+
+      {/* OVERLAY */}
+      <RulesTab />
     </XStack>
   )
 }
