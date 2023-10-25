@@ -3,7 +3,6 @@ import { ThemeProviderProps, useThemeSetting as next_useThemeSetting } from '@ta
 import {
   ThemePreference,
   setThemePreference,
-  useThemePreference,
 } from '@vonovak/react-native-theme-control'
 import { StatusBar } from 'expo-status-bar'
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
@@ -16,9 +15,6 @@ export const ThemeContext = createContext<
 type ThemeName = 'light' | 'dark' | 'system'
 
 export const UniversalThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const current = useThemePreference()
-  const systemTheme = useNonFlickeringColorScheme()
-
   const themeContext = useMemo(() => {
     const set = (val: string) => {
       setThemePreference(val as ThemePreference)
@@ -26,12 +22,12 @@ export const UniversalThemeProvider = ({ children }: { children: React.ReactNode
 
     return {
       set,
-      themes: ['light', 'dark'],
+      themes: ['light'],
       onChangeTheme: set,
-      current,
-      systemTheme: systemTheme as string,
+      current: 'light' as const,
+      systemTheme: 'light',
     }
-  }, [current, systemTheme])
+  }, [])
 
   return (
     <ThemeContext.Provider value={themeContext}>

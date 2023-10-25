@@ -3,31 +3,42 @@ export type Json =
   | number
   | boolean
   | null
-  | { [key: string]: Json }
+  | { [key: string]: Json | undefined }
   | Json[]
 
 export interface Database {
   public: {
     Tables: {
-      profiles: {
+      stats: {
         Row: {
-          about: string | null
-          avatar_url: string | null
+          "2048_high_efficiency": number | null
+          "4096_high_efficiency": number | null
+          "8192_high_efficiency": number | null
+          high_score: number | null
           id: string
-          name: string | null
         }
         Insert: {
-          about?: string | null
-          avatar_url?: string | null
+          "2048_high_efficiency"?: number | null
+          "4096_high_efficiency"?: number | null
+          "8192_high_efficiency"?: number | null
+          high_score?: number | null
           id: string
-          name?: string | null
         }
         Update: {
-          about?: string | null
-          avatar_url?: string | null
+          "2048_high_efficiency"?: number | null
+          "4096_high_efficiency"?: number | null
+          "8192_high_efficiency"?: number | null
+          high_score?: number | null
           id?: string
-          name?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "stats_id_fkey"
+            columns: ["id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
@@ -44,4 +55,3 @@ export interface Database {
     }
   }
 }
-

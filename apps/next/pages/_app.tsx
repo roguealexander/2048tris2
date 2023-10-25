@@ -37,6 +37,7 @@ function MyApp({
         <link rel="icon" href="/favicon.svg" />
       </Head>
       <NextThemeProvider
+        forcedTheme='light'
         onChangeTheme={(next) => {
           setTheme(next as ColorScheme)
         }}

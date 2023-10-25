@@ -1,47 +1,37 @@
-import { H2, Paragraph, SubmitButton, Text, Theme, XStack, YStack } from '@my/ui'
+import { H2, Paragraph, SubmitButton, Text, Theme, YStack } from '@my/ui'
 import { SchemaForm, formFields } from 'app/utils/SchemaForm'
 import { useSupabase } from 'app/utils/supabase/useSupabase'
-import React, { useEffect } from 'react'
-import { FormProvider, useForm, useWatch } from 'react-hook-form'
-import { createParam } from 'solito'
+import React from 'react'
+import { FormProvider, useForm } from 'react-hook-form'
 import { Link } from 'solito/link'
 import { useRouter } from 'solito/router'
 import { z } from 'zod'
 
-import { AppleSignIn } from './components/AppleSignIn'
-import { GoogleSignIn } from './components/GoogleSignIn'
-import { SocialLogin } from './components/SocialLogin'
-
-const { useParams, useUpdateParams } = createParam<{ email?: string }>()
+import { hashString } from 'app/utils/hashString'
 
 const SignInSchema = z.object({
-  email: formFields.text.email().describe('Email // Enter your email'),
+  name: formFields.text.min(4).describe('Name // Scoreboard name'),
   password: formFields.text.min(6).describe('Password // Enter your password'),
 })
 
-export const SignInScreen = () => {
+export const SignInComponent = () => {
   const supabase = useSupabase()
   const router = useRouter()
-  const { params } = useParams()
-  const updateParams = useUpdateParams()
-  useEffect(() => {
-    // remove the persisted email from the url, mostly to not leak user's email in case they share it
-    if (params?.email) {
-      updateParams({ email: undefined }, { web: { replace: true } })
-    }
-  }, [params?.email, updateParams])
   const form = useForm<z.infer<typeof SignInSchema>>()
 
-  async function signInWithEmail({ email, password }: z.infer<typeof SignInSchema>) {
+  async function signIn({ name, password }: z.infer<typeof SignInSchema>) {
     const { error } = await supabase.auth.signInWithPassword({
-      email: email,
+      email: `${hashString(name)}@fake.com`,
       password: password,
     })
 
     if (error) {
       const errorMessage = error?.message.toLowerCase()
       if (errorMessage.includes('email')) {
-        form.setError('email', { type: 'custom', message: errorMessage })
+        form.setError('name', {
+          type: 'custom',
+          message: errorMessage.replaceAll('email', 'name').replaceAll('Email', 'Name'),
+        })
       } else if (errorMessage.includes('password')) {
         form.setError('password', { type: 'custom', message: errorMessage })
       } else {
@@ -58,13 +48,12 @@ export const SignInScreen = () => {
         form={form}
         schema={SignInSchema}
         defaultValues={{
-          email: params?.email || '',
+          name: '',
           password: '',
         }}
-        onSubmit={signInWithEmail}
+        onSubmit={signIn}
         props={{
           password: {
-            afterElement: <ForgotPasswordLink />,
             secureTextEntry: true,
           },
         }}
@@ -77,7 +66,6 @@ export const SignInScreen = () => {
                 </SubmitButton>
               </Theme>
               <SignUpLink />
-              <SocialLogin />
             </>
           )
         }}
@@ -98,23 +86,10 @@ export const SignInScreen = () => {
 }
 
 const SignUpLink = () => {
-  const email = useWatch<z.infer<typeof SignInSchema>>({ name: 'email' })
   return (
-    <Link href={`/sign-up?${new URLSearchParams(email ? { email } : undefined).toString()}`}>
+    <Link href={`/sign-up`}>
       <Paragraph textAlign="center" theme="alt1">
         Don&apos;t have an account? <Text textDecorationLine="underline">Sign up</Text>
-      </Paragraph>
-    </Link>
-  )
-}
-
-const ForgotPasswordLink = () => {
-  const email = useWatch<z.infer<typeof SignInSchema>>({ name: 'email' })
-
-  return (
-    <Link href={`/reset-password?${new URLSearchParams(email ? { email } : undefined)}`}>
-      <Paragraph mt="$1" theme="alt2" textDecorationLine="underline">
-        Forgot your password?
       </Paragraph>
     </Link>
   )

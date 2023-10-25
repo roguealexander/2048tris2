@@ -1,4 +1,4 @@
-import { SignUpScreen } from 'app/features/auth/sign-up-screen'
+import { SignUpComponent } from 'app/features/auth/sign-up-component'
 import { Stack } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
@@ -10,7 +10,7 @@ export default function Screen() {
           title: 'Sign Up',
         }}
       />
-      <SignUpScreen />
+      <SignUpComponent />
     </SafeAreaView>
   )
 }
