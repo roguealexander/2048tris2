@@ -3354,7 +3354,7 @@ __metadata:
     "@tamagui-google-fonts/courier-prime": "*"
     "@tamagui/animations-moti": ^1.74.8
     "@tamagui/animations-react-native": ^1.74.8
-    "@tamagui/build": ^1.74.8
+    "@tamagui/build": "*"
     "@tamagui/cli": ^1.74.8
     "@tamagui/create-theme": ^1.74.8
     "@tamagui/font-inter": ^1.74.8
@@ -6999,7 +6999,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tamagui/build@npm:1.74.8, @tamagui/build@npm:^1.74.8":
+"@tamagui/build@npm:1.74.8":
   version: 1.74.8
   resolution: "@tamagui/build@npm:1.74.8"
   dependencies:
