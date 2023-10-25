@@ -15,6 +15,10 @@ export default function HomeLayout() {
   const [fontLoaded] = useFonts({
     Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
     InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
+    CourierPrime: require('@tamagui-google-fonts/courier-prime/fonts/CourierPrime-Regular.ttf'),
+    CourierPrimeItalic: require('@tamagui-google-fonts/courier-prime/fonts/CourierPrime-Italic.ttf'),
+    CourierPrimeBold: require('@tamagui-google-fonts/courier-prime/fonts/CourierPrime-Bold.ttf'),
+    CourierPrimeBoldItalic: require('@tamagui-google-fonts/courier-prime/fonts/CourierPrime-BoldItalic.ttf'),
   })
 
   const [sessionLoadAttempted, setSessionLoadAttempted] = useState(false)

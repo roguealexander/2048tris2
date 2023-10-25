@@ -21,7 +21,8 @@ import { TileRecord } from '../types'
 import { batch } from '@legendapp/state'
 import { Stats } from './stats'
 import { ActiveTilesHistogram } from './active-tile-histogram'
-import { Button, PortalHost, PortalItem, SizableText, XStack, YStack } from '@my/ui'
+import { Button, PortalHost, PortalItem, SizableText, Spacer, XStack, YStack } from '@my/ui'
+import { GestureDetector, Gesture } from 'react-native-gesture-handler'
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -237,9 +238,19 @@ export const BoardComp = observer(() => {
     actions$.drop()
   }
 
-  const moveBall: React.MouseEventHandler<HTMLDivElement> = (event) => {
+  const moveBall = (event: any) => {
     state$.mouseX.set(event.nativeEvent.offsetX)
   }
+
+	// Native gesture handler
+  // const gesture = Gesture.Pan()
+	// 	.onBegin((event) => {
+	// 		state$.mouseX.set(event.x)
+	// 	})
+  //   .onChange((event) => {
+  //     state$.mouseX.set(event.x)
+  //   })
+  //   .onFinalize(releaseBall)
 
   return (
     <YStack
@@ -251,20 +262,22 @@ export const BoardComp = observer(() => {
       h={height}
       style={{ boxSizing: 'content-box' }}
     >
-      <YStack
-        ref={scene}
-        onPress={releaseBall}
-        // onMouseMove={moveBall}
-        pos="absolute"
-        w={width + 64 * 2}
-        h={height + 64 * 2}
-        l={-64}
-        t={-64}
-      >
-        <TileDropPositioner>
-          <Tile size={state$.activeTile} />
-        </TileDropPositioner>
-      </YStack>
+      {/* <GestureDetector gesture={gesture}> */}
+        <YStack
+          ref={scene}
+          onPress={releaseBall}
+          onPointerMove={moveBall}
+          pos="absolute"
+          w={width + 64 * 2}
+          h={height + 64 * 2}
+          l={-64}
+          t={-64}
+        >
+          <TileDropPositioner>
+            <Tile size={state$.activeTile} />
+          </TileDropPositioner>
+        </YStack>
+      {/* </GestureDetector> */}
     </YStack>
   )
 })
@@ -272,7 +285,7 @@ export const BoardComp = observer(() => {
 export const Board = observer(() => {
   return (
     <YStack gap="$2" pos="relative" ai="flex-start">
-      <SizableText>2048tris</SizableText>
+      <Spacer size={20} />
       <BoardComp />
     </YStack>
   )

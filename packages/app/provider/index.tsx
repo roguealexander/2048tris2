@@ -6,6 +6,7 @@ import { SafeAreaProvider } from './safe-area'
 import { TamaguiProvider } from './tamagui'
 import { UniversalThemeProvider } from './theme'
 import { ToastProvider } from './toast'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 
 export function Provider({
   initialSession,
@@ -39,4 +40,5 @@ const Providers = compose([
   TamaguiProvider,
   ToastProvider,
   QueryClientProvider,
+  GestureHandlerRootView,
 ])

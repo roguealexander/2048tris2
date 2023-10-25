@@ -17,7 +17,7 @@ export const Tile = observer(({ size }: { size?: Observable<TileSize | null> }) 
 
 	return (
 		<XStack w={tileRadius} h={tileRadius} br={tileRadius} bg={tileData.color} jc='center' ai='center'>
-			<SizableText size="$8" color={tileData.textColor}>{tileData.size}</SizableText>
+			<SizableText size="$7" color={tileData.textColor}>{tileData.size}</SizableText>
 		</XStack>
 	)
 })

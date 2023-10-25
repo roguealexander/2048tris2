@@ -3351,6 +3351,7 @@ __metadata:
   resolution: "@my/ui@workspace:packages/ui"
   dependencies:
     "@hookform/resolvers": ^3.1.0
+    "@tamagui-google-fonts/courier-prime": "*"
     "@tamagui/animations-moti": ^1.74.8
     "@tamagui/animations-react-native": ^1.74.8
     "@tamagui/build": ^1.74.8
@@ -6831,6 +6832,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tamagui-google-fonts/courier-prime@*, @tamagui-google-fonts/courier-prime@workspace:packages/font-courier-prime":
+  version: 0.0.0-use.local
+  resolution: "@tamagui-google-fonts/courier-prime@workspace:packages/font-courier-prime"
+  dependencies:
+    "@tamagui/build": "*"
+    subset-font: ^1.6.1
+  peerDependencies:
+    "@tamagui/core": "*"
+  languageName: unknown
+  linkType: soft
+
 "@tamagui/accordion@npm:1.74.8":
   version: 1.74.8
   resolution: "@tamagui/accordion@npm:1.74.8"
@@ -6965,6 +6977,25 @@ __metadata:
     "@tamagui/simple-hash": 1.74.8
     "@tamagui/static": 1.74.8
   checksum: 231b2331a892fc622a2b1f9db24e7a2415ce677724b807fdcad3b1e59f4cd7266143e202b962712a14c0edddd4387f307f6e641dbd38ed87fda31f3cdb2363b2
+  languageName: node
+  linkType: hard
+
+"@tamagui/build@npm:*":
+  version: 1.75.4
+  resolution: "@tamagui/build@npm:1.75.4"
+  dependencies:
+    "@types/fs-extra": ^9.0.13
+    chokidar: ^3.5.2
+    esbuild: ~0.19.3
+    execa: ^5.0.0
+    fast-glob: ^3.2.11
+    fs-extra: ^11.1.0
+    get-tsconfig: ^4.5.0
+    lodash.debounce: ^4.0.8
+    typescript: ^5.2.2
+  bin:
+    tamagui-build: tamagui-build.js
+  checksum: 03e6ffda6b9ac12a5a564361d7023f25ea8c9d80d16880e371891005d0390130ad127eca4744cdc5753b2a406b3d47576d6fa555852b8960a4febfad3fdf57c5
   languageName: node
   linkType: hard
 
@@ -10421,6 +10452,7 @@ __metadata:
     "@supabase/auth-helpers-nextjs": ^0.7.4
     "@supabase/auth-helpers-react": ^0.4.2
     "@supabase/supabase-js": ^2.33.1
+    "@tamagui-google-fonts/courier-prime": "*"
     "@tamagui/animations-react-native": ^1.74.8
     "@tamagui/colors": ^1.74.8
     "@tamagui/font-inter": ^1.74.8
@@ -16483,6 +16515,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fontverter@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "fontverter@npm:2.0.0"
+  dependencies:
+    wawoff2: ^2.0.0
+    woff2sfnt-sfnt2woff: ^1.0.0
+  checksum: 3dbfcc0023a6af401a34c248b965fdc4abacb6cb738b7eed56d7440b672f029b24c709975f7f3648c3d86bcc08fa6c6fca3762f286ceb9d73920e7b5f6ec0b76
+  languageName: node
+  linkType: hard
+
 "for-each@npm:^0.3.3":
   version: 0.3.3
   resolution: "for-each@npm:0.3.3"
@@ -17414,6 +17456,13 @@ __metadata:
   bin:
     handlebars: bin/handlebars
   checksum: 00e68bb5c183fd7b8b63322e6234b5ac8fbb960d712cb3f25587d559c2951d9642df83c04a1172c918c41bcfc81bfbd7a7718bbce93b893e0135fc99edea93ff
+  languageName: node
+  linkType: hard
+
+"harfbuzzjs@npm:^0.3.0":
+  version: 0.3.3
+  resolution: "harfbuzzjs@npm:0.3.3"
+  checksum: 2f17d536d339538312c2fdd2da825d5533ced4d923f4ad02bfabce8acc74c249b95290593dc5aa78e760a4f2906552a6c47e16a1122a4ae4780c1958792f043a
   languageName: node
   linkType: hard
 
@@ -21916,7 +21965,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"p-limit@npm:^3.0.2":
+"p-limit@npm:^3.0.2, p-limit@npm:^3.1.0":
   version: 3.1.0
   resolution: "p-limit@npm:3.1.0"
   dependencies:
@@ -22016,17 +22065,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"pako@npm:^1.0.7, pako@npm:~1.0.5":
+  version: 1.0.11
+  resolution: "pako@npm:1.0.11"
+  checksum: 1be2bfa1f807608c7538afa15d6f25baa523c30ec870a3228a89579e474a4d992f4293859524e46d5d87fd30fa17c5edf34dbef0671251d9749820b488660b16
+  languageName: node
+  linkType: hard
+
 "pako@npm:~0.2.0":
   version: 0.2.9
   resolution: "pako@npm:0.2.9"
   checksum: 055f9487cd57fbb78df84315873bbdd089ba286f3499daed47d2effdc6253e981f5db6898c23486de76d4a781559f890d643bd3a49f70f1b4a18019c98aa5125
-  languageName: node
-  linkType: hard
-
-"pako@npm:~1.0.5":
-  version: 1.0.11
-  resolution: "pako@npm:1.0.11"
-  checksum: 1be2bfa1f807608c7538afa15d6f25baa523c30ec870a3228a89579e474a4d992f4293859524e46d5d87fd30fa17c5edf34dbef0671251d9749820b488660b16
   languageName: node
   linkType: hard
 
@@ -25747,6 +25796,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"subset-font@npm:^1.6.1":
+  version: 1.7.1
+  resolution: "subset-font@npm:1.7.1"
+  dependencies:
+    fontverter: ^2.0.0
+    harfbuzzjs: ^0.3.0
+    lodash: ^4.17.21
+    p-limit: ^3.1.0
+  checksum: 39f11491d97e2d66caeea742cc1c03e686720f2e89096a65c01c65b3aba7726ee45f43fa16aa1c79f204fd6db8fbc805291cd72628005d080f03dd67dcf6e755
+  languageName: node
+  linkType: hard
+
 "sucrase@npm:^3.20.0":
   version: 3.34.0
   resolution: "sucrase@npm:3.34.0"
@@ -27771,6 +27832,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"wawoff2@npm:^2.0.0":
+  version: 2.0.1
+  resolution: "wawoff2@npm:2.0.1"
+  dependencies:
+    argparse: ^2.0.1
+  bin:
+    woff2_compress.js: bin/woff2_compress.js
+    woff2_decompress.js: bin/woff2_decompress.js
+  checksum: 7fbe0c5968713afc2f2fe854e94eec2424d90f2f76d9515ab50455dd9e446dbfb5a46a9fefc7b861dcbd68cb319cfdc084c6336ec3fbefab553d26ced839edf1
+  languageName: node
+  linkType: hard
+
 "wcwidth@npm:^1.0.1":
   version: 1.0.1
   resolution: "wcwidth@npm:1.0.1"
@@ -28090,6 +28163,15 @@ __metadata:
   dependencies:
     string-width: ^1.0.2 || 2 || 3 || 4
   checksum: d5fc37cd561f9daee3c80e03b92ed3e84d80dde3365a8767263d03dacfc8fa06b065ffe1df00d8c2a09f731482fcacae745abfbb478d4af36d0a891fad4834d3
+  languageName: node
+  linkType: hard
+
+"woff2sfnt-sfnt2woff@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "woff2sfnt-sfnt2woff@npm:1.0.0"
+  dependencies:
+    pako: ^1.0.7
+  checksum: 7c558ce8e1b956d39047e78bf07b35b5a9545ad3750fdc82e1fa9c2b559a58fe5cf17f103199dbd42411ce5f0ad5f133cb55ef101e64112545539119666d41f8
   languageName: node
   linkType: hard
 

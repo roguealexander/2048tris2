@@ -74,3 +74,38 @@ export const bodyFont = createFont({
     Object.entries(headingSize).map(([k, v]) => [k, getVariableValue(v) + 5])
   ),
 })
+
+const courierPrimeSize = {
+  1: 11,
+  2: 12,
+  3: 13,
+  4: 14,
+  true: 14,
+  5: 16,
+  6: 18,
+  7: 20,
+  8: 23,
+  9: 30,
+  10: 46,
+  11: 55,
+  12: 62,
+  13: 72,
+  14: 92,
+  15: 114,
+  16: 134,
+}
+export const courierPrimeFont = createFont({
+  family: 'Courier Prime',
+  weight: {
+    1: '300',
+    // 2 will be 300
+    4: '400',
+    6: '600',
+  },
+  size: Object.fromEntries(
+    Object.entries(courierPrimeSize).map(([k, v]) => [k, getVariableValue(v) * 1.2])
+  ),
+  lineHeight: Object.fromEntries(
+    Object.entries(headingSize).map(([k, v]) => [k, getVariableValue(v) + 5])
+  ),
+})

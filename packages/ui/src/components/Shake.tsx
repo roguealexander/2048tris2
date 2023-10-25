@@ -37,7 +37,7 @@ export const Shake = ({
             animatedNumber.setValue(
               idx + 1 === arr.length ? 0 : (idx + 1) % 2 === 0 ? -shakeDistance : shakeDistance
             ),
-          100 * idx
+          100  * idx
         )
       )
       return () => {
