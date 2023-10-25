@@ -7,7 +7,7 @@ import { ObservablePersistLocalStorage } from '@legendapp/state/persist-plugins/
 
 // Global configuration
 configureObservablePersistence({
-    pluginLocal: ObservablePersistLocalStorage
+  pluginLocal: ObservablePersistLocalStorage,
 })
 
 type TileQueue = [TileSize, TileSize, TileSize, TileSize, TileSize, TileSize]
@@ -27,13 +27,14 @@ export const highScores$ = observable<HighScores>({
   efficiency_8192: 0,
 })
 persistObservable(highScores$, {
-  local: 'highScores'
+  local: 'highScores',
 })
 
 type GameState = {
   toppedOut: boolean
   resetting: boolean
-  engineEnabled: boolean
+  gamePhysicsPaused: boolean
+  gameInteractionPaused: boolean
   resetCount: number
 
   activeTile: TileSize
@@ -52,6 +53,9 @@ type GameState = {
   efficiency: number
   targetEfficiency: EfficiencyTile
   targetHighEfficiency: number
+
+  activeHighEfficiencyPanel: EfficiencyTile | null
+  activeHighEfficiencyValue: number | null
 }
 
 type GameActions = {
@@ -60,10 +64,11 @@ type GameActions = {
   reset: () => void
   topOut: () => void
   triggerHighEfficiencyCheck: (size: EfficiencyTile) => void
-  setTargetEfficiency: (size: EfficiencyTile) => void
+  closeActiveHighEfficiencyPanel: () => void
 }
 
 const getQueueTile = (): TileSize => {
+  // return '128'
   return rand(['2', '2', '2', '4', '4', '4', '8', '8', '8', '16', '16', '32'])
 }
 const constructInitialQueue = (): TileQueue => {
@@ -80,7 +85,16 @@ const constructInitialQueue = (): TileQueue => {
 export const state$ = observable<GameState>({
   toppedOut: false,
   resetting: false,
-  engineEnabled: computed((): boolean => !state$.toppedOut.get() && !state$.resetting.get()),
+  gamePhysicsPaused: computed((): boolean => {
+    return state$.toppedOut.get() || state$.resetting.get()
+  }),
+  gameInteractionPaused: computed((): boolean => {
+    return (
+      state$.toppedOut.get() ||
+      state$.resetting.get() ||
+      state$.activeHighEfficiencyPanel.get() !== null
+    )
+  }),
   resetCount: 0,
 
   activeTile: getQueueTile(),
@@ -135,26 +149,41 @@ export const state$ = observable<GameState>({
         return activeTileCount[size] > 0
       }) ?? '2'
 
-    const largestPower = getTilePower(largestTile)
 
-    const weightedScore = TileList.slice(0, largestPower).reduce((acc, size, index) => {
-      const rawScore = parseInt(size) * activeTileCount[size]
-      const adjustedScore = rawScore * ((index + 1) / largestPower)
+    const largestTilePoints = activeTileCount[largestTile] * parseInt(largestTile)
 
-      return acc + adjustedScore
-    }, 0)
+    if (largestTilePoints === 0) return 0
 
-    if (weightedScore === 0) return 0
 
-    return Math.round(10000 * (weightedScore / state$.points.get())) / 100
+    return Math.round(10000 * (largestTilePoints / state$.points.get())) / 100
   }),
   targetEfficiency: '2048',
   targetHighEfficiency: computed((): number => {
     switch (state$.targetEfficiency.get()) {
-      case '2048': return highScores$.efficiency_2048.get()
-      case '4096': return highScores$.efficiency_4096.get()
-      case '8192': return highScores$.efficiency_8192.get()
+      case '2048':
+        return highScores$.efficiency_2048.get()
+      case '4096':
+        return highScores$.efficiency_4096.get()
+      case '8192':
+        return highScores$.efficiency_8192.get()
     }
+  }),
+
+  activeHighEfficiencyPanel: null,
+  activeHighEfficiencyValue: computed((): number | null => {
+    const activeHighEfficiencyPanel = state$.activeHighEfficiencyPanel.get()
+
+    switch (activeHighEfficiencyPanel) {
+      case null:
+        return null
+      case '2048':
+        return highScores$.efficiency_2048.peek()
+      case '4096':
+        return highScores$.efficiency_4096.peek()
+      case '8192':
+        return highScores$.efficiency_8192.peek()
+    }
+    
   })
 })
 
@@ -252,6 +281,7 @@ export const actions$ = observable<GameActions>({
       })
 
       state$.targetEfficiency.set('2048')
+      state$.activeHighEfficiencyPanel.set(null)
     })
   },
   topOut: () => {
@@ -264,25 +294,55 @@ export const actions$ = observable<GameActions>({
   },
   triggerHighEfficiencyCheck: (size: EfficiencyTile) => {
     const efficiency = state$.efficiency.peek()
-    switch (size) {
-      case '2048': {
-        if (efficiency > highScores$.efficiency_2048.peek()) {
-          highScores$.efficiency_2048.set(efficiency)
+    batch(() => {
+      switch (size) {
+        case '2048': {
+          if (efficiency > highScores$.efficiency_2048.peek()) {
+            highScores$.efficiency_2048.set(efficiency)
+            state$.activeHighEfficiencyPanel.set('2048')
+          } else {
+            state$.targetEfficiency.set('4096')
+          }
+          break;
+        }
+        case '4096': {
+          if (efficiency > highScores$.efficiency_4096.peek()) {
+            highScores$.efficiency_4096.set(efficiency)
+            state$.activeHighEfficiencyPanel.set('4096')
+          } else {
+            state$.targetEfficiency.set('8192')
+          }
+          break
+        }
+        case '8192': {
+          if (efficiency > highScores$.efficiency_8192.peek()) {
+            highScores$.efficiency_8192.set(efficiency)
+            state$.activeHighEfficiencyPanel.set('8192')
+          } else {
+            state$.targetEfficiency.set('8192')
+          }
+          break
         }
       }
-      case '4096': {
-        if (efficiency > highScores$.efficiency_4096.peek()) {
-          highScores$.efficiency_4096.set(efficiency)
-        }
-      }
-      case '8192': {
-        if (efficiency > highScores$.efficiency_8192.peek()) {
-          highScores$.efficiency_8192.set(efficiency)
-        }
-      }
-    }
+    })
   },
-  setTargetEfficiency: (size: EfficiencyTile) => {
-    state$.targetEfficiency.set(size)
-  }
+  closeActiveHighEfficiencyPanel: () => {
+    const activeHighEfficiencyPanel = state$.activeHighEfficiencyPanel.get()
+    if (activeHighEfficiencyPanel == null) return
+
+    batch(() => {
+      // Increment target efficiency
+      switch (activeHighEfficiencyPanel) {
+        case '2048':
+          state$.targetEfficiency.set('4096')
+        case '4096':
+          state$.targetEfficiency.set('8192')
+        case '8192':
+          state$.targetEfficiency.set('8192')
+      }
+
+      // Close panel
+      state$.activeHighEfficiencyPanel.set(null)
+    })
+  },
 })

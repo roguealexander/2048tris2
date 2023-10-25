@@ -18,7 +18,7 @@ const TopOutHighScoreSubtitle = observer(() => {
   )
 })
 
-export const TopOutLeftPanel = observer(() => {
+export const TopOutPanel = observer(() => {
   if (!state$.toppedOut.get()) return null
   return (
     <YStack gap="$4" ai="center" jc="center" pt="$12" h='100%' mr="$12">

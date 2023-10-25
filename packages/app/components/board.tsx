@@ -50,7 +50,7 @@ const TileDropPositioner = observer(({ children }: { children: ReactNode }) => {
   const dropX = state$.dropX.get()
   return (
     <XStack pos="absolute" pe="none" l={dropX} t={64} x="-50%" y="-50%">
-      {state$.engineEnabled.get() && children}
+      {state$.gamePhysicsPaused.get() ? null : children}
     </XStack>
   )
 })
@@ -64,7 +64,7 @@ export const BoardComp = observer(() => {
   )
   const runner = useRef(Runner.create())
 
-  runner.current.enabled = state$.engineEnabled.get()
+  runner.current.enabled = !state$.gamePhysicsPaused.get()
 
   useObserve(
     () => state$.resetCount.get(),
@@ -220,7 +220,7 @@ export const BoardComp = observer(() => {
   }, [])
 
   const releaseBall = () => {
-    if (!state$.engineEnabled.get()) return
+    if (state$.gameInteractionPaused.get()) return
 
     const radius = getTileRadius(state$.activeTile.peek())
 
