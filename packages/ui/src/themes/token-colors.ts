@@ -27,6 +27,14 @@ export {
   lightTransparent,
 } from './colors'
 
+const colors2048 = {
+  background: '#FDFAE7',
+	border: '#BEADA5',
+	playarea: '#D8C1B3',
+	text: '#807F82',
+	btn: '#776E65',
+}
+
 export const colorTokens = {
   light: {
     blue: blue,
@@ -59,6 +67,7 @@ export const darkColors = {
   ...colorTokens.dark.purple,
   ...colorTokens.dark.red,
   ...colorTokens.dark.yellow,
+  ...colors2048,
 }
 
 export const lightColors = {
@@ -70,6 +79,7 @@ export const lightColors = {
   ...colorTokens.light.purple,
   ...colorTokens.light.red,
   ...colorTokens.light.yellow,
+  ...colors2048,
 }
 
 export const color = {

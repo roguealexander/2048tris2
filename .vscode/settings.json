@@ -8,6 +8,10 @@
   },
   "typescript.tsdk": "node_modules/typescript/lib",
   "cSpell.words": [
+    "falso",
+    "legendapp",
+    "ngneat",
+    "NOSSR",
     "supabase"
   ]
 }

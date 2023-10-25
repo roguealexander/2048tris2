@@ -1,33 +1,31 @@
+import { observable } from '@legendapp/state'
 import {
-  AchievementCard,
-  Banner,
-  Button,
-  EventCard,
-  FeedCard,
-  H2,
-  H4,
-  OverviewCard,
-  Paragraph,
-  ScrollView,
-  Separator,
-  Text,
-  Theme,
-  TodoCard,
   XStack,
   YStack,
-  isWeb,
-  useMedia,
 } from '@my/ui'
-import { ArrowRight, DollarSign, Edit2, User, Users } from '@tamagui/lucide-icons'
-import { api } from 'app/utils/api'
+import { ActiveTilesHistogram } from 'app/components/active-tile-histogram'
+import { Board } from 'app/components/board'
+import { Hold } from 'app/components/hold'
+import { HoldListener } from 'app/components/hold-listener'
+import { Queue } from 'app/components/queue'
+import { Stats } from 'app/components/stats'
+import { Tile } from 'app/components/tile'
+import { TileSize } from 'app/types'
 import React from 'react'
-import { useLink } from 'solito/link'
-
 
 export function HomeScreen() {
   return (
-    <XStack maw={1480} als="center" f={1}>
-      <Text>TEST</Text>
+    <XStack maw={1480} als="center" f={1} gap={64} pt={64}>
+      <HoldListener />
+      <YStack w="$12" gap="$2">
+        <Hold />
+        <Stats />
+        <ActiveTilesHistogram />
+      </YStack>
+      <Board />
+      <Queue />
     </XStack>
   )
 }
+
+export default HomeScreen
