@@ -59,10 +59,13 @@ export const BoardComp = observer(() => {
   const scene = useRef<HTMLDivElement | null>(null)
   const engine = useRef(
     Engine.create({
-      gravity: { x: 0, y: 2 },
+      gravity: { x: 0, y: 1, scale: 0.004 },
     })
   )
-  const runner = useRef(Runner.create())
+  const runner = useRef(Runner.create({
+		isFixed: false,
+		delta: 1000 / 60
+	}))
 
   runner.current.enabled = !state$.gamePhysicsPaused.get()
 
@@ -137,8 +140,17 @@ export const BoardComp = observer(() => {
       Bodies.rectangle(cw + 20 - 128, ch / 2, 40, ch, { isStatic: true, render: { opacity: 0 } }),
     ])
 
+		Events.on(runner.current, 'tick',() => {
+			// @ts-ignore
+			runner.current.deltaMin = runner.current.fps > 60 ? 1000 / runner.current.fps : 1000 / 60;
+		})
+
     Runner.start(runner.current, engine.current)
     Render.run(render)
+
+		// Events.on(runner, 'tick',() => {
+		// 	runner.current.deltaMin = runner.current.fps > 60 ? 1000 / runner.current.fps : 1000 / 60;
+		// })
 
     Events.on(engine.current, 'collisionActive', (event) => {
       const { pairs } = event
