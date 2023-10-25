@@ -1,6 +1,6 @@
 import { Memo, observer } from '@legendapp/state/react'
 import { highScores$, state$ } from '../state'
-import { SizableText, XStack, YStack } from '@my/ui'
+import { SizableText, YStack } from '@my/ui'
 
 export const Score = observer(() => {
   return (
@@ -33,7 +33,7 @@ export const Efficiency = observer(() => {
         </b>
       </SizableText>
       <SizableText>
-        High Efficiency:
+        Efficiency Record:
         <br />
         <b>
           <Memo>{state$.targetHighEfficiency}</Memo>% (<Memo>{state$.targetEfficiency}</Memo>)

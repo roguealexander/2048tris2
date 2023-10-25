@@ -11,7 +11,7 @@ export const Page: NextPageWithLayout = () => {
   return (
     <>
       <Head>
-        <title>Home</title>
+        <title>2048tris</title>
       </Head>
       <HomeScreenNOSSR />
     </>
