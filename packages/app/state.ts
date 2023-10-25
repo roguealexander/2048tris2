@@ -67,7 +67,7 @@ type GameActions = {
   closeActiveHighEfficiencyPanel: () => void
 }
 
-const getQueueTile = (): TileSize => {
+export const getQueueTile = (): TileSize => {
   // return '128'
   return rand(['2', '2', '2', '4', '4', '4', '8', '8', '8', '16', '16', '32'])
 }

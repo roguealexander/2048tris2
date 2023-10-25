@@ -5,7 +5,7 @@ import { ActiveTilesHistogram } from 'app/components/active-tile-histogram'
 import { Board } from 'app/components/board'
 import { HighEfficiencyPanel } from 'app/components/high-efficiency-panel'
 import { Hold } from 'app/components/hold'
-import { HoldListener } from 'app/components/hold-listener'
+import { GameplayHoldListener } from 'app/components/hold-listener'
 import { Queue } from 'app/components/queue'
 import { RulesTab } from 'app/components/rules-tab'
 import { Efficiency, Score } from 'app/components/stats'
@@ -37,7 +37,7 @@ const ActiveRightPanel = observer(() => {
 export function HomeScreen() {
   return (
     <XStack w='100%' als="center" jc='center' f={1} gap={64} pt={24}>
-      <HoldListener />
+      <GameplayHoldListener />
 
       {/* LEFT */}
       <TopOutPanel />

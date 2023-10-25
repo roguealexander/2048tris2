@@ -38,7 +38,7 @@ const Tabs = observer(() => {
         <Show if={appState$.tab.get() === 'rules'}>
           <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[32]} />
         </Show>
-        <SizableText zi={2} color={appState$.tab.get() === 'rules' ? colors.background : colors.text}>Rules</SizableText>
+        <SizableText zi={2} color={appState$.tab.get() === 'rules' ? colors.background : colors.text}>How to Play</SizableText>
       </XStack>
       <XStack
         h="$3"
