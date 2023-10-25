@@ -2,116 +2,160 @@ import { batch, computed, observable } from '@legendapp/state'
 import { TileList, TileRecord, TileSize } from './types'
 import { rand } from '@ngneat/falso'
 import { getTilePower, getTileRadius } from './tiles'
+import { configureObservablePersistence, persistObservable } from '@legendapp/state/persist'
+import { ObservablePersistLocalStorage } from '@legendapp/state/persist-plugins/local-storage'
+
+// Global configuration
+configureObservablePersistence({
+    pluginLocal: ObservablePersistLocalStorage
+})
 
 type TileQueue = [TileSize, TileSize, TileSize, TileSize, TileSize, TileSize]
+type EfficiencyTile = '2048' | '4096' | '8192'
+
+type HighScores = {
+  points: number
+  efficiency_2048: number
+  efficiency_4096: number
+  efficiency_8192: number
+}
+
+export const highScores$ = observable<HighScores>({
+  points: 0,
+  efficiency_2048: 0,
+  efficiency_4096: 0,
+  efficiency_8192: 0,
+})
+persistObservable(highScores$, {
+  local: 'highScores'
+})
 
 type GameState = {
-	toppedOut: boolean
+  toppedOut: boolean
   resetting: boolean
   engineEnabled: boolean
   resetCount: number
 
-	activeTile: TileSize
-	heldTile: TileSize | null
+  activeTile: TileSize
+  heldTile: TileSize | null
   holdShakeCount: number
-	queue: TileQueue
-	holdAvailable: boolean
-	points: number
+  queue: TileQueue
+  holdAvailable: boolean
+  points: number
 
-	mouseX: number
-	dropX: number
+  mouseX: number
+  dropX: number
 
-	activeTileCount: TileRecord<number>
-	maxTilesCount: number
-	largestTile: TileSize
-	efficiency: number
+  activeTileCount: TileRecord<number>
+  maxTilesCount: number
+  largestTile: TileSize
+  efficiency: number
+  targetEfficiency: EfficiencyTile
+  targetHighEfficiency: number
 }
 
 type GameActions = {
-	drop: () => void
-	hold: () => void
-	reset: () => void
-	topOut: () => void
+  drop: () => void
+  hold: () => void
+  reset: () => void
+  topOut: () => void
+  triggerHighEfficiencyCheck: (size: EfficiencyTile) => void
+  setTargetEfficiency: (size: EfficiencyTile) => void
 }
 
 const getQueueTile = (): TileSize => {
-	return rand(['2', '2', '2', '4', '4', '4', '8', '8', '8', '16', '16', '32'])
+  return rand(['2', '2', '2', '4', '4', '4', '8', '8', '8', '16', '16', '32'])
 }
 const constructInitialQueue = (): TileQueue => {
-	return [getQueueTile(), getQueueTile(), getQueueTile(), getQueueTile(), getQueueTile(), getQueueTile()]
+  return [
+    getQueueTile(),
+    getQueueTile(),
+    getQueueTile(),
+    getQueueTile(),
+    getQueueTile(),
+    getQueueTile(),
+  ]
 }
 
 export const state$ = observable<GameState>({
-	toppedOut: false,
+  toppedOut: false,
   resetting: false,
   engineEnabled: computed((): boolean => !state$.toppedOut.get() && !state$.resetting.get()),
   resetCount: 0,
 
-	activeTile: getQueueTile(),
-	heldTile: null,
+  activeTile: getQueueTile(),
+  heldTile: null,
   holdShakeCount: 0,
-	queue: constructInitialQueue(),
-	holdAvailable: true,
-	points: 0,
+  queue: constructInitialQueue(),
+  holdAvailable: true,
+  points: 0,
 
-	mouseX: 0,
-	dropX: computed((): number => {
-		const radius = getTileRadius(state$.activeTile.get())
-		return Math.min(Math.max(64 + radius / 2, state$.mouseX.get()), 64 + 450 - radius / 2)
-	}),
+  mouseX: 0,
+  dropX: computed((): number => {
+    const radius = getTileRadius(state$.activeTile.get())
+    return Math.min(Math.max(64 + radius / 2, state$.mouseX.get()), 64 + 450 - radius / 2)
+  }),
 
-	activeTileCount: {
-		'2': 0,
-		'4': 0,
-		'8': 0,
-		'16': 0,
-		'32': 0,
-		'64': 0,
-		'128': 0,
-		'256': 0,
-		'512': 0,
-		'1024': 0,
-		'2048': 0,
-		'4096': 0,
-		'8192': 0,
-	},
-	maxTilesCount: computed((): number => {
-		let maxCount = 0
+  activeTileCount: {
+    '2': 0,
+    '4': 0,
+    '8': 0,
+    '16': 0,
+    '32': 0,
+    '64': 0,
+    '128': 0,
+    '256': 0,
+    '512': 0,
+    '1024': 0,
+    '2048': 0,
+    '4096': 0,
+    '8192': 0,
+  },
+  maxTilesCount: computed((): number => {
+    let maxCount = 0
 
-		Object.values(state$.activeTileCount.get()).forEach((count) => {
-			if (count > maxCount) {
-				maxCount = count
-			}
-		})
+    Object.values(state$.activeTileCount.get()).forEach((count) => {
+      if (count > maxCount) {
+        maxCount = count
+      }
+    })
 
-		return maxCount
-	}),
-	largestTile: computed((): TileSize => {
-		return (Object.keys(state$.activeTileCount.get())
-			.reverse()
-			.find((size) => state$.activeTileCount[size as TileSize].peek() > 0) ?? '2') as TileSize
-	}),
-	efficiency: computed((): number => {
-		const activeTileCount = state$.activeTileCount.get()
+    return maxCount
+  }),
+  largestTile: computed((): TileSize => {
+    return (Object.keys(state$.activeTileCount.get())
+      .reverse()
+      .find((size) => state$.activeTileCount[size as TileSize].peek() > 0) ?? '2') as TileSize
+  }),
+  efficiency: computed((): number => {
+    const activeTileCount = state$.activeTileCount.get()
 
-		const largestTile =
-			[...TileList].reverse().find((size) => {
-				return activeTileCount[size] > 0
-			}) ?? '2'
+    const largestTile =
+      [...TileList].reverse().find((size) => {
+        return activeTileCount[size] > 0
+      }) ?? '2'
 
-		const largestPower = getTilePower(largestTile)
+    const largestPower = getTilePower(largestTile)
 
-		const weightedScore = TileList.slice(0, largestPower).reduce((acc, size, index) => {
-			const rawScore = parseInt(size) * activeTileCount[size]
-			const adjustedScore = rawScore * ((index + 1) / largestPower)
+    const weightedScore = TileList.slice(0, largestPower).reduce((acc, size, index) => {
+      const rawScore = parseInt(size) * activeTileCount[size]
+      const adjustedScore = rawScore * ((index + 1) / largestPower)
 
-			return acc + adjustedScore
-		}, 0)
+      return acc + adjustedScore
+    }, 0)
 
-		if (weightedScore === 0) return 0
+    if (weightedScore === 0) return 0
 
-		return Math.round(10000 * (weightedScore / state$.points.get())) / 100
-	}),
+    return Math.round(10000 * (weightedScore / state$.points.get())) / 100
+  }),
+  targetEfficiency: '2048',
+  targetHighEfficiency: computed((): number => {
+    switch (state$.targetEfficiency.get()) {
+      case '2048': return highScores$.efficiency_2048.get()
+      case '4096': return highScores$.efficiency_4096.get()
+      case '8192': return highScores$.efficiency_8192.get()
+    }
+  })
 })
 
 const incrementHoldShakeCount = () => {
@@ -119,98 +163,126 @@ const incrementHoldShakeCount = () => {
 }
 
 const pullActiveTileFromQueue = () => {
-	state$.activeTile.set(state$.queue[0]!.peek())
+  state$.activeTile.set(state$.queue[0]!.peek())
 }
 
 const advanceQueue = () => {
-	state$.queue.set((queue: TileQueue) => queue.slice(1).concat(getQueueTile()) as TileQueue)
+  state$.queue.set((queue: TileQueue) => queue.slice(1).concat(getQueueTile()) as TileQueue)
 }
 
 const setHeldTile = (tile: TileSize) => {
-	state$.heldTile.set(tile)
+  state$.heldTile.set(tile)
 }
 
 const addPoints = (additional: number) => {
-	state$.points.set((points) => points + additional)
+  state$.points.set((points) => points + additional)
 }
 
 const resetHoldAvailable = () => {
-	state$.holdAvailable.set(true)
+  state$.holdAvailable.set(true)
 }
 
 const swapActiveAndHeldTiles = () => {
-	const heldTile = state$.heldTile.peek()
-	const activeTile = state$.activeTile.peek()
-	state$.heldTile.set(activeTile)
-	state$.activeTile.set(heldTile)
-	state$.holdAvailable.set(false)
+  const heldTile = state$.heldTile.peek()
+  const activeTile = state$.activeTile.peek()
+  state$.heldTile.set(activeTile)
+  state$.activeTile.set(heldTile)
+  state$.holdAvailable.set(false)
 }
 
 export const actions$ = observable<GameActions>({
-	drop: () => {
-		batch(() => {
-			const activeTile = state$.activeTile.peek()
+  drop: () => {
+    batch(() => {
+      const activeTile = state$.activeTile.peek()
 
-			addPoints(parseInt(activeTile))
-			pullActiveTileFromQueue()
-			advanceQueue()
-			resetHoldAvailable()
-		})
-	},
-	hold: () => {
-		batch(() => {
-			// Exit if hold action already used
-			const holdAvailable = state$.holdAvailable.peek()
-			if (!holdAvailable) {
+      addPoints(parseInt(activeTile))
+      pullActiveTileFromQueue()
+      advanceQueue()
+      resetHoldAvailable()
+    })
+  },
+  hold: () => {
+    batch(() => {
+      // Exit if hold action already used
+      const holdAvailable = state$.holdAvailable.peek()
+      if (!holdAvailable) {
         incrementHoldShakeCount()
-				return
-			}
+        return
+      }
 
-			// If no tile in hold, pull from queue
-			const heldTile = state$.heldTile.peek()
-			if (heldTile == null) {
-				setHeldTile(state$.activeTile.peek())
-				pullActiveTileFromQueue()
-				advanceQueue()
-				return
-			}
+      // If no tile in hold, pull from queue
+      const heldTile = state$.heldTile.peek()
+      if (heldTile == null) {
+        setHeldTile(state$.activeTile.peek())
+        pullActiveTileFromQueue()
+        advanceQueue()
+        return
+      }
 
-			// Switch active and held tiles
-			swapActiveAndHeldTiles()
-		})
-	},
-	reset: () => {
-		batch(() => {
+      // Switch active and held tiles
+      swapActiveAndHeldTiles()
+    })
+  },
+  reset: () => {
+    batch(() => {
       state$.toppedOut.set(false)
       state$.resetting.set(true)
-      state$.resetCount.set((count) => count += 1)
+      state$.resetCount.set((count) => (count += 1))
 
-			state$.activeTile.set(getQueueTile())
-			state$.heldTile.set(null)
-			state$.queue.set(constructInitialQueue())
-			state$.holdAvailable.set(true)
-			state$.points.set(0)
+      state$.activeTile.set(getQueueTile())
+      state$.heldTile.set(null)
+      state$.queue.set(constructInitialQueue())
+      state$.holdAvailable.set(true)
+      state$.points.set(0)
 
-			state$.activeTileCount.set({
-				'2': 0,
-				'4': 0,
-				'8': 0,
-				'16': 0,
-				'32': 0,
-				'64': 0,
-				'128': 0,
-				'256': 0,
-				'512': 0,
-				'1024': 0,
-				'2048': 0,
-				'4096': 0,
-				'8192': 0,
-			})
-		})
-	},
-	topOut: () => {
-		batch(() => {
-			state$.toppedOut.set(true)
-		})
-	},
+      state$.activeTileCount.set({
+        '2': 0,
+        '4': 0,
+        '8': 0,
+        '16': 0,
+        '32': 0,
+        '64': 0,
+        '128': 0,
+        '256': 0,
+        '512': 0,
+        '1024': 0,
+        '2048': 0,
+        '4096': 0,
+        '8192': 0,
+      })
+
+      state$.targetEfficiency.set('2048')
+    })
+  },
+  topOut: () => {
+    batch(() => {
+      if (state$.points.peek() > highScores$.points.peek()) {
+        highScores$.points.set(state$.points.peek())
+      }
+      state$.toppedOut.set(true)
+    })
+  },
+  triggerHighEfficiencyCheck: (size: EfficiencyTile) => {
+    const efficiency = state$.efficiency.peek()
+    switch (size) {
+      case '2048': {
+        if (efficiency > highScores$.efficiency_2048.peek()) {
+          highScores$.efficiency_2048.set(efficiency)
+        }
+      }
+      case '4096': {
+        if (efficiency > highScores$.efficiency_4096.peek()) {
+          highScores$.efficiency_4096.set(efficiency)
+        }
+      }
+      case '8192': {
+        if (efficiency > highScores$.efficiency_8192.peek()) {
+          highScores$.efficiency_8192.set(efficiency)
+        }
+      }
+    }
+  },
+  setTargetEfficiency: (size: EfficiencyTile) => {
+    state$.targetEfficiency.set(size)
+  }
 })

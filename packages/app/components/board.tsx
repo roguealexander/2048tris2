@@ -19,10 +19,7 @@ import ball4096 from '../assets/4096.png'
 import ball8192 from '../assets/8192.png'
 import { TileRecord } from '../types'
 import { batch } from '@legendapp/state'
-import { Stats } from './stats'
-import { ActiveTilesHistogram } from './active-tile-histogram'
-import { Button, PortalHost, PortalItem, SizableText, Spacer, XStack, YStack } from '@my/ui'
-import { GestureDetector, Gesture } from 'react-native-gesture-handler'
+import { Spacer, XStack, YStack } from '@my/ui'
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -169,6 +166,16 @@ export const BoardComp = observer(() => {
           const size = getTileSizeFromRadius(aRadius)
           const mergedSize = getMergedTileSize(size)
           const mergedRadius = getTileRadius(mergedSize)
+
+					if (mergedSize === '2048' && state$.targetEfficiency.peek() === '2048') {
+						actions$.triggerHighEfficiencyCheck('2048')
+					}
+					if (mergedSize === '4096' && state$.targetEfficiency.peek() === '4096') {
+						actions$.triggerHighEfficiencyCheck('4096')
+					}
+					if (mergedSize === '8192' && state$.targetEfficiency.peek() === '8192') {
+						actions$.triggerHighEfficiencyCheck('8192')
+					}
 
           batch(() => {
             state$.activeTileCount[size].set((count) => count - 2)

@@ -6,7 +6,7 @@ import { Board } from 'app/components/board'
 import { Hold } from 'app/components/hold'
 import { HoldListener } from 'app/components/hold-listener'
 import { Queue } from 'app/components/queue'
-import { Stats } from 'app/components/stats'
+import { Efficiency, Score } from 'app/components/stats'
 import { Tile } from 'app/components/tile'
 import { TopOutLeftPanel } from 'app/components/top-out-overlay'
 import { state$ } from 'app/state'
@@ -18,7 +18,10 @@ const ActiveLeftPanel = observer(() => {
   return (
     <YStack w="$12" gap="$2">
       <Hold />
-      <Stats />
+      <Score />
+      <XStack w="100%" h={2} bg="$border" />
+      <Efficiency />
+      <XStack w="100%" h={2} bg="$border" />
       <ActiveTilesHistogram />
     </YStack>
   )
