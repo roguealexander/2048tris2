@@ -1,9 +1,15 @@
 import { observer, useObserve } from '@legendapp/state/react'
 import { actions$, state$ } from '../state'
 import { Tile } from './tile'
-import { Engine, Render, World, Events, Bodies, Runner, Composite } from 'matter-js'
+import { Engine, Render, World, Events, Bodies, Runner, Composite, Body } from 'matter-js'
 import { useRef, useEffect, ReactNode } from 'react'
-import { getMergedTileSize, getTileRadius, getTileSizeFromRadius } from '../tiles'
+import {
+  getMergedTileSize,
+  getTilePower,
+  getTileRadius,
+  getTileSizeFromPower,
+  getTileSizeFromRadius,
+} from '../tiles'
 import ball2 from '../assets/2.png'
 import ball4 from '../assets/4.png'
 import ball8 from '../assets/8.png'
@@ -17,7 +23,7 @@ import ball1024 from '../assets/1024.png'
 import ball2048 from '../assets/2048.png'
 import ball4096 from '../assets/4096.png'
 import ball8192 from '../assets/8192.png'
-import { TileRecord } from '../types'
+import { TilePower, TileRecord } from '../types'
 import { batch } from '@legendapp/state'
 import { Spacer, XStack, YStack } from '@my/ui'
 
@@ -62,10 +68,12 @@ export const BoardComp = observer(() => {
       gravity: { x: 0, y: 1, scale: 0.004 },
     })
   )
-  const runner = useRef(Runner.create({
-		isFixed: false,
-		delta: 1000 / 60
-	}))
+  const runner = useRef(
+    Runner.create({
+      isFixed: false,
+      delta: 1000 / 60,
+    })
+  )
 
   runner.current.enabled = !state$.gamePhysicsPaused.get()
 
@@ -140,17 +148,13 @@ export const BoardComp = observer(() => {
       Bodies.rectangle(cw + 20 - 128, ch / 2, 40, ch, { isStatic: true, render: { opacity: 0 } }),
     ])
 
-		Events.on(runner.current, 'tick',() => {
-			// @ts-ignore
-			runner.current.deltaMin = runner.current.fps > 60 ? 1000 / runner.current.fps : 1000 / 60;
-		})
+    Events.on(runner.current, 'tick', () => {
+      // @ts-ignore
+      runner.current.deltaMin = runner.current.fps > 60 ? 1000 / runner.current.fps : 1000 / 60
+    })
 
     Runner.start(runner.current, engine.current)
     Render.run(render)
-
-		// Events.on(runner, 'tick',() => {
-		// 	runner.current.deltaMin = runner.current.fps > 60 ? 1000 / runner.current.fps : 1000 / 60;
-		// })
 
     Events.on(engine.current, 'collisionActive', (event) => {
       const { pairs } = event
@@ -158,36 +162,41 @@ export const BoardComp = observer(() => {
       pairs.forEach((pair) => {
         const { id, bodyA, bodyB } = pair
 
-        if (
-          (bodyA.id === 100 && bodyB.id !== lastDroppedTileId) ||
-          (bodyB.id === 100 && bodyA.id !== lastDroppedTileId)
-        ) {
-          actions$.topOut()
-        }
+        // if (
+        //   (bodyA.id === 100 && bodyB.id !== lastDroppedTileId) ||
+        //   (bodyB.id === 100 && bodyA.id !== lastDroppedTileId)
+        // ) {
+        //   actions$.topOut()
+        // }
 
         if (handledCollision[id]) return
         handledCollision[id] = true
 
-        const aRadius = bodyA.circleRadius
-        const bRadius = bodyB.circleRadius
+        if (
+          bodyA.collisionFilter.category === 2 &&
+          bodyB.collisionFilter.category === 2 &&
+          bodyA.collisionFilter.group != null &&
+          bodyB.collisionFilter.group != null &&
+          bodyA.collisionFilter.group === bodyB.collisionFilter.group
+        ) {
+          const power = bodyA.collisionFilter.group
 
-        if (aRadius === bRadius && aRadius != null) {
-          World.remove(engine.current.world, bodyA)
-          World.remove(engine.current.world, bodyB)
+          World.remove(engine.current.world, bodyA.parent)
+          World.remove(engine.current.world, bodyB.parent)
 
-          const size = getTileSizeFromRadius(aRadius)
+          const size = getTileSizeFromPower(power as TilePower)
           const mergedSize = getMergedTileSize(size)
           const mergedRadius = getTileRadius(mergedSize)
 
-					if (mergedSize === '2048' && state$.targetEfficiency.peek() === '2048') {
-						actions$.triggerHighEfficiencyCheck('2048')
-					}
-					if (mergedSize === '4096' && state$.targetEfficiency.peek() === '4096') {
-						actions$.triggerHighEfficiencyCheck('4096')
-					}
-					if (mergedSize === '8192' && state$.targetEfficiency.peek() === '8192') {
-						actions$.triggerHighEfficiencyCheck('8192')
-					}
+          if (mergedSize === '2048' && state$.targetEfficiency.peek() === '2048') {
+            actions$.triggerHighEfficiencyCheck('2048')
+          }
+          if (mergedSize === '4096' && state$.targetEfficiency.peek() === '4096') {
+            actions$.triggerHighEfficiencyCheck('4096')
+          }
+          if (mergedSize === '8192' && state$.targetEfficiency.peek() === '8192') {
+            actions$.triggerHighEfficiencyCheck('8192')
+          }
 
           batch(() => {
             state$.activeTileCount[size].set((count) => count - 2)
@@ -197,7 +206,7 @@ export const BoardComp = observer(() => {
           const x = (bodyA.position.x + bodyB.position.x) / 2
           const y = (bodyA.position.y + bodyB.position.y) / 2
 
-          const ball = Bodies.circle(x, y, mergedRadius, {
+          const ballTile = Bodies.circle(x, y, mergedRadius, {
             density: 0.00005,
             restitution: 0.2,
             friction: 0.005,
@@ -209,6 +218,17 @@ export const BoardComp = observer(() => {
                 yScale: 1,
               },
             },
+          })
+
+          const ballSensor = Bodies.circle(x, y, mergedRadius + 4, {
+            id: ++tileId,
+            isSensor: true,
+            collisionFilter: { category: 2, group: power + 1 },
+            render: { visible: false },
+          })
+
+          const ball = Body.create({
+            parts: [ballSensor, ballTile],
           })
 
           World.add(engine.current.world, [ball])
@@ -235,10 +255,11 @@ export const BoardComp = observer(() => {
     if (state$.gameInteractionPaused.get()) return
 
     const radius = getTileRadius(state$.activeTile.peek())
+    const power = getTilePower(state$.activeTile.peek())
 
     lastDroppedTileId = ++tileId
 
-    const ball = Bodies.circle(state$.dropX.get() * 2, 64 * 2, radius, {
+    const ballTile = Bodies.circle(state$.dropX.get() * 2, 64 * 2, radius, {
       density: 0.00005,
       restitution: 0.2,
       friction: 0.005,
@@ -251,6 +272,16 @@ export const BoardComp = observer(() => {
         },
       },
     })
+    const ballSensor = Bodies.circle(state$.dropX.get() * 2, 64 * 2, radius + 4, {
+      id: ++tileId,
+      isSensor: true,
+      collisionFilter: { category: 2, group: power },
+      render: { visible: false },
+    })
+
+    const ball = Body.create({
+      parts: [ballSensor, ballTile],
+    })
 
     state$.activeTileCount[state$.activeTile.peek()].set((count) => count + 1)
     World.add(engine.current.world, [ball])
@@ -261,11 +292,11 @@ export const BoardComp = observer(() => {
     state$.mouseX.set(event.nativeEvent.offsetX)
   }
 
-	// Native gesture handler
+  // Native gesture handler
   // const gesture = Gesture.Pan()
-	// 	.onBegin((event) => {
-	// 		state$.mouseX.set(event.x)
-	// 	})
+  // 	.onBegin((event) => {
+  // 		state$.mouseX.set(event.x)
+  // 	})
   //   .onChange((event) => {
   //     state$.mouseX.set(event.x)
   //   })
@@ -282,20 +313,20 @@ export const BoardComp = observer(() => {
       style={{ boxSizing: 'content-box' }}
     >
       {/* <GestureDetector gesture={gesture}> */}
-        <YStack
-          ref={scene}
-          onPress={releaseBall}
-          onPointerMove={moveBall}
-          pos="absolute"
-          w={width + 64 * 2}
-          h={height + 64 * 2}
-          l={-64}
-          t={-64}
-        >
-          <TileDropPositioner>
-            <Tile size={state$.activeTile} />
-          </TileDropPositioner>
-        </YStack>
+      <YStack
+        ref={scene}
+        onPress={releaseBall}
+        onPointerMove={moveBall}
+        pos="absolute"
+        w={width + 64 * 2}
+        h={height + 64 * 2}
+        l={-64}
+        t={-64}
+      >
+        <TileDropPositioner>
+          <Tile size={state$.activeTile} />
+        </TileDropPositioner>
+      </YStack>
       {/* </GestureDetector> */}
     </YStack>
   )

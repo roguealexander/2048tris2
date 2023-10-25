@@ -141,7 +141,9 @@ export const getTileData = (size: TileSize | null): TileData | null => {
   if (size == null) return null
   return tiles[size]
 }
-
+export const getTileSizeFromPower = (power: TilePower): TileSize => {
+  return `${2 ** power}` as TileSize
+}
 export const getTilePower = (size: TileSize): number => {
   return tiles[size].power
 }
@@ -150,7 +152,7 @@ export const getTileRadius = (size: TileSize): number => {
 }
 export const getTileSizeFromRadius = (radius: number): TileSize => {
   const power = (radius - 30) / 15 as TilePower
-  return `${2 ** power}` as TileSize
+  return getTileSizeFromPower(power)
 }
 export const getMergedTileSize = (size: TileSize): TileSize => {
   return mergedSize[size]
