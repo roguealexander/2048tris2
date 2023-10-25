@@ -10,6 +10,7 @@ import { HoldListener } from 'app/components/hold-listener'
 import { Queue } from 'app/components/queue'
 import { Stats } from 'app/components/stats'
 import { Tile } from 'app/components/tile'
+import { TopOutOverlay } from 'app/components/top-out-overlay'
 import { TileSize } from 'app/types'
 import React from 'react'
 
@@ -24,6 +25,7 @@ export function HomeScreen() {
       </YStack>
       <Board />
       <Queue />
+      <TopOutOverlay />
     </XStack>
   )
 }

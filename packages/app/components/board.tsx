@@ -57,27 +57,6 @@ const TileDropPositioner = observer(({ children }: { children: ReactNode }) => {
 	)
 })
 
-const TopOutOverlay = observer(() => {
-	if (!state$.toppedOut.get()) return null
-	return (
-		<div className='flex flex-col gap-8 absolute justify-center items-center -inset-4'>
-			<div className='absolute inset-0 bg-background opacity-70' />
-			<p className='text-6xl z-10'>GAME OVER</p>
-			<Button className='z-10' onPress={() => actions$.reset()}>
-				New Game
-			</Button>
-			<div className='flex flex-row justify-start items-start gap-8 z-10'>
-				<div className='flex flex-col w-32 gap-4 items-start'>
-					<Stats />
-				</div>
-				<div className='flex flex-col w-32 gap-4 items-start'>
-					<ActiveTilesHistogram />
-				</div>
-			</div>
-		</div>
-	)
-})
-
 export const Board = observer(() => {
 	const scene = useRef<HTMLDivElement | null>(null)
 	const engine = useRef(
@@ -268,7 +247,6 @@ export const Board = observer(() => {
 					</TileDropPositioner>
 				</YStack>
 			</YStack>
-			<TopOutOverlay />
 		</YStack>
 	)
 })
