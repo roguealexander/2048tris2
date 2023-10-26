@@ -1,5 +1,5 @@
 import { observer } from '@legendapp/state/react'
-import { SizableText, XStack, YStack } from '@my/ui'
+import { ScrollView, SizableText, XStack, YStack } from '@my/ui'
 import { appState$ } from 'app/appState'
 import { TileSize } from 'app/types'
 import { Tile } from './tile'
@@ -141,10 +141,10 @@ const RulesCombineExample = () => {
 }
 
 export const RulesTab = observer(() => {
-  if (appState$.tab.get() !== 'rules') return
+  if (appState$.tab.get() !== 'rules') return null
 
   return (
-    <YStack fullscreen bg="$background" ai="center" jc="center">
+    <ScrollView fullscreen mih='100%' mah='100%' bg="$background" ai="center" jc="flex-start" pt={64}>
       <YStack ai="flex-start">
         <SizableText size="$5">HOW TO PLAY:</SizableText>
         <br />
@@ -163,6 +163,6 @@ export const RulesTab = observer(() => {
         <SizableText>Combine tiles</SizableText>
         <RulesCombineExample />
       </YStack>
-    </YStack>
+    </ScrollView>
   )
 })

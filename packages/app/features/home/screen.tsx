@@ -6,6 +6,7 @@ import { Board } from 'app/components/board'
 import { HighEfficiencyPanel } from 'app/components/high-efficiency-panel'
 import { Hold } from 'app/components/hold'
 import { GameplayHoldListener } from 'app/components/hold-listener'
+import { LeaderboardTab } from 'app/components/leaderboard-tab'
 import { Queue } from 'app/components/queue'
 import { RulesTab } from 'app/components/rules-tab'
 import { Efficiency, Score } from 'app/components/stats'
@@ -36,7 +37,7 @@ const ActiveRightPanel = observer(() => {
 
 export function HomeScreen() {
   return (
-    <XStack w='100%' als="center" jc='center' f={1} gap={64} pt={24}>
+    <XStack w='100%' mih='100vh' mah='100vh' als="center" jc='center' f={1} gap={64} pt={64}>
       <GameplayHoldListener />
 
       {/* LEFT */}
@@ -52,6 +53,7 @@ export function HomeScreen() {
 
       {/* OVERLAY */}
       <RulesTab />
+      <LeaderboardTab />
     </XStack>
   )
 }

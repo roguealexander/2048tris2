@@ -13,3 +13,5 @@ export type TileData = {
   color: string
   textColor: string
 }
+
+export type LeaderboardType = 'score' | 'efficiency2048' | 'efficiency4096' | 'efficiency8192'
