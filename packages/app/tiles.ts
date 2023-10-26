@@ -13,7 +13,7 @@ const tile4: TileData = {
   size: '4',
   power: 2,
   radius: 2,
-  density: 1,
+  density: 1.5,
   color: colors.tile['4'],
   textColor: colors.text,
 }
@@ -143,6 +143,9 @@ export const getTileData = (size: TileSize | null): TileData | null => {
 }
 export const getTileSizeFromPower = (power: TilePower): TileSize => {
   return `${2 ** power}` as TileSize
+}
+export const getTileDensity = (size: TileSize): number => {
+  return tiles[size].density
 }
 export const getTilePower = (size: TileSize): number => {
   return tiles[size].power

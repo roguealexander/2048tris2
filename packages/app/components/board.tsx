@@ -1,14 +1,24 @@
 import { observer, useObserve } from '@legendapp/state/react'
 import { actions$, state$ } from '../state'
 import { Tile } from './tile'
-import { Engine, Render, World, Events, Bodies, Runner, Composite, Body } from 'matter-js'
+import {
+  Engine,
+  Render,
+  World,
+  Events,
+  Bodies,
+  Runner,
+  Composite,
+  Body,
+  Constraint,
+} from 'matter-js'
 import { useRef, useEffect, ReactNode } from 'react'
 import {
   getMergedTileSize,
+  getTileDensity,
   getTilePower,
   getTileRadius,
   getTileSizeFromPower,
-  getTileSizeFromRadius,
 } from '../tiles'
 import ball2 from '../assets/2.png'
 import ball4 from '../assets/4.png'
@@ -23,11 +33,13 @@ import ball1024 from '../assets/1024.png'
 import ball2048 from '../assets/2048.png'
 import ball4096 from '../assets/4096.png'
 import ball8192 from '../assets/8192.png'
-import { TilePower, TileRecord } from '../types'
+import { TilePower, TileRecord, TileSize } from '../types'
 import { batch } from '@legendapp/state'
 import { Spacer, XStack, YStack } from '@my/ui'
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+const WorldScale = 1
 
 const width = 450
 const height = 700
@@ -49,8 +61,99 @@ const tileAsset: TileRecord<string> = {
   '8192': ball8192.src,
 }
 
-const handledCollision: Record<string, boolean> = {}
+let sensorConstraints: Record<number, Constraint> = {}
+let sensorTiles: Record<number, Body> = {}
+let handledCollisions: Record<string, boolean> = {}
 let tileId = 450
+
+const createBounds = (cw: number, ch: number) => {
+	return [
+		// Top Sensor
+		Bodies.rectangle(cw / 2, -20 + 64, cw, 40, {
+			id: 100,
+			isSensor: true,
+			isStatic: true,
+			render: { opacity: 0 },
+		}),
+
+		// Left Boundary
+		Bodies.rectangle(-20 + 64 * WorldScale, ch / 2, 40, ch, {
+			isStatic: true,
+			render: { opacity: 0 },
+			friction: 0,
+			frictionStatic: 0,
+		}),
+		// Bottom Boundary
+		Bodies.rectangle(cw / 2, ch + 20 - 64 * WorldScale, cw, 40, {
+			isStatic: true,
+			render: { opacity: 0 },
+			friction: 0,
+			frictionStatic: 0,
+		}),
+		// Right Boundary
+		Bodies.rectangle(cw + 20 - 64 * WorldScale, ch / 2, 40, ch, {
+			isStatic: true,
+			render: { opacity: 0 },
+			friction: 0,
+			frictionStatic: 0,
+		}),
+	]
+}
+
+const createTile = (
+  size: TileSize,
+  position: { x: number; y: number },
+  velocity?: { x: number; y: number }
+) => {
+  const radius = getTileRadius(size) / 2
+  const power = getTilePower(size)
+  const density = getTileDensity(size)
+
+  const ballId = ++tileId
+  const sensorId = ++tileId
+  const constraintId = ++tileId
+
+  const ballTile = Bodies.circle(position.x, position.y, radius * WorldScale, {
+    id: ballId,
+    density: 0.0001 * density,
+    restitution: 0.2,
+    frictionStatic: 0,
+    render: {
+      sprite: {
+        texture: tileAsset[size],
+        xScale: 0.5 * WorldScale,
+        yScale: 0.5 * WorldScale,
+      },
+    },
+  })
+
+  const ballSensor = Bodies.circle(position.x, position.y, (radius + 2) * WorldScale, {
+    id: sensorId,
+    mass: 0.00001,
+    isSensor: true,
+    collisionFilter: { category: 2, mask: power, group: power },
+    render: { visible: false },
+  })
+
+  const ballConstraint = Constraint.create({
+    id: constraintId,
+    bodyA: ballTile,
+    bodyB: ballSensor,
+    render: { visible: false },
+  })
+
+  // Set velocity
+  if (velocity != null) {
+    Body.setVelocity(ballTile, velocity)
+  }
+
+  sensorConstraints[sensorId] = ballConstraint
+  sensorTiles[sensorId] = ballTile
+
+  state$.activeTileCount[size].set((count) => count + 1)
+
+  return [ballTile, ballSensor, ballConstraint]
+}
 
 const TileDropPositioner = observer(({ children }: { children: ReactNode }) => {
   const dropX = state$.dropX.get()
@@ -65,7 +168,8 @@ export const BoardComp = observer(() => {
   const scene = useRef<HTMLDivElement | null>(null)
   const engine = useRef(
     Engine.create({
-      gravity: { x: 0, y: 1, scale: 0.004 },
+      positionIterations: 10,
+      gravity: { x: 0, y: 1, scale: 0.001 },
     })
   )
   const runner = useRef(
@@ -92,33 +196,22 @@ export const BoardComp = observer(() => {
 
       Composite.clear(engine.current!.world, false)
 
-      const cw = (width + 64 * 2) * 2
-      const ch = (height + 64 * 2) * 2
+      sensorConstraints = {}
+      sensorTiles = {}
+      handledCollisions = {}
 
-      World.add(engine.current.world, [
-        // Top Sensor
-        Bodies.rectangle(cw / 2, -20 + 64, cw, 40, {
-          id: 100,
-          isSensor: true,
-          isStatic: true,
-          render: { opacity: 0 },
-        }),
+      const cw = (width + 64 * 2) * WorldScale
+      const ch = (height + 64 * 2) * WorldScale
 
-        // Left Boundary
-        Bodies.rectangle(-20 + 128, ch / 2, 40, ch, { isStatic: true, render: { opacity: 0 } }),
-        // Bottom Boundary
-        Bodies.rectangle(cw / 2, ch + 20 - 128, cw, 40, { isStatic: true, render: { opacity: 0 } }),
-        // Right Boundary
-        Bodies.rectangle(cw + 20 - 128, ch / 2, 40, ch, { isStatic: true, render: { opacity: 0 } }),
-      ])
+      World.add(engine.current.world, createBounds(cw, ch))
 
       state$.resetting.set(false)
     }
   )
 
   useEffect(() => {
-    const cw = (width + 64 * 2) * 2
-    const ch = (height + 64 * 2) * 2
+    const cw = (width + 64 * 2) * WorldScale
+    const ch = (height + 64 * 2) * WorldScale
 
     const render = Render.create({
       element: scene.current!,
@@ -128,25 +221,11 @@ export const BoardComp = observer(() => {
         height: ch,
         wireframes: false,
         background: 'transparent',
+        pixelRatio: 2,
       },
     })
 
-    World.add(engine.current.world, [
-      // Top Sensor
-      Bodies.rectangle(cw / 2, -20 + 64, cw, 40, {
-        id: 100,
-        isSensor: true,
-        isStatic: true,
-        render: { opacity: 0 },
-      }),
-
-      // Left Boundary
-      Bodies.rectangle(-20 + 128, ch / 2, 40, ch, { isStatic: true, render: { opacity: 0 } }),
-      // Bottom Boundary
-      Bodies.rectangle(cw / 2, ch + 20 - 128, cw, 40, { isStatic: true, render: { opacity: 0 } }),
-      // Right Boundary
-      Bodies.rectangle(cw + 20 - 128, ch / 2, 40, ch, { isStatic: true, render: { opacity: 0 } }),
-    ])
+    World.add(engine.current.world, createBounds(cw, ch))
 
     Events.on(runner.current, 'tick', () => {
       // @ts-ignore
@@ -169,8 +248,8 @@ export const BoardComp = observer(() => {
         //   actions$.topOut()
         // }
 
-        if (handledCollision[id]) return
-        handledCollision[id] = true
+        if (handledCollisions[id]) return
+        handledCollisions[id] = true
 
         if (
           bodyA.collisionFilter.category === 2 &&
@@ -181,57 +260,28 @@ export const BoardComp = observer(() => {
         ) {
           const power = bodyA.collisionFilter.group
 
-          World.remove(engine.current.world, bodyA.parent)
-          World.remove(engine.current.world, bodyB.parent)
+          const constraintA = sensorConstraints[bodyA.id]!
+          const constraintB = sensorConstraints[bodyB.id]!
+          const tileA = sensorTiles[bodyA.id]!
+          const tileB = sensorTiles[bodyB.id]!
+
+          delete sensorConstraints[bodyA.id]
+          delete sensorConstraints[bodyB.id]
+          delete sensorTiles[bodyA.id]
+          delete sensorTiles[bodyB.id]
+
+          // Remove items
+          World.remove(engine.current.world, [bodyA, bodyB, constraintA, constraintB, tileA, tileB])
 
           const size = getTileSizeFromPower(power as TilePower)
           const mergedSize = getMergedTileSize(size)
-          const mergedRadius = getTileRadius(mergedSize)
-
-          if (mergedSize === '2048' && state$.targetEfficiency.peek() === '2048') {
-            actions$.triggerHighEfficiencyCheck('2048')
-          }
-          if (mergedSize === '4096' && state$.targetEfficiency.peek() === '4096') {
-            actions$.triggerHighEfficiencyCheck('4096')
-          }
-          if (mergedSize === '8192' && state$.targetEfficiency.peek() === '8192') {
-            actions$.triggerHighEfficiencyCheck('8192')
-          }
-
-          batch(() => {
-            state$.activeTileCount[size].set((count) => count - 2)
-            state$.activeTileCount[mergedSize].set((count) => count + 1)
-          })
 
           const x = (bodyA.position.x + bodyB.position.x) / 2
           const y = (bodyA.position.y + bodyB.position.y) / 2
 
-          const ballTile = Bodies.circle(x, y, mergedRadius, {
-            density: 0.00005,
-            restitution: 0.2,
-            friction: 0.005,
-            id: ++tileId,
-            render: {
-              sprite: {
-                texture: tileAsset[mergedSize],
-                xScale: 1,
-                yScale: 1,
-              },
-            },
-          })
+          const tileBodies = createTile(mergedSize, { x, y })
 
-          const ballSensor = Bodies.circle(x, y, mergedRadius + 4, {
-            id: ++tileId,
-            isSensor: true,
-            collisionFilter: { category: 2, group: power + 1 },
-            render: { visible: false },
-          })
-
-          const ball = Body.create({
-            parts: [ballSensor, ballTile],
-          })
-
-          World.add(engine.current.world, [ball])
+          World.add(engine.current.world, tileBodies)
         }
       })
     })
@@ -254,37 +304,14 @@ export const BoardComp = observer(() => {
   const releaseBall = () => {
     if (state$.gameInteractionPaused.get()) return
 
-    const radius = getTileRadius(state$.activeTile.peek())
-    const power = getTilePower(state$.activeTile.peek())
+    const tileBodies = createTile(
+      state$.activeTile.peek(),
+      { x: state$.dropX.get() * WorldScale, y: 64 * WorldScale },
+      { x: 0, y: 10 * WorldScale }
+    )
 
-    lastDroppedTileId = ++tileId
+    World.add(engine.current.world, tileBodies)
 
-    const ballTile = Bodies.circle(state$.dropX.get() * 2, 64 * 2, radius, {
-      density: 0.00005,
-      restitution: 0.2,
-      friction: 0.005,
-      id: lastDroppedTileId,
-      render: {
-        sprite: {
-          texture: tileAsset[state$.activeTile.peek()],
-          xScale: 1,
-          yScale: 1,
-        },
-      },
-    })
-    const ballSensor = Bodies.circle(state$.dropX.get() * 2, 64 * 2, radius + 4, {
-      id: ++tileId,
-      isSensor: true,
-      collisionFilter: { category: 2, group: power },
-      render: { visible: false },
-    })
-
-    const ball = Body.create({
-      parts: [ballSensor, ballTile],
-    })
-
-    state$.activeTileCount[state$.activeTile.peek()].set((count) => count + 1)
-    World.add(engine.current.world, [ball])
     actions$.drop()
   }
 
