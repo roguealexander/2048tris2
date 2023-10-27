@@ -11,7 +11,7 @@ type GameState = {
 
   activeTile: TileSize
   heldTile: TileSize | null
-  holdShakeCount: number
+  holdShakeKey: string | null
   queue: TileQueue
   holdAvailable: boolean
   score: number
@@ -60,7 +60,7 @@ const constructInitialQueue = (): TileQueue => {
   ]
 }
 
-const getInitGameState = (): Omit<GameState, 'resetCount' | 'holdShakeCount' | 'mouseX'> => ({
+const getInitGameState = (): Omit<GameState, 'resetCount' | 'holdShakeKey' | 'mouseX'> => ({
   toppedOut: false,
   resetting: false,
   activeTile: getQueueTile(),
@@ -94,7 +94,7 @@ export const state$ = observable<GameState & GameStateComputed>({
   // STATE
   ...getInitGameState(),
   resetCount: 0,
-  holdShakeCount: 0,
+  holdShakeKey: null,
   mouseX: 0,
 
   // COMPUTED
@@ -176,7 +176,7 @@ const incrementBallsDropped = () => {
 }
 
 const incrementHoldShakeCount = () => {
-  state$.holdShakeCount.set((count) => count + 1)
+  state$.holdShakeKey.set((key) => (key == null ? '0' : `${parseInt(key) + 1}`))
 }
 
 const pullActiveTileFromQueue = () => {

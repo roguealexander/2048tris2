@@ -268,6 +268,10 @@ export const BoardComp = observer(() => {
   )
 
   useEffect(() => {
+    engine.current.positionIterations = 12
+    engine.current.velocityIterations = 12
+    engine.current.gravity = { x: 0, y: 1, scale: 0.0015 }
+
     const cw = (width + 64 * 2) * WorldScale
     const ch = (height + 64 * 2) * WorldScale
 
