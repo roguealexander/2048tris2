@@ -13,7 +13,7 @@ export const Score = observer(() => {
         </b>
       </SizableText>
       <SizableText>
-        High Score:
+        Record:
         <br />
         <b>
           <Memo>{highScores$.points}</Memo>
@@ -33,7 +33,7 @@ export const Efficiency = observer(() => {
         </b>
       </SizableText>
       <SizableText>
-        Efficiency Record:
+        Record:
         <br />
         <b>
           <Memo>{state$.targetHighEfficiency}</Memo>% (<Memo>{state$.targetEfficiency}</Memo>)

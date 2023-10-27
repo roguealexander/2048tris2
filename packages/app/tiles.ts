@@ -5,7 +5,7 @@ const tile2: TileData = {
   size: '2',
   power: 1,
   radius: 1,
-  density: 2,
+  density: 3,
   color: colors.tile['2'],
   textColor: colors.text,
 }
@@ -13,7 +13,7 @@ const tile4: TileData = {
   size: '4',
   power: 2,
   radius: 2,
-  density: 1.5,
+  density: 2,
   color: colors.tile['4'],
   textColor: colors.text,
 }
@@ -21,7 +21,7 @@ const tile8: TileData = {
   size: '8',
   power: 3,
   radius: 3,
-  density: 1,
+  density: 1.5,
   color: colors.tile['8'],
   textColor: colors.background,
 }
@@ -29,7 +29,7 @@ const tile16: TileData = {
   size: '16',
   power: 4,
   radius: 4,
-  density: 1,
+  density: 1.5,
   color: colors.tile['16'],
   textColor: colors.background,
 }

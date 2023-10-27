@@ -24,6 +24,7 @@ export const ActiveTilesHistogram = observer(() => {
               jc="flex-start"
               outlineStyle='solid'
               outlineWidth={size === targetEfficiency ? 2 : 0}
+              zi={size === targetEfficiency ? 2 : 1}
               outlineColor="$border"
               outlineOffset={2}
             >
