@@ -1,10 +1,11 @@
-import { observer } from '@legendapp/state/react'
+import { Memo, observer } from '@legendapp/state/react'
 import { TButton, TSizableText, XStack, YStack } from '@my/ui'
 import { colors } from 'app/colors'
 import { TabContainer } from './tab-container'
 import { useUser } from 'app/utils/useUser'
 import { useSupabase } from 'app/utils/supabase/useSupabase'
 import { AuthComponent } from 'app/features/auth/auth-component'
+import { stats$, statsActions$ } from 'app/statsState'
 
 const Header = observer(() => {
   return (
@@ -53,7 +54,7 @@ const Row = observer(
 
 const LeaderboardStatsTable = observer(() => {
   return (
-    <YStack w="100%">
+    <YStack w="100%" pl="$2">
       <Header />
       <br />
       <TSizableText size="$3">POINTS:</TSizableText>
@@ -69,7 +70,11 @@ const LeaderboardStatsTable = observer(() => {
 })
 
 const ResetStatsButton = observer(() => {
-  return <TButton onPress={() => console.log('reset stats')}>RESET USER STATS</TButton>
+  return (
+    <TButton ml="$2" onPress={() => statsActions$.resetStats()}>
+      RESET USER STATS
+    </TButton>
+  )
 })
 
 const SignOutButton = observer(() => {
@@ -77,29 +82,69 @@ const SignOutButton = observer(() => {
   const signOut = async () => {
     await supabase.auth.signOut()
   }
-  return <TButton onPress={signOut}>SIGN OUT</TButton>
+  return (
+    <TButton ml="$2" onPress={signOut}>
+      SIGN OUT
+    </TButton>
+  )
 })
 
 export const UserTab = observer(() => {
-  const { user, isLoading } = useUser()
-  console.log({
-    user,
-  })
+  const { user } = useUser()
   return (
     <TabContainer tab="user">
-      <TSizableText>User Leaderboard Stats:</TSizableText>
       <br />
-      {user == null ? <AuthComponent /> : <LeaderboardStatsTable />}
+      {user == null && (
+        <>
+          <AuthComponent />
+          <br />
+          <br />
+          <XStack w="100%" h={2} bg="$border" />
+          <br />
+          <br />
+        </>
+      )}
+
+      <TSizableText>
+        Games Played:{' '}
+        <TSizableText size="$5" fontWeight="bold">
+          <Memo>{stats$.gamesPlayed}</Memo>
+        </TSizableText>
+      </TSizableText>
+      <TSizableText>
+        Tiles Dropped:{' '}
+        <TSizableText size="$5" fontWeight="bold">
+          <Memo>{stats$.ballsDropped}</Memo>
+        </TSizableText>
+      </TSizableText>
       <br />
       <br />
+
+      <XStack w="100%" h={2} bg="$border" />
+      <br />
+      <br />
+
+      <TSizableText>
+        User{' '}
+        <TSizableText textDecorationLine={user == null ? 'line-through' : undefined}>
+          Leaderboard
+        </TSizableText>{' '}
+        Stats:
+      </TSizableText>
+      <br />
+      <LeaderboardStatsTable />
+      <br />
+      <br />
+
       <TSizableText>Reset Stats:</TSizableText>
       <br />
       <ResetStatsButton />
+
       {user != null && (
         <>
           <br />
           <br />
-          <TSizableText>Log Out:</TSizableText>
+          <TSizableText>Sign Out:</TSizableText>
           <br />
           <SignOutButton />
         </>

@@ -10475,6 +10475,7 @@ __metadata:
     expo-secure-store: "npm:~12.3.1"
     matter-js: "npm:^0.19.0"
     react-hook-form: "npm:^7.46.1"
+    react-native-mmkv: "npm:^2.10.2"
     react-native-safe-area-context: "npm:4.6.3"
     solito: "npm:^4.0.1"
     superjson: "npm:^1.13.1"
@@ -23365,6 +23366,16 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: b83590b50a113fae6afcee580f5019c29b6a7da144dd8c11ea8676ec580a5dc5776d595d88745989da5918669279f577cd2cd8ae02d43ea04a0d34efc6a1553b
+  languageName: node
+  linkType: hard
+
+"react-native-mmkv@npm:^2.10.2":
+  version: 2.10.2
+  resolution: "react-native-mmkv@npm:2.10.2"
+  peerDependencies:
+    react: "*"
+    react-native: ">=0.71.0"
+  checksum: 0b592b06c02eccfb7edad16efa6ef683ac72bf9db2abbb48540b792176fe9e7a6a64c96741aa1cff596933ce479180f54e273031bb281bb310ae45b11b70df75
   languageName: node
   linkType: hard
 

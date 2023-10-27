@@ -3,8 +3,7 @@ import Head from 'next/head'
 import { NextPageWithLayout } from './_app'
 
 import dynamic from 'next/dynamic'
-import { guestOnlyGetSSP } from 'utils/guestOnly'
- 
+
 const HomeScreenNOSSR = dynamic(() => import('app/features/home/screen'), { ssr: false })
 
 export const Page: NextPageWithLayout = () => {
@@ -19,7 +18,5 @@ export const Page: NextPageWithLayout = () => {
 }
 
 Page.getLayout = (page) => <HomeLayout>{page}</HomeLayout>
-
-export const getServerSideProps = guestOnlyGetSSP()
 
 export default Page

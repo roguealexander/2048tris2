@@ -1,6 +1,7 @@
 import { Memo, observer } from '@legendapp/state/react'
-import { stats$, state$ } from '../state'
+import { state$ } from '../state'
 import { TSizableText, YStack } from '@my/ui'
+import { stats$ } from 'app/statsState'
 
 const HighScoreValue = observer(() => {
   const score = stats$.scoreHigh.get()

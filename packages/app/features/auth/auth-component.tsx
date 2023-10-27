@@ -1,10 +1,8 @@
-import { H2, Paragraph, TSizableText, SubmitButton, Text, Theme, XStack, YStack } from '@my/ui'
+import { H2, TSizableText, SubmitButton, XStack, YStack } from '@my/ui'
 import { SchemaForm, formFields } from 'app/utils/SchemaForm'
 import { useSupabase } from 'app/utils/supabase/useSupabase'
 import React from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
-import { Link } from 'solito/link'
-import { useRouter } from 'solito/router'
 import { z } from 'zod'
 
 import { hashString } from 'app/utils/hashString'
@@ -91,15 +89,18 @@ export const AuthComponent = observer(() => {
                 <SubmitButton onPress={() => submit()} w={250}>
                   Sign {signingIn ? 'In' : 'Up'}
                 </SubmitButton>
-                <TSizableText
-                  cur="pointer"
-                  onPress={() => {
-                    signUpSignIn$.set((curr) => (curr === 'sign-in' ? 'sign-up' : 'sign-in'))
-                    form.clearErrors()
-                  }}
-                  textDecorationLine="underline"
-                >
-                  Sign {signingIn ? 'Up' : 'In'} Instead
+                <TSizableText>
+                  {signingIn ? 'Dont have an account? ' : 'Already have an account? '}
+                  <TSizableText
+                    cur="pointer"
+                    onPress={() => {
+                      signUpSignIn$.set((curr) => (curr === 'sign-in' ? 'sign-up' : 'sign-in'))
+                      form.clearErrors()
+                    }}
+                    textDecorationLine="underline"
+                  >
+                    Sign {signingIn ? 'Up' : 'In'}
+                  </TSizableText>
                 </TSizableText>
               </>
             )

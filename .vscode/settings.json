@@ -16,7 +16,8 @@
     "ngneat",
     "NOSSR",
     "supabase",
-    "tris"
+    "tris",
+    "TRPC"
   ],
   "editor.formatOnSave": true
 }

@@ -34,3 +34,6 @@ export type LeaderboardType =
   | 'efficiency2048'
   | 'efficiency4096'
   | 'efficiency8192'
+
+export type TileQueue = [TileSize, TileSize, TileSize, TileSize, TileSize, TileSize]
+export type EfficiencyTile = '2048' | '4096' | '8192'

@@ -7,7 +7,16 @@ export const TabContainer = observer(({ tab, children }: { tab: Tab; children: R
   if (appState$.tab.get() !== tab) return null
 
   return (
-    <ScrollView fullscreen mah="100%" bg="$background" ai="center" jc="flex-start" pt={64} zi={5}>
+    <ScrollView
+      fullscreen
+      mah="100%"
+      bg="$background"
+      ai="center"
+      jc="flex-start"
+      pt={64}
+      pb={64}
+      zi={5}
+    >
       <YStack ai="flex-start" miw={450}>
         {children}
       </YStack>

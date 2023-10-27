@@ -286,6 +286,7 @@ export const BoardComp = observer(() => {
     World.add(engine.current.world, createBounds(cw, ch))
 
     Events.on(runner.current, 'tick', () => {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       runner.current.deltaMin = runner.current.fps > 60 ? 1000 / runner.current.fps : 1000 / 120
     })

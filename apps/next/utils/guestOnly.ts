@@ -20,14 +20,14 @@ export function guestOnlyGetSSP<
       data: { session },
     } = await supabase.auth.getSession()
 
-    if (session) {
-      return {
-        redirect: {
-          destination: '/',
-          permanent: false,
-        },
-      }
-    }
+    // if (session) {
+    //   return {
+    //     redirect: {
+    //       destination: '/',
+    //       permanent: false,
+    //     },
+    //   }
+    // }
 
     if (getServerSideProps) {
       return getServerSideProps(ctx)

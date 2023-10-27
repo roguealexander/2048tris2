@@ -10,6 +10,7 @@ import { LeaderboardTab } from 'app/components/leaderboard-tab'
 import { Queue } from 'app/components/queue'
 import { RulesTab } from 'app/components/rules-tab'
 import { Efficiency, Score } from 'app/components/stats'
+import { StatsPersistor } from 'app/components/stats-persistor'
 import { Tile } from 'app/components/tile'
 import { TopOutPanel } from 'app/components/top-out-panel'
 import { UserTab } from 'app/components/user-tab'
@@ -39,6 +40,7 @@ const ActiveRightPanel = observer(() => {
 export function HomeScreen() {
   return (
     <XStack w="100%" mih="100vh" mah="100vh" als="center" jc="center" f={1} gap={64} pt={64}>
+      <StatsPersistor />
       <GameplayHoldListener />
 
       {/* LEFT */}

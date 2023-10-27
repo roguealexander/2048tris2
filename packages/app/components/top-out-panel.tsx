@@ -1,8 +1,9 @@
 import { observer } from '@legendapp/state/react'
 import { Button, TSizableText, XStack, YStack } from '@my/ui'
-import { state$, actions$, stats$ } from 'app/state'
+import { state$, actions$ } from 'app/state'
 import { ActiveTilesHistogram } from './active-tile-histogram'
 import { Score, Efficiency } from './stats'
+import { stats$ } from 'app/statsState'
 
 const TopOutTitle = observer(() => {
   if (state$.score.peek() === stats$.scoreHigh.peek()) return 'HIGH SCORE'

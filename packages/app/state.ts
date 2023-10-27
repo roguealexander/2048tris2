@@ -1,57 +1,8 @@
 import { batch, computed, mergeIntoObservable, observable } from '@legendapp/state'
-import { TileList, TileRecord, TileSize } from './types'
+import { EfficiencyTile, TileList, TileQueue, TileRecord, TileSize } from './types'
 import { rand } from '@ngneat/falso'
-import { getTilePower, getTileRadius } from './tiles'
-import { configureObservablePersistence, persistObservable } from '@legendapp/state/persist'
-import { ObservablePersistLocalStorage } from '@legendapp/state/persist-plugins/local-storage'
-
-// Global configuration
-configureObservablePersistence({
-  pluginLocal: ObservablePersistLocalStorage,
-})
-
-type TileQueue = [TileSize, TileSize, TileSize, TileSize, TileSize, TileSize]
-type EfficiencyTile = '2048' | '4096' | '8192'
-
-type Stats = {
-  gamesPlayed: number
-  ballsDropped: number
-
-  scoreHigh: number | null
-  scoreLow: number | null
-
-  efficiency2048: number | null
-  efficiency4096: number | null
-  efficiency8192: number | null
-}
-
-const statsInit: Stats = {
-  gamesPlayed: 0,
-  ballsDropped: 0,
-
-  scoreHigh: null,
-  scoreLow: null,
-
-  efficiency2048: null,
-  efficiency4096: null,
-  efficiency8192: null,
-}
-
-export const stats$ = observable<Stats>(statsInit)
-
-type StatsActions = {
-  resetStats: () => void
-}
-
-export const statsActions$ = observable<StatsActions>({
-  resetStats: () => {
-    mergeIntoObservable(stats$, statsInit)
-  },
-})
-
-persistObservable(stats$, {
-  local: 'highScores_v2',
-})
+import { getTileRadius } from './tiles'
+import { stats$ } from './statsState'
 
 type GameState = {
   toppedOut: boolean
@@ -292,7 +243,7 @@ export const actions$ = observable<GameActions>({
   },
   reset: () => {
     batch(() => {
-      mergeIntoObservable(state$, getInitGameState())
+      mergeIntoObservable(state$, { ...getInitGameState() })
       state$.resetCount.set((count) => (count += 1))
     })
   },
@@ -306,6 +257,9 @@ export const actions$ = observable<GameActions>({
         stats$.scoreHigh.set(state$.score.peek())
       }
       state$.toppedOut.set(true)
+
+      // Update games played
+      stats$.gamesPlayed.set((count) => count + 1)
 
       // Update balls dropped
       stats$.ballsDropped.set((ballsDropped) => ballsDropped + state$.ballsDropped.peek())
@@ -354,10 +308,13 @@ export const actions$ = observable<GameActions>({
       switch (activeHighEfficiencyPanel) {
         case '2048':
           state$.targetEfficiency.set('4096')
+          break
         case '4096':
           state$.targetEfficiency.set('8192')
+          break
         case '8192':
           state$.targetEfficiency.set('8192')
+          break
       }
 
       // Close panel

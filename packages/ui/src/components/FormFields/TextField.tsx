@@ -38,6 +38,10 @@ export const TextField = (props: Pick<InputProps, 'size' | 'autoFocus' | 'secure
             placeholder={placeholder}
             id={id}
             br="$0"
+            borderColor="$border"
+            outlineColor="$border"
+            hoverStyle={{ borderColor: '$border' }}
+            focusStyle={{ borderColor: '$border', outlineColor: '$border' }}
             {...props}
           />
         </Shake>

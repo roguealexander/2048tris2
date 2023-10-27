@@ -11,25 +11,34 @@ export interface Database {
     Tables: {
       stats: {
         Row: {
-          "2048_high_efficiency": number | null
-          "4096_high_efficiency": number | null
-          "8192_high_efficiency": number | null
-          high_score: number | null
+          ballsDropped: number
+          efficiency2048: number | null
+          efficiency4096: number | null
+          efficiency8192: number | null
+          gamesPlayed: number
           id: string
+          scoreHigh: number | null
+          scoreLow: number | null
         }
         Insert: {
-          "2048_high_efficiency"?: number | null
-          "4096_high_efficiency"?: number | null
-          "8192_high_efficiency"?: number | null
-          high_score?: number | null
+          ballsDropped?: number
+          efficiency2048?: number | null
+          efficiency4096?: number | null
+          efficiency8192?: number | null
+          gamesPlayed?: number
           id: string
+          scoreHigh?: number | null
+          scoreLow?: number | null
         }
         Update: {
-          "2048_high_efficiency"?: number | null
-          "4096_high_efficiency"?: number | null
-          "8192_high_efficiency"?: number | null
-          high_score?: number | null
+          ballsDropped?: number
+          efficiency2048?: number | null
+          efficiency4096?: number | null
+          efficiency8192?: number | null
+          gamesPlayed?: number
           id?: string
+          scoreHigh?: number | null
+          scoreLow?: number | null
         }
         Relationships: [
           {
