@@ -70,7 +70,7 @@ export const AuthComponent = observer(() => {
   }
 
   return (
-    <XStack bw={2} f={1} w="100%" boc="$border">
+    <XStack bw={4} f={1} w="100%" boc="$border">
       <FormProvider {...form}>
         <SchemaForm
           form={form}
