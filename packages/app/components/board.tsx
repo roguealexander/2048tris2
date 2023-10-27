@@ -112,7 +112,7 @@ const createBounds = (cw: number, ch: number) => {
     }),
 
     // Left Boundary
-    Bodies.rectangle(-20 + 64 * WorldScale, ch / 2, 40, ch, {
+    Bodies.rectangle(-200 + 64 * WorldScale, ch / 2, 400, ch, {
       isStatic: true,
       render: { opacity: 0 },
       friction: 0.1,
@@ -121,7 +121,7 @@ const createBounds = (cw: number, ch: number) => {
       label: 'LeftBound',
     }),
     // Bottom Boundary
-    Bodies.rectangle(cw / 2, ch + 20 - 64 * WorldScale, cw, 40, {
+    Bodies.rectangle(cw / 2, ch + 200 - 64 * WorldScale, cw, 400, {
       isStatic: true,
       render: { opacity: 0 },
       friction: 0.1,
@@ -130,7 +130,7 @@ const createBounds = (cw: number, ch: number) => {
       label: 'RightBound',
     }),
     // Right Boundary
-    Bodies.rectangle(cw + 20 - 64 * WorldScale, ch / 2, 40, ch, {
+    Bodies.rectangle(cw + 200 - 64 * WorldScale, ch / 2, 400, ch, {
       isStatic: true,
       render: { opacity: 0 },
       friction: 0.1,
