@@ -1,19 +1,19 @@
 import { observer } from '@legendapp/state/react'
 import { Button, PortalHost, SizableText, XStack, YStack } from '@my/ui'
-import { state$, actions$, highScores$ } from 'app/state'
+import { state$, actions$, stats$ } from 'app/state'
 import { ActiveTilesHistogram } from './active-tile-histogram'
 import { Score, Efficiency } from './stats'
 
 const TopOutTitle = observer(() => {
-  if (state$.points.peek() === highScores$.points.peek()) return 'HIGH SCORE'
+  if (state$.score.peek() === stats$.scoreHigh.peek()) return 'HIGH SCORE'
   return 'GAME OVER'
 })
 
 const TopOutHighScoreSubtitle = observer(() => {
-  if (state$.points.peek() !== highScores$.points.peek()) return null
+  if (state$.score.peek() !== stats$.scoreHigh.peek()) return null
   return (
     <SizableText size="$9" fontStyle="italic">
-      {highScores$.points.peek()} POINTS
+      {stats$.scoreHigh.peek()} POINTS
     </SizableText>
   )
 })

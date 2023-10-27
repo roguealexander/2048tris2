@@ -1,5 +1,5 @@
 import { Memo, observer } from '@legendapp/state/react'
-import { highScores$, state$ } from '../state'
+import { stats$, state$ } from '../state'
 import { SizableText, YStack } from '@my/ui'
 
 export const Score = observer(() => {
@@ -9,14 +9,14 @@ export const Score = observer(() => {
         Score:
         <br />
         <b>
-          <Memo>{state$.points}</Memo>
+          <Memo>{state$.score}</Memo>
         </b>
       </SizableText>
       <SizableText>
         Record:
         <br />
         <b>
-          <Memo>{highScores$.points}</Memo>
+          <Memo>{stats$.scoreHigh}</Memo>
         </b>
       </SizableText>
     </YStack>

@@ -1,4 +1,4 @@
-import { batch, computed, observable } from '@legendapp/state'
+import { batch, computed, mergeIntoObservable, observable } from '@legendapp/state'
 import { TileList, TileRecord, TileSize } from './types'
 import { rand } from '@ngneat/falso'
 import { getTilePower, getTileRadius } from './tiles'
@@ -13,28 +13,49 @@ configureObservablePersistence({
 type TileQueue = [TileSize, TileSize, TileSize, TileSize, TileSize, TileSize]
 type EfficiencyTile = '2048' | '4096' | '8192'
 
-type HighScores = {
-  points: number
-  efficiency_2048: number
-  efficiency_4096: number
-  efficiency_8192: number
+type Stats = {
+  gamesPlayed: number
+  ballsDropped: number
+
+  scoreHigh: number | null
+  scoreLow: number | null
+
+  efficiency2048: number | null
+  efficiency4096: number | null
+  efficiency8192: number | null
 }
 
-export const highScores$ = observable<HighScores>({
-  points: 0,
-  efficiency_2048: 0,
-  efficiency_4096: 0,
-  efficiency_8192: 0,
+const statsInit: Stats = {
+  gamesPlayed: 0,
+  ballsDropped: 0,
+
+  scoreHigh: null,
+  scoreLow: null,
+
+  efficiency2048: null,
+  efficiency4096: null,
+  efficiency8192: null,
+}
+
+export const stats$ = observable<Stats>(statsInit)
+
+type StatsActions = {
+  resetStats: () => void
+}
+
+export const statsActions$ = observable<StatsActions>({
+  resetStats: () => {
+    mergeIntoObservable(stats$, statsInit)
+  },
 })
-persistObservable(highScores$, {
+
+persistObservable(stats$, {
   local: 'highScores',
 })
 
 type GameState = {
   toppedOut: boolean
   resetting: boolean
-  gamePhysicsPaused: boolean
-  gameInteractionPaused: boolean
   resetCount: number
 
   activeTile: TileSize
@@ -42,19 +63,25 @@ type GameState = {
   holdShakeCount: number
   queue: TileQueue
   holdAvailable: boolean
-  points: number
+  score: number
+  ballsDropped: number
 
   mouseX: number
-  dropX: number
 
   activeTileCount: TileRecord<number>
+  targetEfficiency: EfficiencyTile
+  activeHighEfficiencyPanel: EfficiencyTile | null
+}
+type GameStateComputed = {
+  gamePhysicsPaused: boolean
+  gameInteractionPaused: boolean
+
+  dropX: number
+
   maxTilesCount: number
   largestTile: TileSize
   efficiency: number
-  targetEfficiency: EfficiencyTile
   targetHighEfficiency: number
-
-  activeHighEfficiencyPanel: EfficiencyTile | null
   activeHighEfficiencyValue: number | null
 }
 
@@ -82,33 +109,15 @@ const constructInitialQueue = (): TileQueue => {
   ]
 }
 
-export const state$ = observable<GameState>({
+const getInitGameState = (): Omit<GameState, 'resetCount' | 'holdShakeCount' | 'mouseX'> => ({
   toppedOut: false,
   resetting: false,
-  gamePhysicsPaused: computed((): boolean => {
-    return state$.toppedOut.get() || state$.resetting.get()
-  }),
-  gameInteractionPaused: computed((): boolean => {
-    return (
-      state$.toppedOut.get() ||
-      state$.resetting.get() ||
-      state$.activeHighEfficiencyPanel.get() !== null
-    )
-  }),
-  resetCount: 0,
-
   activeTile: getQueueTile(),
   heldTile: null,
-  holdShakeCount: 0,
   queue: constructInitialQueue(),
   holdAvailable: true,
-  points: 0,
-
-  mouseX: 0,
-  dropX: computed((): number => {
-    const radius = getTileRadius(state$.activeTile.get())
-    return Math.min(Math.max(64 + radius / 2, state$.mouseX.get()), 64 + 450 - radius / 2)
-  }),
+  score: 0,
+  ballsDropped: 0,
 
   activeTileCount: {
     '2': 0,
@@ -125,6 +134,35 @@ export const state$ = observable<GameState>({
     '4096': 0,
     '8192': 0,
   },
+
+  targetEfficiency: '2048',
+  activeHighEfficiencyPanel: null,
+})
+
+export const state$ = observable<GameState & GameStateComputed>({
+  // STATE
+  ...getInitGameState(),
+  resetCount: 0,
+  holdShakeCount: 0,
+  mouseX: 0,
+
+  // COMPUTED
+  gamePhysicsPaused: computed((): boolean => {
+    return state$.toppedOut.get() || state$.resetting.get()
+  }),
+  gameInteractionPaused: computed((): boolean => {
+    return (
+      state$.toppedOut.get() ||
+      state$.resetting.get() ||
+      state$.activeHighEfficiencyPanel.get() !== null
+    )
+  }),
+
+  dropX: computed((): number => {
+    const radius = getTileRadius(state$.activeTile.get())
+    return Math.min(Math.max(64 + radius / 2, state$.mouseX.get()), 64 + 450 - radius / 2)
+  }),
+
   maxTilesCount: computed((): number => {
     let maxCount = 0
 
@@ -149,27 +187,23 @@ export const state$ = observable<GameState>({
         return activeTileCount[size] > 0
       }) ?? '2'
 
-
     const largestTilePoints = activeTileCount[largestTile] * parseInt(largestTile)
 
     if (largestTilePoints === 0) return 0
 
-
-    return Math.round(10000 * (largestTilePoints / state$.points.get())) / 100
+    return Math.round(10000 * (largestTilePoints / state$.score.get())) / 100
   }),
-  targetEfficiency: '2048',
   targetHighEfficiency: computed((): number => {
     switch (state$.targetEfficiency.get()) {
       case '2048':
-        return highScores$.efficiency_2048.get()
+        return stats$.efficiency2048.get()
       case '4096':
-        return highScores$.efficiency_4096.get()
+        return stats$.efficiency4096.get()
       case '8192':
-        return highScores$.efficiency_8192.get()
+        return stats$.efficiency8192.get()
     }
   }),
 
-  activeHighEfficiencyPanel: null,
   activeHighEfficiencyValue: computed((): number | null => {
     const activeHighEfficiencyPanel = state$.activeHighEfficiencyPanel.get()
 
@@ -177,15 +211,18 @@ export const state$ = observable<GameState>({
       case null:
         return null
       case '2048':
-        return highScores$.efficiency_2048.peek()
+        return stats$.efficiency2048.peek()
       case '4096':
-        return highScores$.efficiency_4096.peek()
+        return stats$.efficiency4096.peek()
       case '8192':
-        return highScores$.efficiency_8192.peek()
+        return stats$.efficiency8192.peek()
     }
-    
-  })
+  }),
 })
+
+const incrementBallsDropped = () => {
+  state$.ballsDropped.set((count) => count + 1)
+}
 
 const incrementHoldShakeCount = () => {
   state$.holdShakeCount.set((count) => count + 1)
@@ -204,7 +241,7 @@ const setHeldTile = (tile: TileSize) => {
 }
 
 const addPoints = (additional: number) => {
-  state$.points.set((points) => points + additional)
+  state$.score.set((points) => points + additional)
 }
 
 const resetHoldAvailable = () => {
@@ -228,6 +265,7 @@ export const actions$ = observable<GameActions>({
       pullActiveTileFromQueue()
       advanceQueue()
       resetHoldAvailable()
+      incrementBallsDropped()
     })
   },
   hold: () => {
@@ -254,42 +292,23 @@ export const actions$ = observable<GameActions>({
   },
   reset: () => {
     batch(() => {
-      state$.toppedOut.set(false)
-      state$.resetting.set(true)
+      mergeIntoObservable(state$, getInitGameState())
       state$.resetCount.set((count) => (count += 1))
-
-      state$.activeTile.set(getQueueTile())
-      state$.heldTile.set(null)
-      state$.queue.set(constructInitialQueue())
-      state$.holdAvailable.set(true)
-      state$.points.set(0)
-
-      state$.activeTileCount.set({
-        '2': 0,
-        '4': 0,
-        '8': 0,
-        '16': 0,
-        '32': 0,
-        '64': 0,
-        '128': 0,
-        '256': 0,
-        '512': 0,
-        '1024': 0,
-        '2048': 0,
-        '4096': 0,
-        '8192': 0,
-      })
-
-      state$.targetEfficiency.set('2048')
-      state$.activeHighEfficiencyPanel.set(null)
     })
   },
   topOut: () => {
     batch(() => {
-      if (state$.points.peek() > highScores$.points.peek()) {
-        highScores$.points.set(state$.points.peek())
+      // Update high scores
+      if (state$.score.peek() < (stats$.scoreLow.peek() ?? Infinity)) {
+        stats$.scoreLow.set(state$.score.peek())
+      }
+      if (state$.score.peek() > (stats$.scoreHigh.peek() ?? 0)) {
+        stats$.scoreHigh.set(state$.score.peek())
       }
       state$.toppedOut.set(true)
+
+      // Update balls dropped
+      stats$.ballsDropped.set((ballsDropped) => ballsDropped + state$.ballsDropped.peek())
     })
   },
   triggerHighEfficiencyCheck: (size: EfficiencyTile) => {
@@ -297,17 +316,17 @@ export const actions$ = observable<GameActions>({
     batch(() => {
       switch (size) {
         case '2048': {
-          if (efficiency > highScores$.efficiency_2048.peek()) {
-            highScores$.efficiency_2048.set(efficiency)
+          if (efficiency > stats$.efficiency2048.peek()) {
+            stats$.efficiency2048.set(efficiency)
             state$.activeHighEfficiencyPanel.set('2048')
           } else {
             state$.targetEfficiency.set('4096')
           }
-          break;
+          break
         }
         case '4096': {
-          if (efficiency > highScores$.efficiency_4096.peek()) {
-            highScores$.efficiency_4096.set(efficiency)
+          if (efficiency > stats$.efficiency4096.peek()) {
+            stats$.efficiency4096.set(efficiency)
             state$.activeHighEfficiencyPanel.set('4096')
           } else {
             state$.targetEfficiency.set('8192')
@@ -315,8 +334,8 @@ export const actions$ = observable<GameActions>({
           break
         }
         case '8192': {
-          if (efficiency > highScores$.efficiency_8192.peek()) {
-            highScores$.efficiency_8192.set(efficiency)
+          if (efficiency > stats$.efficiency8192.peek()) {
+            stats$.efficiency8192.set(efficiency)
             state$.activeHighEfficiencyPanel.set('8192')
           } else {
             state$.targetEfficiency.set('8192')
