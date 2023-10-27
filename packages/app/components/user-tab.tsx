@@ -1,122 +1,11 @@
-import { Memo, Show, observer } from '@legendapp/state/react'
-import { Button, ScrollView, TSizableText, XStack, YStack } from '@my/ui'
-import { appState$ } from 'app/appState'
-import { LeaderboardType, TileSize } from 'app/types'
-import { Tile } from './tile'
-import { computed, observable } from '@legendapp/state'
-import { ReactNode } from 'react'
-import { getMergedTileSize, getTileRadius } from 'app/tiles'
-import Animated, { useSharedValue, withTiming, useAnimatedStyle } from 'react-native-reanimated'
-import { getQueueTile } from 'app/state'
-import { BaseHoldListener } from './hold-listener'
-import { ArrowLeftRight, Merge } from '@tamagui/lucide-icons'
+import { observer } from '@legendapp/state/react'
+import { Button, TSizableText, XStack, YStack } from '@my/ui'
 import { colors } from 'app/colors'
 import { TabContainer } from './tab-container'
 import { useUser } from 'app/utils/useUser'
 import { useSupabase } from 'app/utils/supabase/useSupabase'
 import { AuthComponent } from 'app/features/auth/auth-component'
 
-const leaderboard$ = observable<LeaderboardType>('score')
-const leaderboardTitle$ = computed(() => {
-  switch (leaderboard$.get()) {
-    case 'scoreHigh':
-      return 'HIGH SCORE'
-    case 'efficiency2048':
-      return '2048 EFFICIENCY'
-    case 'efficiency4096':
-      return '4096 EFFICIENCY'
-    case 'efficiency8192':
-      return '8192 EFFICIENCY'
-  }
-})
-
-const LeaderboardSelect = observer(() => {
-  return (
-    <XStack w="100%" jc="center" gap="$8">
-      <YStack ai="center">
-        <TSizableText size="$3">Points:</TSizableText>
-        <XStack
-          h="$3"
-          px="$4"
-          ai="center"
-          pos="relative"
-          cursor="pointer"
-          onPress={() => leaderboard$.set('score')}
-        >
-          <Show if={leaderboard$.get() === 'scoreHigh'}>
-            <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[2048]} />
-          </Show>
-          <TSizableText
-            zi={2}
-            color={leaderboard$.get() === 'scoreHigh' ? colors.background : colors.text}
-          >
-            Score
-          </TSizableText>
-        </XStack>
-      </YStack>
-      <YStack h="100%" w={2} bg="$border" />
-      <YStack ai="center">
-        <TSizableText size="$3">Efficiency:</TSizableText>
-        <XStack gap="$4">
-          <XStack
-            h="$3"
-            px="$4"
-            ai="center"
-            pos="relative"
-            cursor="pointer"
-            onPress={() => leaderboard$.set('efficiency2048')}
-          >
-            <Show if={leaderboard$.get() === 'efficiency2048'}>
-              <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[64]} />
-            </Show>
-            <TSizableText
-              zi={2}
-              color={leaderboard$.get() === 'efficiency2048' ? colors.background : colors.text}
-            >
-              2048
-            </TSizableText>
-          </XStack>
-          <XStack
-            h="$3"
-            px="$4"
-            ai="center"
-            pos="relative"
-            cursor="pointer"
-            onPress={() => leaderboard$.set('efficiency4096')}
-          >
-            <Show if={leaderboard$.get() === 'efficiency4096'}>
-              <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[32]} />
-            </Show>
-            <TSizableText
-              zi={2}
-              color={leaderboard$.get() === 'efficiency4096' ? colors.background : colors.text}
-            >
-              4096
-            </TSizableText>
-          </XStack>
-          <XStack
-            h="$3"
-            px="$4"
-            ai="center"
-            pos="relative"
-            cursor="pointer"
-            onPress={() => leaderboard$.set('efficiency8192')}
-          >
-            <Show if={leaderboard$.get() === 'efficiency8192'}>
-              <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[16]} />
-            </Show>
-            <TSizableText
-              zi={2}
-              color={leaderboard$.get() === 'efficiency8192' ? colors.background : colors.text}
-            >
-              8192
-            </TSizableText>
-          </XStack>
-        </XStack>
-      </YStack>
-    </XStack>
-  )
-})
 const Header = observer(() => {
   return (
     <>
@@ -161,6 +50,7 @@ const Row = observer(
     )
   }
 )
+
 const LeaderboardStatsTable = observer(() => {
   return (
     <YStack w="100%">
