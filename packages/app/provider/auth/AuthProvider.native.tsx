@@ -5,7 +5,6 @@ import { router, useSegments } from 'expo-router'
 import { createContext, useEffect, useState } from 'react'
 import { Platform } from 'react-native'
 import { AuthProviderProps } from './AuthProvider'
-import { AuthStateChangeHandler } from './AuthStateChangeHandler'
 
 export const SessionContext = createContext<SessionContextHelper>({
   session: null,
@@ -55,7 +54,6 @@ export const AuthProvider = ({ children, initialSession }: AuthProviderProps) =>
             }
       }
     >
-      <AuthStateChangeHandler />
       {children}
     </SessionContext.Provider>
   )

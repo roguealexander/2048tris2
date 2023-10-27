@@ -12,6 +12,9 @@ import { BaseHoldListener } from './hold-listener'
 import { ArrowLeftRight, Merge } from '@tamagui/lucide-icons'
 import { colors } from 'app/colors'
 import { TabContainer } from './tab-container'
+import { useUser } from 'app/utils/useUser'
+import { useSupabase } from 'app/utils/supabase/useSupabase'
+import { AuthComponent } from 'app/features/auth/auth-component'
 
 const leaderboard$ = observable<LeaderboardType>('score')
 const leaderboardTitle$ = computed(() => {
@@ -119,13 +122,13 @@ const Header = observer(() => {
     <>
       <XStack h="$4" w="100%" ai="center" jc="space-between" px="$4" pos="relative">
         <XStack fullscreen bg={colors.tile['2']} zi={-1} />
+        <SizableText fontWeight="bold">LEADERBOARD</SizableText>
         <XStack ai="center" jc="center" gap="$4">
-          <SizableText w={40}>RANK</SizableText>
-          <SizableText fontWeight="bold">PLAYER</SizableText>
+          <SizableText fontWeight="bold">RANK</SizableText>
+          <SizableText fontWeight="bold" textAlign="right" w={80}>
+            SCORE
+          </SizableText>
         </XStack>
-        <SizableText fontWeight="bold">
-          <Memo>{leaderboardTitle$}</Memo>
-        </SizableText>
       </XStack>
       <XStack w="100%" h={2} bg="$border" />
     </>
@@ -134,44 +137,43 @@ const Header = observer(() => {
 
 const Row = observer(
   ({
+    leaderboard,
     rank,
-    name,
     score,
     highlight,
   }: {
+    leaderboard: string
     rank: number
-    name: string
     score: string
     highlight?: boolean
   }) => {
     return (
       <XStack pos="relative" h="$4" w="100%" ai="center" jc="space-between" px="$4">
-        {(highlight || rank % 2 === 0) && (
-          <XStack fullscreen bg={colors.tile['2']} o={0.5} zi={-1} />
-        )}
+        <XStack fullscreen bg={colors.tile['2']} o={highlight ? 0.6 : 0.4} zi={-1} />
+        <SizableText>{leaderboard}</SizableText>
         <XStack ai="center" jc="center" gap="$4">
-          <SizableText w={40}>{rank}</SizableText>
-          <SizableText fontWeight="bold">{name}</SizableText>
+          <SizableText>{rank}</SizableText>
+          <SizableText w={80} textAlign="right">
+            {score}
+          </SizableText>
         </XStack>
-        <SizableText>{score}</SizableText>
       </XStack>
     )
   }
 )
-const Table = observer(() => {
+const LeaderboardStatsTable = observer(() => {
   return (
     <YStack w="100%">
       <Header />
-      <Row key={0} rank={1} name="NAME" score="100%" />
-      <Row key={1} rank={2} name="NAME" score="100%" />
-      <Row key={2} rank={3} name="NAME" score="100%" />
-      <Row key={3} rank={4} name="NAME" score="100%" />
-      <Row key={4} rank={5} name="NAME" score="100%" />
-      <Row key={5} rank={6} name="NAME" score="100%" />
-      <Row key={6} rank={7} name="NAME" score="100%" />
-      <Row key={7} rank={8} name="NAME" score="100%" />
-      <Row key={8} rank={9} name="NAME" score="100%" />
-      <Row key={9} rank={10} name="NAME" score="100%" />
+      <br />
+      <SizableText size="$3">POINTS:</SizableText>
+      <Row key={0} rank={1} leaderboard="HIGH SCORE" score="100%" />
+      <Row key={1} rank={2} leaderboard="LOW SCORE" score="100%" highlight />
+      <br />
+      <SizableText size="$3">EFFICIENCY:</SizableText>
+      <Row key={2} rank={3} leaderboard="2048 EFFICIENCY" score="100%" />
+      <Row key={3} rank={4} leaderboard="4096 EFFICIENCY" score="100%" highlight />
+      <Row key={4} rank={5} leaderboard="8192 EFFICIENCY" score="100%" />
     </YStack>
   )
 })
@@ -180,16 +182,38 @@ const ResetStatsButton = observer(() => {
   return <Button onPress={() => console.log('reset stats')}>RESET USER STATS</Button>
 })
 
+const SignOutButton = observer(() => {
+  const supabase = useSupabase()
+  const signOut = async () => {
+    await supabase.auth.signOut()
+  }
+  return <Button onPress={signOut}>SIGN OUT</Button>
+})
+
 export const UserTab = observer(() => {
+  const { user, isLoading } = useUser()
+  console.log({
+    user,
+  })
   return (
     <TabContainer tab="user">
-      <SizableText>Leaderboard Stats:</SizableText>
+      <SizableText>User Leaderboard Stats:</SizableText>
       <br />
-      <LeaderboardSelect />
+      {user == null ? <AuthComponent /> : <LeaderboardStatsTable />}
+      <br />
       <br />
       <SizableText>Reset Stats:</SizableText>
       <br />
       <ResetStatsButton />
+      {user != null && (
+        <>
+          <br />
+          <br />
+          <SizableText>Log Out:</SizableText>
+          <br />
+          <SignOutButton />
+        </>
+      )}
     </TabContainer>
   )
 })

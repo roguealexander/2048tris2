@@ -161,7 +161,7 @@ const createTile = (
     {
       id: ballId,
       mass: 1.5 * power * density,
-      restitution: 0,
+      restitution: 0.2,
       frictionStatic: 0,
       frictionAir: 0,
       render: {
@@ -184,7 +184,11 @@ const createTile = (
     friction: 0,
     frictionStatic: 0,
     frictionAir: 0,
-    collisionFilter: { category: categoryTile[size], mask: categoryTopOut | categoryTile[size], group: power },
+    collisionFilter: {
+      category: categoryTile[size],
+      mask: categoryTopOut | categoryTile[size],
+      group: power,
+    },
     render: { visible: false },
     label: 'Sensor',
   }) as BodyWithCascadeDelete
@@ -287,8 +291,8 @@ export const BoardComp = observer(() => {
     Runner.start(runner.current, engine.current)
     Render.run(render)
 
-		Events.on(engine.current, 'collisionActive', (event) => {
-			const { pairs } = event
+    Events.on(engine.current, 'collisionActive', (event) => {
+      const { pairs } = event
 
       pairs.forEach((pair) => {
         const { timeUpdated, timeCreated, bodyA, bodyB } = pair
@@ -297,12 +301,12 @@ export const BoardComp = observer(() => {
           bodyA.collisionFilter.category === categoryTopOut ||
           bodyB.collisionFilter.category === categoryTopOut
         ) {
-					if (timeUpdated - timeCreated > 2000) {
-						actions$.topOut()
-					}
+          if (timeUpdated - timeCreated > 2000) {
+            actions$.topOut()
+          }
         }
-			})
-		})
+      })
+    })
 
     Events.on(engine.current, 'collisionStart', (event) => {
       const { pairs } = event
@@ -317,10 +321,10 @@ export const BoardComp = observer(() => {
           bodyB.collisionFilter.category === categoryPhysics
         )
           return
-				
+
         if (handledCollisions[id]) return
         handledCollisions[id] = true
-				
+
         if (bodyA.collisionFilter.category === bodyB.collisionFilter.category) {
           const power = bodyA.collisionFilter.group
 
@@ -367,7 +371,7 @@ export const BoardComp = observer(() => {
     const tileBodies = createTile(
       state$.activeTile.peek(),
       { x: state$.dropX.get() * WorldScale, y: 64 * WorldScale },
-      { x: 0.01, y: 5 * WorldScale }
+      { x: 0.01, y: 0 * WorldScale }
     )
 
     World.add(engine.current.world, tileBodies)

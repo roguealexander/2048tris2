@@ -1,7 +1,6 @@
 import { Session, createPagesBrowserClient } from '@supabase/auth-helpers-nextjs'
 import { SessionContextProvider } from '@supabase/auth-helpers-react'
 import { useState } from 'react'
-import { AuthStateChangeHandler } from './AuthStateChangeHandler'
 import { Database } from '@my/supabase/types'
 
 export type AuthProviderProps = {
@@ -15,7 +14,6 @@ export const AuthProvider = ({ initialSession, children }: AuthProviderProps) =>
 
   return (
     <SessionContextProvider supabaseClient={supabaseClient} initialSession={initialSession}>
-      <AuthStateChangeHandler />
       {children}
     </SessionContextProvider>
   )
