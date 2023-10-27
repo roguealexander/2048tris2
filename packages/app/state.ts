@@ -50,7 +50,7 @@ export const statsActions$ = observable<StatsActions>({
 })
 
 persistObservable(stats$, {
-  local: 'highScores',
+  local: 'highScores_v2',
 })
 
 type GameState = {

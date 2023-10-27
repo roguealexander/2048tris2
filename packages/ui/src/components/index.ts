@@ -18,4 +18,5 @@ export * from './Shake'
 export * from './SubmitButton'
 export * from './TodoCard'
 
+export * from './TButton'
 export * from './TSizableText'

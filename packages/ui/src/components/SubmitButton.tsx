@@ -1,5 +1,6 @@
 import { useFormState } from 'react-hook-form'
-import { AnimatePresence, Button, ButtonProps, Spinner } from 'tamagui'
+import { AnimatePresence, ButtonProps, Spinner } from 'tamagui'
+import { TButton } from './TButton'
 
 // hack to prevent it from breaking on the server
 const useIsSubmitting = () => {
@@ -18,7 +19,7 @@ export const SubmitButton = (props: ButtonProps) => {
   const isSubmitting = useIsSubmitting()
 
   return (
-    <Button
+    <TButton
       iconAfter={
         <AnimatePresence>
           {isSubmitting && (

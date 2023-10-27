@@ -33,6 +33,7 @@ const colors2048 = {
   playarea: '#D8C1B3',
   tileText: '#807F82',
   text: '#776E65',
+  btn: '#776E65',
 }
 
 export const colorTokens = {

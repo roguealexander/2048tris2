@@ -88,7 +88,7 @@ export const AuthComponent = observer(() => {
           renderAfter={({ submit }) => {
             return (
               <>
-                <SubmitButton onPress={() => submit()} br="$0" w={250}>
+                <SubmitButton onPress={() => submit()} w={250}>
                   Sign {signingIn ? 'In' : 'Up'}
                 </SubmitButton>
                 <TSizableText
@@ -108,7 +108,9 @@ export const AuthComponent = observer(() => {
           {(fields) => (
             <>
               <YStack gap="$3">
-                <H2 mb="$-4">Sign {signingIn ? 'In' : 'Up'}</H2>
+                <H2 mb="$-4" color="$text">
+                  Sign {signingIn ? 'In' : 'Up'}
+                </H2>
                 <TSizableText>to join the leaderboards</TSizableText>
               </YStack>
 

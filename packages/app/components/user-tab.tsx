@@ -1,5 +1,5 @@
 import { observer } from '@legendapp/state/react'
-import { Button, TSizableText, XStack, YStack } from '@my/ui'
+import { TButton, TSizableText, XStack, YStack } from '@my/ui'
 import { colors } from 'app/colors'
 import { TabContainer } from './tab-container'
 import { useUser } from 'app/utils/useUser'
@@ -69,7 +69,7 @@ const LeaderboardStatsTable = observer(() => {
 })
 
 const ResetStatsButton = observer(() => {
-  return <Button onPress={() => console.log('reset stats')}>RESET USER STATS</Button>
+  return <TButton onPress={() => console.log('reset stats')}>RESET USER STATS</TButton>
 })
 
 const SignOutButton = observer(() => {
@@ -77,7 +77,7 @@ const SignOutButton = observer(() => {
   const signOut = async () => {
     await supabase.auth.signOut()
   }
-  return <Button onPress={signOut}>SIGN OUT</Button>
+  return <TButton onPress={signOut}>SIGN OUT</TButton>
 })
 
 export const UserTab = observer(() => {
