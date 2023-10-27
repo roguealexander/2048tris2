@@ -45,6 +45,8 @@ const width = 450
 const height = 700
 let lastDroppedTileId = -1
 
+type BodyWithCascadeDelete = Body & { cascadeDelete?: (Constraint | Body)[] }
+
 const tileAsset: TileRecord<string> = {
   '2': ball2.src,
   '4': ball4.src,
@@ -61,43 +63,41 @@ const tileAsset: TileRecord<string> = {
   '8192': ball8192.src,
 }
 
-let sensorConstraints: Record<number, Constraint> = {}
-let sensorTiles: Record<number, Body> = {}
 let handledCollisions: Record<string, boolean> = {}
 let tileId = 450
 
 const createBounds = (cw: number, ch: number) => {
-	return [
-		// Top Sensor
-		Bodies.rectangle(cw / 2, -20 + 64, cw, 40, {
-			id: 100,
-			isSensor: true,
-			isStatic: true,
-			render: { opacity: 0 },
-		}),
+  return [
+    // Top Sensor
+    Bodies.rectangle(cw / 2, -20 + 64, cw, 40, {
+      id: 100,
+      isSensor: true,
+      isStatic: true,
+      render: { opacity: 0 },
+    }),
 
-		// Left Boundary
-		Bodies.rectangle(-20 + 64 * WorldScale, ch / 2, 40, ch, {
-			isStatic: true,
-			render: { opacity: 0 },
-			friction: 0,
-			frictionStatic: 0,
-		}),
-		// Bottom Boundary
-		Bodies.rectangle(cw / 2, ch + 20 - 64 * WorldScale, cw, 40, {
-			isStatic: true,
-			render: { opacity: 0 },
-			friction: 0,
-			frictionStatic: 0,
-		}),
-		// Right Boundary
-		Bodies.rectangle(cw + 20 - 64 * WorldScale, ch / 2, 40, ch, {
-			isStatic: true,
-			render: { opacity: 0 },
-			friction: 0,
-			frictionStatic: 0,
-		}),
-	]
+    // Left Boundary
+    Bodies.rectangle(-20 + 64 * WorldScale, ch / 2, 40, ch, {
+      isStatic: true,
+      render: { opacity: 0 },
+      friction: 0,
+      frictionStatic: 0,
+    }),
+    // Bottom Boundary
+    Bodies.rectangle(cw / 2, ch + 20 - 64 * WorldScale, cw, 40, {
+      isStatic: true,
+      render: { opacity: 0 },
+      friction: 0,
+      frictionStatic: 0,
+    }),
+    // Right Boundary
+    Bodies.rectangle(cw + 20 - 64 * WorldScale, ch / 2, 40, ch, {
+      isStatic: true,
+      render: { opacity: 0 },
+      friction: 0,
+      frictionStatic: 0,
+    }),
+  ]
 }
 
 const createTile = (
@@ -133,7 +133,7 @@ const createTile = (
     isSensor: true,
     collisionFilter: { category: 2, mask: power, group: power },
     render: { visible: false },
-  })
+  }) as BodyWithCascadeDelete
 
   const ballConstraint = Constraint.create({
     id: constraintId,
@@ -142,13 +142,12 @@ const createTile = (
     render: { visible: false },
   })
 
+  ballSensor.cascadeDelete = [ballTile, ballConstraint]
+
   // Set velocity
   if (velocity != null) {
     Body.setVelocity(ballTile, velocity)
   }
-
-  sensorConstraints[sensorId] = ballConstraint
-  sensorTiles[sensorId] = ballTile
 
   state$.activeTileCount[size].set((count) => count + 1)
 
@@ -196,8 +195,6 @@ export const BoardComp = observer(() => {
 
       Composite.clear(engine.current!.world, false)
 
-      sensorConstraints = {}
-      sensorTiles = {}
       handledCollisions = {}
 
       const cw = (width + 64 * 2) * WorldScale
@@ -260,25 +257,21 @@ export const BoardComp = observer(() => {
         ) {
           const power = bodyA.collisionFilter.group
 
-          const constraintA = sensorConstraints[bodyA.id]!
-          const constraintB = sensorConstraints[bodyB.id]!
-          const tileA = sensorTiles[bodyA.id]!
-          const tileB = sensorTiles[bodyB.id]!
+          const sensorA = bodyA as BodyWithCascadeDelete
+          const sensorB = bodyB as BodyWithCascadeDelete
+					const x = (sensorA.position.x + sensorB.position.x) / 2
+					const y = (sensorA.position.y + sensorB.position.y) / 2
 
-          delete sensorConstraints[bodyA.id]
-          delete sensorConstraints[bodyB.id]
-          delete sensorTiles[bodyA.id]
-          delete sensorTiles[bodyB.id]
+          World.remove(engine.current.world, [
+            sensorA,
+            ...(sensorA.cascadeDelete ?? []),
+            sensorB,
+            ...(sensorB.cascadeDelete ?? []),
+          ])
 
-          // Remove items
-          World.remove(engine.current.world, [bodyA, bodyB, constraintA, constraintB, tileA, tileB])
-
+          // Created merged tile
           const size = getTileSizeFromPower(power as TilePower)
           const mergedSize = getMergedTileSize(size)
-
-          const x = (bodyA.position.x + bodyB.position.x) / 2
-          const y = (bodyA.position.y + bodyB.position.y) / 2
-
           const tileBodies = createTile(mergedSize, { x, y })
 
           World.add(engine.current.world, tileBodies)
