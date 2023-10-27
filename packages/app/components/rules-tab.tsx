@@ -10,6 +10,7 @@ import Animated, { useSharedValue, withTiming, useAnimatedStyle } from 'react-na
 import { getQueueTile } from 'app/state'
 import { BaseHoldListener } from './hold-listener'
 import { ArrowLeftRight, Merge } from '@tamagui/lucide-icons'
+import { TabContainer } from './tab-container'
 
 // Rule drop state
 const mouseX = observable<number>(0)
@@ -141,28 +142,24 @@ const RulesCombineExample = () => {
 }
 
 export const RulesTab = observer(() => {
-  if (appState$.tab.get() !== 'rules') return null
-
   return (
-    <ScrollView fullscreen mih='100%' mah='100%' bg="$background" ai="center" jc="flex-start" pt={64}>
-      <YStack ai="flex-start">
-        <SizableText size="$5">HOW TO PLAY:</SizableText>
-        <br />
-        <SizableText>
-          <b>Hover</b> to position, <b>Click</b> to drop
-        </SizableText>
-        <RulesDropExample />
-        <br />
-        <br />
-        <SizableText>
-          <b>Space</b> to put a tile in the hold
-        </SizableText>
-        <RulesHoldExample />
-        <br />
-        <br />
-        <SizableText>Combine tiles</SizableText>
-        <RulesCombineExample />
-      </YStack>
-    </ScrollView>
+    <TabContainer tab="rules">
+      <SizableText size="$5">HOW TO PLAY:</SizableText>
+      <br />
+      <SizableText>
+        <b>Hover</b> to position, <b>Click</b> to drop
+      </SizableText>
+      <RulesDropExample />
+      <br />
+      <br />
+      <SizableText>
+        <b>Space</b> to put a tile in the hold
+      </SizableText>
+      <RulesHoldExample />
+      <br />
+      <br />
+      <SizableText>Combine tiles</SizableText>
+      <RulesCombineExample />
+    </TabContainer>
   )
 })

@@ -1,5 +1,5 @@
 import { Memo, Show, observer } from '@legendapp/state/react'
-import { ScrollView, SizableText, XStack, YStack } from '@my/ui'
+import { Button, ScrollView, SizableText, XStack, YStack } from '@my/ui'
 import { appState$ } from 'app/appState'
 import { LeaderboardType, TileSize } from 'app/types'
 import { Tile } from './tile'
@@ -176,20 +176,20 @@ const Table = observer(() => {
   )
 })
 
-export const LeaderboardTab = observer(() => {
+const ResetStatsButton = observer(() => {
+  return <Button onPress={() => console.log('reset stats')}>RESET USER STATS</Button>
+})
+
+export const UserTab = observer(() => {
   return (
-    <TabContainer tab="leaderboard">
-      <SizableText>Select Leaderboard:</SizableText>
+    <TabContainer tab="user">
+      <SizableText>Leaderboard Stats:</SizableText>
       <br />
       <LeaderboardSelect />
       <br />
-      <SizableText>Top 10:</SizableText>
+      <SizableText>Reset Stats:</SizableText>
       <br />
-      <Table />
-      <br />
-      <SizableText>Personal Record:</SizableText>
-      <br />
-      <Row rank={531} name="Rogue Rotkosky" score="50.65%" highlight />
+      <ResetStatsButton />
     </TabContainer>
   )
 })

@@ -11,9 +11,11 @@
     "falso",
     "leaderboard",
     "legendapp",
+    "lucide",
     "ngneat",
     "NOSSR",
     "supabase",
     "tris"
-  ]
+  ],
+  "editor.formatOnSave": true
 }

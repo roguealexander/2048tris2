@@ -1,5 +1,6 @@
 import { Show, observer } from '@legendapp/state/react'
 import { SizableText, XStack, YStack } from '@my/ui'
+import { UserCircle2 } from '@tamagui/lucide-icons'
 import { appState$ } from 'app/appState'
 import { colors } from 'app/colors'
 
@@ -11,8 +12,8 @@ export type HomeLayoutProps = {
 
 const Tabs = observer(() => {
   return (
-    <XStack zi={10} h="$4" px="$4" gap="$4" ai="center" pos='absolute' t={0} l={16} r={16}>
-      <XStack fullscreen o={0.9} bg='$background'/>
+    <XStack zi={10} h="$4" px="$4" gap="$4" ai="center" pos="absolute" t={0} l={16} r={16}>
+      <XStack fullscreen o={0.9} bg="$background" />
       <XStack
         h="$3"
         px="$3"
@@ -24,7 +25,11 @@ const Tabs = observer(() => {
         <Show if={appState$.tab.get() === '2048tris'}>
           <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[2048]} />
         </Show>
-        <SizableText size="$5" zi={2}  color={appState$.tab.get() === '2048tris' ? colors.background : colors.text}>
+        <SizableText
+          size="$5"
+          zi={2}
+          color={appState$.tab.get() === '2048tris' ? colors.background : colors.text}
+        >
           2048tris
         </SizableText>
       </XStack>
@@ -37,9 +42,14 @@ const Tabs = observer(() => {
         onPress={() => appState$.tab.set('rules')}
       >
         <Show if={appState$.tab.get() === 'rules'}>
-          <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[32]} />
+          <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[64]} />
         </Show>
-        <SizableText zi={2} color={appState$.tab.get() === 'rules' ? colors.background : colors.text}>How to Play</SizableText>
+        <SizableText
+          zi={2}
+          color={appState$.tab.get() === 'rules' ? colors.background : colors.text}
+        >
+          How to Play
+        </SizableText>
       </XStack>
       <XStack
         h="$3"
@@ -50,9 +60,32 @@ const Tabs = observer(() => {
         onPress={() => appState$.tab.set('leaderboard')}
       >
         <Show if={appState$.tab.get() === 'leaderboard'}>
+          <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[32]} />
+        </Show>
+        <SizableText
+          zi={2}
+          color={appState$.tab.get() === 'leaderboard' ? colors.background : colors.text}
+        >
+          Leaderboard
+        </SizableText>
+      </XStack>
+      <XStack
+        ml="auto"
+        h="$3"
+        w="$3"
+        ai="center"
+        jc="center"
+        pos="relative"
+        cur="pointer"
+        onPress={() => appState$.tab.set('user')}
+      >
+        <Show if={appState$.tab.get() === 'user'}>
           <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[16]} />
         </Show>
-        <SizableText zi={2} color={appState$.tab.get() === 'leaderboard' ? colors.background : colors.text}>Leaderboard</SizableText>
+        <UserCircle2
+          style={{ zIndex: 2 }}
+          color={appState$.tab.get() === 'user' ? colors.background : colors.text}
+        />
       </XStack>
     </XStack>
   )
