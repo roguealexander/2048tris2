@@ -367,7 +367,7 @@ export const BoardComp = observer(() => {
     const tileBodies = createTile(
       state$.activeTile.peek(),
       { x: state$.dropX.get() * WorldScale, y: 64 * WorldScale },
-      { x: 0, y: 5 * WorldScale }
+      { x: 0.01, y: 5 * WorldScale }
     )
 
     World.add(engine.current.world, tileBodies)
