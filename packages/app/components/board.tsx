@@ -285,16 +285,17 @@ export const BoardComp = observer(() => {
 
     World.add(engine.current.world, createBounds(cw, ch))
 
-    Events.on(runner.current, 'tick', () => {
+    const tickCallback = () => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       runner.current.deltaMin = runner.current.fps > 60 ? 1000 / runner.current.fps : 1000 / 120
-    })
+    }
+    Events.on(runner.current, 'tick', tickCallback)
 
     Runner.start(runner.current, engine.current)
     Render.run(render)
 
-    Events.on(engine.current, 'collisionActive', (event) => {
+    const collisionActiveCallback = (event: Matter.IEventCollision<Engine>) => {
       const { pairs } = event
 
       pairs.forEach((pair) => {
@@ -309,9 +310,10 @@ export const BoardComp = observer(() => {
           }
         }
       })
-    })
+    }
+    Events.on(engine.current, 'collisionActive', collisionActiveCallback)
 
-    Events.on(engine.current, 'collisionStart', (event) => {
+    const collisionStartCallback = (event) => {
       const { pairs } = event
 
       pairs.forEach((pair) => {
@@ -356,12 +358,20 @@ export const BoardComp = observer(() => {
           World.add(engine.current.world, tileBodies)
         }
       })
-    })
+    }
+    Events.on(engine.current, 'collisionStart', collisionStartCallback)
 
     return () => {
       Render.stop(render)
       World.clear(engine.current.world, false)
       Engine.clear(engine.current)
+
+      Events.off(runner.current, 'tick', tickCallback)
+      Events.off(engine.current, 'collisionActive', collisionActiveCallback)
+      Events.off(engine.current, 'collisionStart', collisionStartCallback)
+
+      console.log('clear engine unmountaa')
+
       render.canvas.remove()
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
