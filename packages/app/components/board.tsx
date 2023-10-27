@@ -226,8 +226,9 @@ export const BoardComp = observer(() => {
   const scene = useRef<HTMLDivElement | null>(null)
   const engine = useRef(
     Engine.create({
-      positionIterations: 10,
-      gravity: { x: 0, y: 1, scale: 0.002 },
+      positionIterations: 12,
+      velocityIterations: 12,
+      gravity: { x: 0, y: 1, scale: 0.0015 },
     })
   )
   const runner = useRef(
