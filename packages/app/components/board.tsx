@@ -87,7 +87,7 @@ const topOutSensorLabel = 'top-out-sensor'
 const createBounds = (cw: number, ch: number) => {
   return [
     // Top Sensor
-    Bodies.rectangle(cw / 2, -20 + 64, cw, 40, {
+    Bodies.rectangle(cw / 2, -200 + 64, cw, 400, {
       id: 100,
       isSensor: true,
       isStatic: true,
