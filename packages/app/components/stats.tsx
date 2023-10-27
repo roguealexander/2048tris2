@@ -1,44 +1,44 @@
 import { Memo, observer } from '@legendapp/state/react'
 import { stats$, state$ } from '../state'
-import { SizableText, YStack } from '@my/ui'
+import { TSizableText, YStack } from '@my/ui'
 
 export const Score = observer(() => {
   return (
     <YStack gap="$2" w="100%">
-      <SizableText>
+      <TSizableText>
         Score:
         <br />
         <b>
           <Memo>{state$.score}</Memo>
         </b>
-      </SizableText>
-      <SizableText>
+      </TSizableText>
+      <TSizableText>
         Record:
         <br />
         <b>
           <Memo>{stats$.scoreHigh}</Memo>
         </b>
-      </SizableText>
+      </TSizableText>
     </YStack>
   )
 })
 export const Efficiency = observer(() => {
   return (
     <YStack gap="$2" w="100%">
-      <SizableText>
+      <TSizableText>
         Efficiency:
         <br />
         <b>
           <Memo>{state$.efficiency}</Memo>%
         </b>
-      </SizableText>
-      <SizableText>
+      </TSizableText>
+      <TSizableText>
         Record:
         <br />
         <b>
           <Memo>{state$.targetHighEfficiency}</Memo>% (<Memo>{state$.targetEfficiency}</Memo>)
         </b>
-      </SizableText>
+      </TSizableText>
     </YStack>
   )
 })

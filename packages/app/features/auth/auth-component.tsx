@@ -1,4 +1,4 @@
-import { H2, Paragraph, SizableText, SubmitButton, Text, Theme, XStack, YStack } from '@my/ui'
+import { H2, Paragraph, TSizableText, SubmitButton, Text, Theme, XStack, YStack } from '@my/ui'
 import { SchemaForm, formFields } from 'app/utils/SchemaForm'
 import { useSupabase } from 'app/utils/supabase/useSupabase'
 import React from 'react'
@@ -91,7 +91,7 @@ export const AuthComponent = observer(() => {
                 <SubmitButton onPress={() => submit()} br="$0" w={250}>
                   Sign {signingIn ? 'In' : 'Up'}
                 </SubmitButton>
-                <SizableText
+                <TSizableText
                   cur="pointer"
                   onPress={() => {
                     signUpSignIn$.set((curr) => (curr === 'sign-in' ? 'sign-up' : 'sign-in'))
@@ -100,7 +100,7 @@ export const AuthComponent = observer(() => {
                   textDecorationLine="underline"
                 >
                   Sign {signingIn ? 'Up' : 'In'} Instead
-                </SizableText>
+                </TSizableText>
               </>
             )
           }}
@@ -109,7 +109,7 @@ export const AuthComponent = observer(() => {
             <>
               <YStack gap="$3">
                 <H2 mb="$-4">Sign {signingIn ? 'In' : 'Up'}</H2>
-                <SizableText>to join the leaderboards</SizableText>
+                <TSizableText>to join the leaderboards</TSizableText>
               </YStack>
 
               {Object.values(fields)}

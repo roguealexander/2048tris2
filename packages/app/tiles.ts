@@ -1,5 +1,5 @@
-import { colors } from "./colors";
-import { TileSize, TileData, TileRecord, TilePower } from "./types";
+import { colors } from './colors'
+import { TileSize, TileData, TileRecord, TilePower } from './types'
 
 const tile2: TileData = {
   size: '2',
@@ -7,7 +7,7 @@ const tile2: TileData = {
   radius: 1,
   density: 3,
   color: colors.tile['2'],
-  textColor: colors.text,
+  textColor: colors.tileText,
 }
 const tile4: TileData = {
   size: '4',
@@ -15,7 +15,7 @@ const tile4: TileData = {
   radius: 2,
   density: 2,
   color: colors.tile['4'],
-  textColor: colors.text,
+  textColor: colors.tileText,
 }
 const tile8: TileData = {
   size: '8',
@@ -151,10 +151,10 @@ export const getTilePower = (size: TileSize): number => {
   return tiles[size].power
 }
 export const getTileRadius = (size: TileSize): number => {
-  return 30 + (15 * getTileData(size)!.radius)
+  return 30 + 15 * getTileData(size)!.radius
 }
 export const getTileSizeFromRadius = (radius: number): TileSize => {
-  const power = (radius - 30) / 15 as TilePower
+  const power = ((radius - 30) / 15) as TilePower
   return getTileSizeFromPower(power)
 }
 export const getMergedTileSize = (size: TileSize): TileSize => {
@@ -173,5 +173,3 @@ export const getTileStyle = (data: TileData) => {
     height: getTileRadius(data.size),
   }
 }
-
-

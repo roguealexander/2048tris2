@@ -125,8 +125,8 @@ type Theme = {
   yellow12: string;
   border: string;
   playarea: string;
+  tileText: string;
   text: string;
-  btn: string;
   shadowColor: string;
   shadowColorHover: string;
   shadowColorPress: string;
@@ -517,8 +517,8 @@ const ks = [
 'yellow12',
 'border',
 'playarea',
+'tileText',
 'text',
-'btn',
 'shadowColor',
 'shadowColorHover',
 'shadowColorPress',

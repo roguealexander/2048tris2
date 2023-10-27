@@ -115,7 +115,7 @@ const createBounds = (cw: number, ch: number) => {
     Bodies.rectangle(-20 + 64 * WorldScale, ch / 2, 40, ch, {
       isStatic: true,
       render: { opacity: 0 },
-      friction: 0,
+      friction: 0.1,
       frictionStatic: 0,
       collisionFilter: { category: categoryPhysics, mask: categoryPhysics },
       label: 'LeftBound',
@@ -124,7 +124,7 @@ const createBounds = (cw: number, ch: number) => {
     Bodies.rectangle(cw / 2, ch + 20 - 64 * WorldScale, cw, 40, {
       isStatic: true,
       render: { opacity: 0 },
-      friction: 0,
+      friction: 0.1,
       frictionStatic: 0,
       collisionFilter: { category: categoryPhysics, mask: categoryPhysics },
       label: 'RightBound',
@@ -133,7 +133,7 @@ const createBounds = (cw: number, ch: number) => {
     Bodies.rectangle(cw + 20 - 64 * WorldScale, ch / 2, 40, ch, {
       isStatic: true,
       render: { opacity: 0 },
-      friction: 0,
+      friction: 0.1,
       frictionStatic: 0,
       collisionFilter: { category: categoryPhysics, mask: categoryPhysics },
       label: 'BottomBound',
@@ -161,7 +161,8 @@ const createTile = (
     {
       id: ballId,
       mass: 1.5 * power * density,
-      restitution: 0.2,
+      restitution: 0.3,
+      friction: 0.05,
       frictionStatic: 0,
       frictionAir: 0,
       render: {
@@ -226,7 +227,7 @@ export const BoardComp = observer(() => {
   const engine = useRef(
     Engine.create({
       positionIterations: 10,
-      gravity: { x: 0, y: 1, scale: 0.001 },
+      gravity: { x: 0, y: 1, scale: 0.002 },
     })
   )
   const runner = useRef(
@@ -285,7 +286,7 @@ export const BoardComp = observer(() => {
 
     Events.on(runner.current, 'tick', () => {
       // @ts-ignore
-      runner.current.deltaMin = runner.current.fps > 60 ? 1000 / runner.current.fps : 1000 / 60
+      runner.current.deltaMin = runner.current.fps > 60 ? 1000 / runner.current.fps : 1000 / 120
     })
 
     Runner.start(runner.current, engine.current)

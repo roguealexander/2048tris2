@@ -2,7 +2,7 @@ import { observer } from '@legendapp/state/react'
 import { state$ } from '../state'
 import { TileList } from '../types'
 import { getTileColor } from '../tiles'
-import { SizableText, XStack, YStack } from '@my/ui'
+import { TSizableText, XStack, YStack } from '@my/ui'
 
 export const ActiveTilesHistogram = observer(() => {
   const maxTilesCountRaw = state$.maxTilesCount.get()
@@ -11,7 +11,7 @@ export const ActiveTilesHistogram = observer(() => {
   const targetEfficiency = state$.targetEfficiency.get()
   return (
     <>
-      <SizableText>Histogram:</SizableText>
+      <TSizableText>Histogram:</TSizableText>
       <YStack w="100%" ai="center" jc="flex-start">
         {TileList.map((size) => {
           return (
@@ -22,7 +22,7 @@ export const ActiveTilesHistogram = observer(() => {
               pos="relative"
               ai="center"
               jc="flex-start"
-              outlineStyle='solid'
+              outlineStyle="solid"
               outlineWidth={size === targetEfficiency ? 2 : 0}
               zi={size === targetEfficiency ? 2 : 1}
               outlineColor="$border"
@@ -39,7 +39,7 @@ export const ActiveTilesHistogram = observer(() => {
                   width: `${Math.max(5, (70 * activeTileCount[size]) / maxTilesCount)}%`,
                 }}
               />
-              <SizableText>{size}</SizableText>
+              <TSizableText>{size}</TSizableText>
             </XStack>
           )
         })}

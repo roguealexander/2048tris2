@@ -17,3 +17,5 @@ export * from './Settings'
 export * from './Shake'
 export * from './SubmitButton'
 export * from './TodoCard'
+
+export * from './TSizableText'

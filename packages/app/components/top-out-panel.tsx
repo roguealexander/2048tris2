@@ -1,5 +1,5 @@
 import { observer } from '@legendapp/state/react'
-import { Button, PortalHost, SizableText, XStack, YStack } from '@my/ui'
+import { Button, TSizableText, XStack, YStack } from '@my/ui'
 import { state$, actions$, stats$ } from 'app/state'
 import { ActiveTilesHistogram } from './active-tile-histogram'
 import { Score, Efficiency } from './stats'
@@ -12,26 +12,26 @@ const TopOutTitle = observer(() => {
 const TopOutHighScoreSubtitle = observer(() => {
   if (state$.score.peek() !== stats$.scoreHigh.peek()) return null
   return (
-    <SizableText size="$9" fontStyle="italic">
+    <TSizableText size="$9" fontStyle="italic">
       {stats$.scoreHigh.peek()} POINTS
-    </SizableText>
+    </TSizableText>
   )
 })
 
 export const TopOutPanel = observer(() => {
   if (!state$.toppedOut.get()) return null
   return (
-    <YStack gap="$4" ai="center" jc="center" pt="$12" h='100%' mr="$12">
+    <YStack gap="$4" ai="center" jc="center" pt="$12" h="100%" mr="$12">
       <YStack ai="center">
-        <SizableText size="$10" zi={1}>
+        <TSizableText size="$10" zi={1}>
           <TopOutTitle />
-        </SizableText>
+        </TSizableText>
         <TopOutHighScoreSubtitle />
       </YStack>
 
       <XStack w="100%" h={2} bg="$border" />
 
-      <SizableText>Stats:</SizableText>
+      <TSizableText>Stats:</TSizableText>
       <XStack zi={1} gap="$8" jc="flex-start" ai="flex-start">
         <YStack w="$12" gap="$6" ai="flex-start">
           <Score />

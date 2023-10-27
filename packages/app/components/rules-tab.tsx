@@ -1,5 +1,5 @@
 import { observer } from '@legendapp/state/react'
-import { ScrollView, SizableText, XStack, YStack } from '@my/ui'
+import { ScrollView, TSizableText, XStack, YStack } from '@my/ui'
 import { appState$ } from 'app/appState'
 import { TileSize } from 'app/types'
 import { Tile } from './tile'
@@ -113,7 +113,7 @@ const RulesHoldExample = observer(() => {
           y={holdPressed.get() ? 4 : 0}
           shadowOffset={holdPressed.get() ? { width: 0, height: 0 } : { width: 4, height: 4 }}
         >
-          <SizableText zi={2}>Space</SizableText>
+          <TSizableText zi={2}>Space</TSizableText>
         </XStack>
         <ArrowLeftRight color="$text" />
       </YStack>
@@ -144,21 +144,21 @@ const RulesCombineExample = () => {
 export const RulesTab = observer(() => {
   return (
     <TabContainer tab="rules">
-      <SizableText size="$5">HOW TO PLAY:</SizableText>
+      <TSizableText size="$5">HOW TO PLAY:</TSizableText>
       <br />
-      <SizableText>
+      <TSizableText>
         <b>Hover</b> to position, <b>Click</b> to drop
-      </SizableText>
+      </TSizableText>
       <RulesDropExample />
       <br />
       <br />
-      <SizableText>
+      <TSizableText>
         <b>Space</b> to put a tile in the hold
-      </SizableText>
+      </TSizableText>
       <RulesHoldExample />
       <br />
       <br />
-      <SizableText>Combine tiles</SizableText>
+      <TSizableText>Combine tiles</TSizableText>
       <RulesCombineExample />
     </TabContainer>
   )

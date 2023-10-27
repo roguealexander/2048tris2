@@ -1,5 +1,5 @@
 import { Show, observer } from '@legendapp/state/react'
-import { SizableText, XStack, YStack } from '@my/ui'
+import { TSizableText, XStack, YStack } from '@my/ui'
 import { UserCircle2 } from '@tamagui/lucide-icons'
 import { appState$ } from 'app/appState'
 import { colors } from 'app/colors'
@@ -25,13 +25,13 @@ const Tabs = observer(() => {
         <Show if={appState$.tab.get() === '2048tris'}>
           <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[2048]} />
         </Show>
-        <SizableText
+        <TSizableText
           size="$5"
           zi={2}
           color={appState$.tab.get() === '2048tris' ? colors.background : colors.text}
         >
           2048tris
-        </SizableText>
+        </TSizableText>
       </XStack>
       <XStack
         h="$3"
@@ -44,12 +44,12 @@ const Tabs = observer(() => {
         <Show if={appState$.tab.get() === 'rules'}>
           <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[64]} />
         </Show>
-        <SizableText
+        <TSizableText
           zi={2}
           color={appState$.tab.get() === 'rules' ? colors.background : colors.text}
         >
           How to Play
-        </SizableText>
+        </TSizableText>
       </XStack>
       <XStack
         h="$3"
@@ -62,12 +62,12 @@ const Tabs = observer(() => {
         <Show if={appState$.tab.get() === 'leaderboard'}>
           <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[32]} />
         </Show>
-        <SizableText
+        <TSizableText
           zi={2}
           color={appState$.tab.get() === 'leaderboard' ? colors.background : colors.text}
         >
           Leaderboard
-        </SizableText>
+        </TSizableText>
       </XStack>
       <XStack
         ml="auto"

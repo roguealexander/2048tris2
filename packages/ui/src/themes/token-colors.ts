@@ -29,10 +29,10 @@ export {
 
 const colors2048 = {
   background: '#FDFAE7',
-	border: '#BEADA5',
-	playarea: '#D8C1B3',
-	text: '#807F82',
-	btn: '#776E65',
+  border: '#BEADA5',
+  playarea: '#D8C1B3',
+  tileText: '#807F82',
+  text: '#776E65',
 }
 
 export const colorTokens = {

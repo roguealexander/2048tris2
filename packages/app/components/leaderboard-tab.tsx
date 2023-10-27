@@ -1,23 +1,17 @@
 import { Memo, Show, observer } from '@legendapp/state/react'
-import { ScrollView, SizableText, XStack, YStack } from '@my/ui'
-import { appState$ } from 'app/appState'
-import { LeaderboardType, TileSize } from 'app/types'
-import { Tile } from './tile'
+import { TSizableText, XStack, YStack } from '@my/ui'
+import { LeaderboardType } from 'app/types'
 import { computed, observable } from '@legendapp/state'
-import { ReactNode } from 'react'
-import { getMergedTileSize, getTileRadius } from 'app/tiles'
-import Animated, { useSharedValue, withTiming, useAnimatedStyle } from 'react-native-reanimated'
-import { getQueueTile } from 'app/state'
-import { BaseHoldListener } from './hold-listener'
-import { ArrowLeftRight, Merge } from '@tamagui/lucide-icons'
 import { colors } from 'app/colors'
 import { TabContainer } from './tab-container'
 
-const leaderboard$ = observable<LeaderboardType>('score')
+const leaderboard$ = observable<LeaderboardType>('scoreHigh')
 const leaderboardTitle$ = computed(() => {
   switch (leaderboard$.get()) {
-    case 'score':
+    case 'scoreHigh':
       return 'HIGH SCORE'
+    case 'scoreLow':
+      return 'LOW SCORE'
     case 'efficiency2048':
       return '2048 EFFICIENCY'
     case 'efficiency4096':
@@ -29,32 +23,52 @@ const leaderboardTitle$ = computed(() => {
 
 const LeaderboardSelect = observer(() => {
   return (
-    <XStack w="100%" jc="center" gap="$8">
+    <XStack w="100%" jc="center" gap="$4">
       <YStack ai="center">
-        <SizableText size="$3">Points:</SizableText>
-        <XStack
-          h="$3"
-          px="$4"
-          ai="center"
-          pos="relative"
-          cursor="pointer"
-          onPress={() => leaderboard$.set('score')}
-        >
-          <Show if={leaderboard$.get() === 'score'}>
-            <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[2048]} />
-          </Show>
-          <SizableText
-            zi={2}
-            color={leaderboard$.get() === 'score' ? colors.background : colors.text}
+        <TSizableText size="$3">Score:</TSizableText>
+        <XStack gap="$2">
+          <XStack
+            h="$3"
+            px="$4"
+            ai="center"
+            pos="relative"
+            cursor="pointer"
+            onPress={() => leaderboard$.set('scoreHigh')}
           >
-            Score
-          </SizableText>
+            <Show if={leaderboard$.get() === 'scoreHigh'}>
+              <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile['2048']} />
+            </Show>
+            <TSizableText
+              zi={2}
+              color={leaderboard$.get() === 'scoreHigh' ? colors.background : colors.text}
+            >
+              High
+            </TSizableText>
+          </XStack>
+          <XStack
+            h="$3"
+            px="$4"
+            ai="center"
+            pos="relative"
+            cursor="pointer"
+            onPress={() => leaderboard$.set('scoreLow')}
+          >
+            <Show if={leaderboard$.get() === 'scoreLow'}>
+              <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile['4096']} />
+            </Show>
+            <TSizableText
+              zi={2}
+              color={leaderboard$.get() === 'scoreLow' ? colors.background : colors.text}
+            >
+              Low
+            </TSizableText>
+          </XStack>
         </XStack>
       </YStack>
       <YStack h="100%" w={2} bg="$border" />
       <YStack ai="center">
-        <SizableText size="$3">Efficiency:</SizableText>
-        <XStack gap="$4">
+        <TSizableText size="$3">Efficiency:</TSizableText>
+        <XStack gap="$2">
           <XStack
             h="$3"
             px="$4"
@@ -66,12 +80,12 @@ const LeaderboardSelect = observer(() => {
             <Show if={leaderboard$.get() === 'efficiency2048'}>
               <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[64]} />
             </Show>
-            <SizableText
+            <TSizableText
               zi={2}
               color={leaderboard$.get() === 'efficiency2048' ? colors.background : colors.text}
             >
               2048
-            </SizableText>
+            </TSizableText>
           </XStack>
           <XStack
             h="$3"
@@ -84,12 +98,12 @@ const LeaderboardSelect = observer(() => {
             <Show if={leaderboard$.get() === 'efficiency4096'}>
               <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[32]} />
             </Show>
-            <SizableText
+            <TSizableText
               zi={2}
               color={leaderboard$.get() === 'efficiency4096' ? colors.background : colors.text}
             >
               4096
-            </SizableText>
+            </TSizableText>
           </XStack>
           <XStack
             h="$3"
@@ -102,12 +116,12 @@ const LeaderboardSelect = observer(() => {
             <Show if={leaderboard$.get() === 'efficiency8192'}>
               <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[16]} />
             </Show>
-            <SizableText
+            <TSizableText
               zi={2}
               color={leaderboard$.get() === 'efficiency8192' ? colors.background : colors.text}
             >
               8192
-            </SizableText>
+            </TSizableText>
           </XStack>
         </XStack>
       </YStack>
@@ -120,12 +134,12 @@ const Header = observer(() => {
       <XStack h="$4" w="100%" ai="center" jc="space-between" px="$4" pos="relative">
         <XStack fullscreen bg={colors.tile['2']} zi={-1} />
         <XStack ai="center" jc="center" gap="$4">
-          <SizableText w={40}>RANK</SizableText>
-          <SizableText fontWeight="bold">PLAYER</SizableText>
+          <TSizableText w={40}>RANK</TSizableText>
+          <TSizableText fontWeight="bold">PLAYER</TSizableText>
         </XStack>
-        <SizableText fontWeight="bold">
+        <TSizableText fontWeight="bold">
           <Memo>{leaderboardTitle$}</Memo>
-        </SizableText>
+        </TSizableText>
       </XStack>
       <XStack w="100%" h={2} bg="$border" />
     </>
@@ -150,10 +164,10 @@ const Row = observer(
           <XStack fullscreen bg={colors.tile['2']} o={0.5} zi={-1} />
         )}
         <XStack ai="center" jc="center" gap="$4">
-          <SizableText w={40}>{rank}</SizableText>
-          <SizableText fontWeight="bold">{name}</SizableText>
+          <TSizableText w={40}>{rank}</TSizableText>
+          <TSizableText fontWeight="bold">{name}</TSizableText>
         </XStack>
-        <SizableText>{score}</SizableText>
+        <TSizableText>{score}</TSizableText>
       </XStack>
     )
   }
@@ -179,15 +193,15 @@ const Table = observer(() => {
 export const LeaderboardTab = observer(() => {
   return (
     <TabContainer tab="leaderboard">
-      <SizableText>Select Leaderboard:</SizableText>
+      <TSizableText>Select Leaderboard:</TSizableText>
       <br />
       <LeaderboardSelect />
       <br />
-      <SizableText>Top 10:</SizableText>
+      <TSizableText>Top 10:</TSizableText>
       <br />
       <Table />
       <br />
-      <SizableText>Personal Record:</SizableText>
+      <TSizableText>Personal Record:</TSizableText>
       <br />
       <Row rank={531} name="Rogue Rotkosky" score="50.65%" highlight />
     </TabContainer>
