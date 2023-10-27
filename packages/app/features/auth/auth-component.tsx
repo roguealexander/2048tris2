@@ -8,6 +8,8 @@ import { z } from 'zod'
 import { hashString } from 'app/utils/hashString'
 import { observable } from '@legendapp/state'
 import { observer } from '@legendapp/state/react'
+import { stats$ } from 'app/statsState'
+import { api } from 'app/utils/api'
 
 const SignInSchema = z.object({
   name: formFields.text.min(4).describe('Name // Scoreboard name'),
@@ -24,8 +26,13 @@ const signUpSignIn$ = observable<'sign-up' | 'sign-in'>('sign-up')
 export const AuthComponent = observer(() => {
   const supabase = useSupabase()
   const form = useForm<z.infer<typeof SignInSchema>>()
+  const updateStatsMutation = api.tris.updateUserStats.useMutation()
 
   const signingIn = signUpSignIn$.get() === 'sign-in'
+
+  const persistExistingStats = () => {
+    updateStatsMutation.mutate(stats$.get())
+  }
 
   const handleError = (errorMessage: string) => {
     if (errorMessage.includes('email')) {
@@ -48,7 +55,10 @@ export const AuthComponent = observer(() => {
 
     if (error) {
       handleError(error.message.toLowerCase())
+      return
     }
+
+    persistExistingStats()
   }
 
   async function signUp({ name, password }: z.infer<typeof SignUpSchema>) {
@@ -64,7 +74,10 @@ export const AuthComponent = observer(() => {
 
     if (error) {
       handleError(error.message.toLowerCase())
+      return
     }
+
+    persistExistingStats()
   }
 
   return (

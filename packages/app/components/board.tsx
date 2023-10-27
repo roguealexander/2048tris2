@@ -348,6 +348,11 @@ export const BoardComp = observer(() => {
           const mergedSize = getMergedTileSize(size)
           const tileBodies = createTile(mergedSize, position, velocity)
 
+          // Update efficiency score
+          if (mergedSize === state$.targetEfficiency.peek()) {
+            actions$.triggerHighEfficiencyCheck(mergedSize)
+          }
+
           World.add(engine.current.world, tileBodies)
         }
       })

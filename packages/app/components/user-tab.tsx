@@ -6,6 +6,7 @@ import { useUser } from 'app/utils/useUser'
 import { useSupabase } from 'app/utils/supabase/useSupabase'
 import { AuthComponent } from 'app/features/auth/auth-component'
 import { stats$, statsActions$ } from 'app/statsState'
+import { User } from '@supabase/supabase-js'
 
 const Header = observer(() => {
   return (
@@ -53,18 +54,39 @@ const Row = observer(
 )
 
 const LeaderboardStatsTable = observer(() => {
+  const scoreHigh = stats$.scoreHigh.get()
+  const scoreLow = stats$.scoreLow.get()
+  const efficiency2048 = stats$.efficiency2048.get()
+  const efficiency4096 = stats$.efficiency4096.get()
+  const efficiency8192 = stats$.efficiency8192.get()
   return (
     <YStack w="100%" pl="$2">
       <Header />
       <br />
       <TSizableText size="$3">POINTS:</TSizableText>
-      <Row key={0} rank={1} leaderboard="HIGH SCORE" score="100%" />
-      <Row key={1} rank={2} leaderboard="LOW SCORE" score="100%" highlight />
+      <Row key={0} rank={1} leaderboard="HIGH SCORE" score={`${scoreHigh ?? '--'}`} />
+      <Row key={1} rank={2} leaderboard="LOW SCORE" score={`${scoreLow ?? '--'}`} highlight />
       <br />
       <TSizableText size="$3">EFFICIENCY:</TSizableText>
-      <Row key={2} rank={3} leaderboard="2048 EFFICIENCY" score="100%" />
-      <Row key={3} rank={4} leaderboard="4096 EFFICIENCY" score="100%" highlight />
-      <Row key={4} rank={5} leaderboard="8192 EFFICIENCY" score="100%" />
+      <Row
+        key={2}
+        rank={3}
+        leaderboard="2048 EFFICIENCY"
+        score={efficiency2048 ? `${efficiency2048}%` : '--'}
+      />
+      <Row
+        key={3}
+        rank={4}
+        leaderboard="4096 EFFICIENCY"
+        score={efficiency4096 ? `${efficiency2048}%` : '--'}
+        highlight
+      />
+      <Row
+        key={4}
+        rank={5}
+        leaderboard="8192 EFFICIENCY"
+        score={efficiency8192 ? `${efficiency2048}%` : '--'}
+      />
     </YStack>
   )
 })
@@ -81,11 +103,24 @@ const SignOutButton = observer(() => {
   const supabase = useSupabase()
   const signOut = async () => {
     await supabase.auth.signOut()
+    statsActions$.resetStats()
   }
   return (
     <TButton ml="$2" onPress={signOut}>
       SIGN OUT
     </TButton>
+  )
+})
+
+const AuthedUser = observer(({ user }: { user: User }) => {
+  const userName = user.user_metadata['name']
+  return (
+    <TSizableText>
+      Signed in User:{' '}
+      <TSizableText size="$5" fontWeight="bold">
+        {userName}
+      </TSizableText>
+    </TSizableText>
   )
 })
 
@@ -105,6 +140,12 @@ export const UserTab = observer(() => {
         </>
       )}
 
+      {user != null && (
+        <>
+          <AuthedUser user={user} />
+          <br />
+        </>
+      )}
       <TSizableText>
         Games Played:{' '}
         <TSizableText size="$5" fontWeight="bold">
@@ -133,6 +174,10 @@ export const UserTab = observer(() => {
       </TSizableText>
       <br />
       <LeaderboardStatsTable />
+      <br />
+      <br />
+
+      <XStack w="100%" h={2} bg="$border" />
       <br />
       <br />
 

@@ -8,6 +8,7 @@
   },
   "typescript.tsdk": "node_modules/typescript/lib",
   "cSpell.words": [
+    "Authed",
     "falso",
     "leaderboard",
     "leaderboards",

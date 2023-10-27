@@ -1,4 +1,4 @@
-import { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
+import { inferRouterContext, inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import { createTRPCRouter } from '../trpc'
 import { greetingRouter } from './greeting'
 import { trisRouter } from './tris'
@@ -20,3 +20,6 @@ export type RouterInputs = inferRouterInputs<AppRouter>
  * @example type HelloOutput = RouterOutputs['example']['hello']
  **/
 export type RouterOutputs = inferRouterOutputs<AppRouter>
+
+// export type RouterSession = inferRouterContext<typeof appRouter>['session']
+// export type RouterSupabase = inferRouterContext<typeof appRouter>['supabase']
