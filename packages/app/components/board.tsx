@@ -379,7 +379,7 @@ export const BoardComp = observer(() => {
     }
     Events.on(engine.current, 'collisionActive', collisionActiveCallback)
 
-    const collisionStartCallback = (event) => {
+    const collisionStartCallback = (event: Matter.IEventCollision<Engine>) => {
       // Prevent collisions after game ends
       if (state$.toppedOut.peek() || state$.resetting.peek()) return
 
