@@ -15,6 +15,7 @@ import { TopOutPanel } from 'app/components/top-out-panel'
 import { UserTab } from 'app/components/user-tab'
 import { state$ } from 'app/state'
 import React from 'react'
+import { PopSoundEffect } from 'app/components/pop-sound-effect'
 
 const ActiveLeftPanel = observer(() => {
   if (state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null) return null
@@ -47,6 +48,7 @@ export function HomeScreen() {
     <XStack w="100%" mih="100vh" mah="100vh" als="center" jc="center" f={1} gap={64} pt={64}>
       <StatsPersistor />
       <GameplayHoldListener />
+      <PopSoundEffect />
 
       {/* LEFT */}
       <TopOutPanel />

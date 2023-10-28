@@ -147,7 +147,7 @@ export const getTileSizeFromPower = (power: TilePower): TileSize => {
 export const getTileDensity = (size: TileSize): number => {
   return tiles[size].density
 }
-export const getTilePower = (size: TileSize): number => {
+export const getTilePower = (size: TileSize): TilePower => {
   return tiles[size].power
 }
 export const getTileRadius = (size: TileSize): number => {

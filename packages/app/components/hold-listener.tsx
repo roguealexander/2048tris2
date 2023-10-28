@@ -1,6 +1,8 @@
 import { observer, useMount, useUnmount } from '@legendapp/state/react'
-import { actions$ } from '../state'
+import { actions$, state$ } from '../state'
 import { appState$ } from 'app/appState'
+import { useRef, useEffect } from 'react'
+import useSound from 'use-sound'
 
 export const BaseHoldListener = observer(
   ({ onHold, onHoldDown }: { onHold: () => void; onHoldDown?: () => void }) => {
@@ -33,5 +35,11 @@ export const BaseHoldListener = observer(
 
 export const GameplayHoldListener = observer(() => {
   if (appState$.tab.get() !== '2048tris') return null
-  return <BaseHoldListener onHold={actions$.hold} />
+  return (
+    <BaseHoldListener
+      onHold={() => {
+        actions$.hold()
+      }}
+    />
+  )
 })

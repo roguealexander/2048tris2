@@ -21,6 +21,8 @@ import {
   getTileRadius,
   getTileSizeFromPower,
 } from '../tiles'
+import { useSound } from 'use-sound'
+
 import ball2 from '../assets/2.png'
 import ball4 from '../assets/4.png'
 import ball8 from '../assets/8.png'
@@ -34,7 +36,7 @@ import ball1024 from '../assets/1024.png'
 import ball2048 from '../assets/2048.png'
 import ball4096 from '../assets/4096.png'
 import ball8192 from '../assets/8192.png'
-import { TilePower, TileRecord, TileSize } from '../types'
+import { TileList, TilePower, TileRecord, TileSize } from '../types'
 import { Spacer, TButton, XStack, YStack } from '@my/ui'
 import Animated, {
   useAnimatedStyle,
@@ -42,6 +44,8 @@ import Animated, {
   SharedValue,
   useDerivedValue,
 } from 'react-native-reanimated'
+import { randNumber } from '@ngneat/falso'
+import { appActions$ } from 'app/appState'
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -179,7 +183,7 @@ const createTile = (
         },
       },
       label: 'Tile',
-      collisionFilter: { category: categoryPhysics, mask: categoryPhysics },
+      collisionFilter: { category: categoryPhysics, mask: categoryPhysics, group: power },
     },
     28
   )
@@ -249,6 +253,23 @@ const TileDropPositioner = observer(
 )
 
 export const BoardComp = observer(() => {
+  // // SOUND
+  // const [playPop] = useSound('../sounds/pop.mp3', {
+  //   volume: 0.3,
+  //   playbackRate: 1,
+  // })
+  // const playPopTileSound = useRef((power: TilePower) => {
+  //   const rate = Math.max(0.5, 2 - 0.15 * power)
+  //   playPop({ playbackRate: rate })
+  // })
+  // useEffect(() => {
+  //   playPopTileSound.current = (power: TilePower) => {
+  //     const rate = Math.max(0.5, 2 - 0.15 * power)
+  //     playPop({ playbackRate: rate })
+  //   }
+  // }, [playPop])
+
+  // MATTER-JS
   const scene = useRef<HTMLDivElement | null>(null)
   const engine = useRef(
     Engine.create({
@@ -283,6 +304,11 @@ export const BoardComp = observer(() => {
       for (let i = bodies.length - 1; i >= 0; i--) {
         if (bodies[i]!.label === 'Tile') {
           Composite.remove(engine.current.world, bodies[i]!)
+          const power = (bodies[i]?.collisionFilter.group ?? 3) as TilePower
+          if (power >= 4) {
+            appActions$.triggerPopSound(power, bodies[i]?.id ?? power)
+            // playPopTileSound.current(power)
+          }
           await sleep(25)
         }
       }
@@ -354,6 +380,9 @@ export const BoardComp = observer(() => {
     Events.on(engine.current, 'collisionActive', collisionActiveCallback)
 
     const collisionStartCallback = (event) => {
+      // Prevent collisions after game ends
+      if (state$.toppedOut.peek() || state$.resetting.peek()) return
+
       const { pairs } = event
 
       pairs.forEach((pair) => {
@@ -389,6 +418,10 @@ export const BoardComp = observer(() => {
           const size = getTileSizeFromPower(power as TilePower)
           const mergedSize = getMergedTileSize(size)
           const tileBodies = createTile(mergedSize, position, velocity)
+
+          // Pop sound effect
+          appActions$.triggerPopSound(power + 1, sensorA.id)
+          // playPopTileSound.current(power + 1)
 
           // Update efficiency score
           if (mergedSize === state$.targetEfficiency.peek()) {
@@ -479,16 +512,32 @@ export const BoardComp = observer(() => {
         t={-64}
       ></YStack>
       {/* </GestureDetector> */}
-      <StartGameButton />
+      {/* <StartGameButton onPress={() => appActions$.)} /> */}
+
+      {/* TESTING POP SOUNDS */}
+      {/* {TileList.map((size) => {
+        const power = getTilePower(size)
+        return (
+          <TButton key={size} onPress={() => playPopTileSound.current(power as TilePower)}>
+            {size}
+          </TButton>
+        )
+      })} */}
     </YStack>
   )
 })
 
-const StartGameButton = observer(() => {
+const StartGameButton = observer(({ onPress }: { onPress: () => void }) => {
   if (state$.started.get()) return null
   return (
     <XStack fullscreen ai="center" jc="center">
-      <TButton onPress={actions$.start} w={200}>
+      <TButton
+        onPress={() => {
+          actions$.start()
+          onPress()
+        }}
+        w={200}
+      >
         START
       </TButton>
     </XStack>

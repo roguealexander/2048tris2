@@ -9404,6 +9404,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@use-it/interval@npm:^0.1.3":
+  version: 0.1.4
+  resolution: "@use-it/interval@npm:0.1.4"
+  peerDependencies:
+    react: ^16.8.0
+  checksum: 11d71fd3e528f3205c3a3de5a7f7e1178b93cfd5d94890645d6da758e06e7821bf9c5384551f387d5915796b11d67a9ed03c54fdda348f54a06e0ebc009fb2e3
+  languageName: node
+  linkType: hard
+
 "@vercel/build-utils@npm:7.2.0":
   version: 7.2.0
   resolution: "@vercel/build-utils@npm:7.2.0"
@@ -10477,8 +10486,10 @@ __metadata:
     react-hook-form: "npm:^7.46.1"
     react-native-mmkv: "npm:^2.10.2"
     react-native-safe-area-context: "npm:4.6.3"
+    react-native-use-sound: "npm:^1.2.2"
     solito: "npm:^4.0.1"
     superjson: "npm:^1.13.1"
+    use-sound: "npm:^4.0.1"
     uuid: "npm:^9.0.1"
     zod: "npm:^3.22.2"
   languageName: unknown
@@ -17693,6 +17704,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"howler@npm:^2.1.3":
+  version: 2.2.4
+  resolution: "howler@npm:2.2.4"
+  checksum: e4177f6581ede99fdec68c2dc16a01e74ed3e4f3b28d4804030246f74f15a50311bd3d4d332a6e968a296e6bae1d0a8c8703e8e22d98ef8f5a3299e545e2fe55
+  languageName: node
+  linkType: hard
+
 "html-entities@npm:^2.1.0":
   version: 2.4.0
   resolution: "html-entities@npm:2.4.0"
@@ -23475,6 +23493,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-use-sound@npm:^1.2.2":
+  version: 1.2.2
+  resolution: "react-native-use-sound@npm:1.2.2"
+  dependencies:
+    "@use-it/interval": "npm:^0.1.3"
+  peerDependencies:
+    react: ">=16.8"
+    react-native: ">=0.8.0"
+    react-native-sound: ">=0.11.0"
+  checksum: 37e6588f1483806865d7f45f26fbd2172c2a40f64e1f1fdf16b37057441f9834bc721cc34247ca82a0bc9f76d3190be67f2e6314d50342c9660cdb1954ec5a85
+  languageName: node
+  linkType: hard
+
 "react-native-web-internals@npm:1.74.8":
   version: 1.74.8
   resolution: "react-native-web-internals@npm:1.74.8"
@@ -27439,6 +27470,17 @@ __metadata:
     "@types/react":
       optional: true
   checksum: ec99e31aefeb880f6dc4d02cb19a01d123364954f857811470ece32872f70d6c3eadbe4d073770706a9b7db6136f2a9fbf1bb803e07fbb21e936a47479281690
+  languageName: node
+  linkType: hard
+
+"use-sound@npm:^4.0.1":
+  version: 4.0.1
+  resolution: "use-sound@npm:4.0.1"
+  dependencies:
+    howler: "npm:^2.1.3"
+  peerDependencies:
+    react: ">=16.8"
+  checksum: 1bab548579bc4fee82cbd043ef0cd89d03171ba5d1244b355e09e3ebc1082ff393ca014dbc6acb4733121d6a398d4b8e544b69172028af86c37c01d6b2a7ba96
   languageName: node
   linkType: hard
 

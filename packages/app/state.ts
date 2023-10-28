@@ -89,7 +89,7 @@ const getInitGameState = (): Omit<GameState, 'started' | 'resetCount' | 'holdSha
 
 export const state$ = observable<GameState & GameStateComputed>({
   // STATE
-  started: false,
+  started: true,
   ...getInitGameState(),
   resetCount: 0,
   holdShakeKey: null,
