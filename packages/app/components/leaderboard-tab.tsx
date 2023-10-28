@@ -229,7 +229,7 @@ const extractRowData = (
   }
 }
 const extractRowValue = (type: LeaderboardType, row: LeaderboardQueryData[0]): string | null => {
-  const value = row[type] as number | null
+  const value = (row as any)[type] as number | null
   if (value == null) return null
   switch (type) {
     case 'scoreHigh':
