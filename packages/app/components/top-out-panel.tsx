@@ -1,33 +1,62 @@
 import { observer } from '@legendapp/state/react'
-import { Button, TSizableText, XStack, YStack } from '@my/ui'
+import { TButton, TSizableText, XStack, YStack } from '@my/ui'
 import { state$, actions$ } from 'app/state'
 import { ActiveTilesHistogram } from './active-tile-histogram'
 import { Score, Efficiency } from './stats'
 import { stats$ } from 'app/statsState'
 
-const TopOutTitle = observer(() => {
-  if (state$.score.peek() === stats$.scoreHigh.peek()) return 'HIGH SCORE'
-  return 'GAME OVER'
-})
+const TopOutTitle = observer(
+  ({ isHighScore, isLowScore }: { isHighScore: boolean; isLowScore: boolean }) => {
+    if (isHighScore)
+      return (
+        <>
+          NEW HIGH
+          <br />
+          SCORE
+        </>
+      )
+    if (isLowScore)
+      return (
+        <>
+          NEW LOW
+          <br />
+          SCORE
+        </>
+      )
+    return 'GAME OVER'
+  }
+)
 
 const TopOutHighScoreSubtitle = observer(() => {
-  if (state$.score.peek() !== stats$.scoreHigh.peek()) return null
   return (
     <TSizableText size="$9" fontStyle="italic">
       {stats$.scoreHigh.peek()} POINTS
     </TSizableText>
   )
 })
+const TopOutLowScoreSubtitle = observer(() => {
+  return (
+    <TSizableText size="$9" fontStyle="italic">
+      {stats$.scoreLow.peek()} POINTS
+    </TSizableText>
+  )
+})
 
 export const TopOutPanel = observer(() => {
   if (!state$.toppedOut.get()) return null
+
+  const isHighScore = state$.score.peek() === stats$.scoreHigh.peek()
+  const isLowScore = !isHighScore && state$.score.peek() === stats$.scoreLow.peek()
+
   return (
-    <YStack gap="$4" ai="center" jc="center" pt="$12" h="100%" mr="$12">
+    <YStack gap="$4" ai="center" jc="center" h={700}>
+      <br />
       <YStack ai="center">
-        <TSizableText size="$10" zi={1}>
-          <TopOutTitle />
+        <TSizableText size="$10" zi={1} textAlign="center">
+          <TopOutTitle isHighScore={isHighScore} isLowScore={isLowScore} />
         </TSizableText>
-        <TopOutHighScoreSubtitle />
+        {isHighScore && <TopOutHighScoreSubtitle />}
+        {isLowScore && <TopOutLowScoreSubtitle />}
       </YStack>
 
       <XStack w="100%" h={2} bg="$border" />
@@ -40,15 +69,15 @@ export const TopOutPanel = observer(() => {
           <Efficiency />
         </YStack>
         <YStack w="$12" gap="$2" ai="flex-start">
-          <ActiveTilesHistogram />
+          <ActiveTilesHistogram noTargetEfficiency />
         </YStack>
       </XStack>
 
       <XStack w="100%" h={2} bg="$border" />
 
-      <Button zi={1} br="$0" onPress={() => actions$.reset()}>
+      <TButton zi={1} br="$0" onPress={actions$.reset}>
         New Game
-      </Button>
+      </TButton>
     </YStack>
   )
 })

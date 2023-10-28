@@ -1,10 +1,10 @@
-import { batch, computed, mergeIntoObservable, observable } from '@legendapp/state'
+import { batch, computed, observable } from '@legendapp/state'
 import { EfficiencyTile, TileList, TileQueue, TileRecord, TileSize } from './types'
 import { rand } from '@ngneat/falso'
-import { getTileRadius } from './tiles'
 import { stats$ } from './statsState'
 
 type GameState = {
+  started: boolean
   toppedOut: boolean
   resetting: boolean
   resetCount: number
@@ -17,8 +17,6 @@ type GameState = {
   score: number
   ballsDropped: number
 
-  mouseX: number
-
   activeTileCount: TileRecord<number>
   targetEfficiency: EfficiencyTile
   activeHighEfficiencyPanel: EfficiencyTile | null
@@ -26,8 +24,6 @@ type GameState = {
 type GameStateComputed = {
   gamePhysicsPaused: boolean
   gameInteractionPaused: boolean
-
-  dropX: number
 
   maxTilesCount: number
   largestTile: TileSize
@@ -37,6 +33,7 @@ type GameStateComputed = {
 }
 
 type GameActions = {
+  start: () => void
   drop: () => void
   hold: () => void
   reset: () => void
@@ -60,7 +57,7 @@ const constructInitialQueue = (): TileQueue => {
   ]
 }
 
-const getInitGameState = (): Omit<GameState, 'resetCount' | 'holdShakeKey' | 'mouseX'> => ({
+const getInitGameState = (): Omit<GameState, 'started' | 'resetCount' | 'holdShakeKey'> => ({
   toppedOut: false,
   resetting: false,
   activeTile: getQueueTile(),
@@ -92,26 +89,22 @@ const getInitGameState = (): Omit<GameState, 'resetCount' | 'holdShakeKey' | 'mo
 
 export const state$ = observable<GameState & GameStateComputed>({
   // STATE
+  started: false,
   ...getInitGameState(),
   resetCount: 0,
   holdShakeKey: null,
-  mouseX: 0,
 
   // COMPUTED
   gamePhysicsPaused: computed((): boolean => {
-    return state$.toppedOut.get() || state$.resetting.get()
+    return !state$.started.get() || state$.toppedOut.get() || state$.resetting.get()
   }),
   gameInteractionPaused: computed((): boolean => {
     return (
+      !state$.started.get() ||
       state$.toppedOut.get() ||
       state$.resetting.get() ||
       state$.activeHighEfficiencyPanel.get() !== null
     )
-  }),
-
-  dropX: computed((): number => {
-    const radius = getTileRadius(state$.activeTile.get())
-    return Math.min(Math.max(64 + radius / 2, state$.mouseX.get()), 64 + 450 - radius / 2)
   }),
 
   maxTilesCount: computed((): number => {
@@ -208,6 +201,9 @@ const swapActiveAndHeldTiles = () => {
 }
 
 export const actions$ = observable<GameActions>({
+  start: () => {
+    state$.started.set(true)
+  },
   drop: () => {
     batch(() => {
       const activeTile = state$.activeTile.peek()
@@ -242,12 +238,17 @@ export const actions$ = observable<GameActions>({
     })
   },
   reset: () => {
-    batch(() => {
-      mergeIntoObservable(state$, { ...getInitGameState() })
-      state$.resetCount.set((count) => (count += 1))
-    })
+    console.log('reset')
+    state$.set((currState) => ({
+      ...currState,
+      ...getInitGameState(),
+      resetting: true,
+      resetCount: currState.resetCount + 1,
+    }))
+    console.log('state', state$.peek())
   },
   topOut: () => {
+    console.log('top out')
     batch(() => {
       // Update high scores
       if (state$.score.peek() < (stats$.scoreLow.peek() ?? Infinity)) {

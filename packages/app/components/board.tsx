@@ -35,7 +35,13 @@ import ball2048 from '../assets/2048.png'
 import ball4096 from '../assets/4096.png'
 import ball8192 from '../assets/8192.png'
 import { TilePower, TileRecord, TileSize } from '../types'
-import { Spacer, XStack, YStack } from '@my/ui'
+import { Spacer, TButton, XStack, YStack } from '@my/ui'
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  SharedValue,
+  useDerivedValue,
+} from 'react-native-reanimated'
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -213,14 +219,34 @@ const createTile = (
   return [ballTile, ballSensor, ballConstraint]
 }
 
-const TileDropPositioner = observer(({ children }: { children: ReactNode }) => {
-  const dropX = state$.dropX.get()
-  return (
-    <XStack pos="absolute" pe="none" l={dropX - 64} t={0} x="-50%" y="-50%">
-      {state$.gamePhysicsPaused.get() ? null : children}
-    </XStack>
-  )
-})
+const TileDropPositioner = observer(
+  ({ dropX, children }: { dropX: SharedValue<number>; children: ReactNode }) => {
+    const animatedStyle = useAnimatedStyle(() => {
+      return {
+        left: dropX.value - 64 - 64,
+      }
+    }, [dropX])
+    return (
+      <Animated.View
+        style={[
+          {
+            position: 'absolute',
+            pointerEvents: 'none',
+            top: -64,
+            width: 128,
+            height: 128,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          },
+          animatedStyle,
+        ]}
+      >
+        {state$.gamePhysicsPaused.get() ? null : children}
+      </Animated.View>
+    )
+  }
+)
 
 export const BoardComp = observer(() => {
   const scene = useRef<HTMLDivElement | null>(null)
@@ -238,6 +264,13 @@ export const BoardComp = observer(() => {
     })
   )
 
+  // const releaseDelay = useSharedValue(0)
+  const mouseX = useSharedValue(0)
+  const dropX = useDerivedValue(() => {
+    const radius = getTileRadius(state$.activeTile.get())
+    return Math.min(Math.max(64 + radius / 2, mouseX.value), 64 + 450 - radius / 2)
+  }, [mouseX, state$.activeTile.get()])
+
   runner.current.enabled = !state$.gamePhysicsPaused.get()
 
   useObserve(
@@ -248,7 +281,7 @@ export const BoardComp = observer(() => {
       const bodies = Composite.allBodies(engine.current!.world)
 
       for (let i = bodies.length - 1; i >= 0; i--) {
-        if (bodies[i]!.label === 'Circle Body') {
+        if (bodies[i]!.label === 'Tile') {
           Composite.remove(engine.current.world, bodies[i]!)
           await sleep(25)
         }
@@ -300,6 +333,9 @@ export const BoardComp = observer(() => {
     Render.run(render)
 
     const collisionActiveCallback = (event: Matter.IEventCollision<Engine>) => {
+      // Prevent topout after game ends and before reset complete
+      if (state$.toppedOut.peek() || state$.resetting.peek()) return
+
       const { pairs } = event
 
       pairs.forEach((pair) => {
@@ -374,8 +410,6 @@ export const BoardComp = observer(() => {
       Events.off(engine.current, 'collisionActive', collisionActiveCallback)
       Events.off(engine.current, 'collisionStart', collisionStartCallback)
 
-      console.log('clear engine unmountaa')
-
       render.canvas.remove()
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -389,20 +423,24 @@ export const BoardComp = observer(() => {
 
   const releaseBall = () => {
     if (state$.gameInteractionPaused.get()) return
+    // if (releaseDelay.value > 0) return
 
     const tileBodies = createTile(
       state$.activeTile.peek(),
-      { x: state$.dropX.get() * WorldScale, y: 64 * WorldScale },
+      { x: dropX.value * WorldScale, y: 64 * WorldScale },
       { x: 0.01, y: 0 * WorldScale }
     )
 
     World.add(engine.current.world, tileBodies)
 
+    // releaseDelay.value = 250
+    // releaseDelay.value = withTiming(0, { duration: 250 })
+
     actions$.drop()
   }
 
   const moveBall = (event: any) => {
-    state$.mouseX.set(event.nativeEvent.offsetX)
+    mouseX.value = event.nativeEvent.offsetX
   }
 
   // Native gesture handler
@@ -427,7 +465,7 @@ export const BoardComp = observer(() => {
     >
       {/* <GestureDetector gesture={gesture}> */}
 
-      <TileDropPositioner>
+      <TileDropPositioner dropX={dropX}>
         <Tile size={state$.activeTile} />
       </TileDropPositioner>
       <YStack
@@ -441,7 +479,19 @@ export const BoardComp = observer(() => {
         t={-64}
       ></YStack>
       {/* </GestureDetector> */}
+      <StartGameButton />
     </YStack>
+  )
+})
+
+const StartGameButton = observer(() => {
+  if (state$.started.get()) return null
+  return (
+    <XStack fullscreen ai="center" jc="center">
+      <TButton onPress={actions$.start} w={200}>
+        START
+      </TButton>
+    </XStack>
   )
 })
 
