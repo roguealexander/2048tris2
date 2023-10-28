@@ -546,8 +546,7 @@ const StartGameButton = observer(({ onPress }: { onPress: () => void }) => {
 
 export const Board = observer(() => {
   return (
-    <YStack gap="$2" pos="relative" ai="flex-start">
-      <Spacer size={20} />
+    <YStack gap="$2" pos="relative" ai="flex-start" mt={30}>
       <BoardComp />
     </YStack>
   )

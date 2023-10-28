@@ -238,17 +238,14 @@ export const actions$ = observable<GameActions>({
     })
   },
   reset: () => {
-    console.log('reset')
     state$.set((currState) => ({
       ...currState,
       ...getInitGameState(),
       resetting: true,
       resetCount: currState.resetCount + 1,
     }))
-    console.log('state', state$.peek())
   },
   topOut: () => {
-    console.log('top out')
     batch(() => {
       // Update high scores
       if (state$.score.peek() < (stats$.scoreLow.peek() ?? Infinity)) {

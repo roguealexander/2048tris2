@@ -20,8 +20,9 @@ import { PopSoundEffect } from 'app/components/pop-sound-effect'
 const ActiveLeftPanel = observer(() => {
   if (state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null) return null
   return (
-    <YStack w="$12" gap="$2">
-      <Hold />
+    <YStack w="$12" gap="$4" mt={30}>
+      <NewGameButton />
+      <XStack w="100%" h={2} bg="$border" />
       <Score />
       <XStack w="100%" h={2} bg="$border" />
       <Efficiency />
@@ -35,10 +36,9 @@ const ActiveRightPanel = observer(() => {
   if (state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null) return null
   return (
     <YStack gap="$2" ai="flex-start">
+      <Hold />
+      <br />
       <Queue />
-      <br />
-      <br />
-      <NewGameButton />
     </YStack>
   )
 })

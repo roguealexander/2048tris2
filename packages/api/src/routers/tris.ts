@@ -23,6 +23,9 @@ export const LeaderboardTypeSchema = z.union([
   z.literal('efficiency8192'),
 ])
 
+const statsSelect =
+  'scoreHigh, scoreLow, efficiency2048, efficiency4096, efficiency8192, gamesPlayed, ballsDropped' as const
+
 export type LeaderboardType = z.infer<typeof LeaderboardTypeSchema>
 
 const mergeNullable = (
@@ -54,7 +57,7 @@ export const trisRouter = createTRPCRouter({
   getUserStats: protectedProcedure.query(async ({ ctx: { supabase, session } }) => {
     const { data, error } = await supabase
       .from('users')
-      .select('*')
+      .select(statsSelect)
       .match({ id: session.user.id })
       .limit(1)
       .single()
@@ -64,6 +67,24 @@ export const trisRouter = createTRPCRouter({
     }
 
     return data as Stats
+  }),
+  resetUserStats: protectedProcedure.mutation(async ({ ctx: { supabase, session } }) => {
+    const { error } = await supabase
+      .from('users')
+      .update({
+        gamesPlayed: 0,
+        ballsDropped: 0,
+        scoreHigh: null,
+        scoreLow: null,
+        efficiency2048: null,
+        efficiency4096: null,
+        efficiency8192: null,
+      })
+      .eq('id', session.user.id)
+
+    if (error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    }
   }),
   updateUserStats: protectedProcedure
     .input(StatsSchema)
@@ -79,14 +100,23 @@ export const trisRouter = createTRPCRouter({
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: existingStatsError.message })
       }
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('users')
         .update(mergeStats(existingStats, input))
         .eq('id', session.user.id)
+        .select(statsSelect)
+        .single()
 
       if (error != null) {
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
       }
+
+      const parsed = StatsSchema.safeParse(data)
+      if (!parsed.success) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: parsed.error.message })
+      }
+
+      return parsed.data as Stats
     }),
   getLeaderboard: publicProcedure
     .input(LeaderboardTypeSchema)

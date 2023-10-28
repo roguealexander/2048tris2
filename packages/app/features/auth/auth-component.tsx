@@ -30,8 +30,9 @@ export const AuthComponent = observer(() => {
 
   const signingIn = signUpSignIn$.get() === 'sign-in'
 
-  const persistExistingStats = () => {
-    updateStatsMutation.mutate(stats$.get())
+  const persistExistingStats = async () => {
+    const updatedStats = await updateStatsMutation.mutateAsync(stats$.get())
+    stats$.set(updatedStats)
   }
 
   const handleError = (errorMessage: string) => {
@@ -58,7 +59,7 @@ export const AuthComponent = observer(() => {
       return
     }
 
-    persistExistingStats()
+    await persistExistingStats()
   }
 
   async function signUp({ name, password }: z.infer<typeof SignUpSchema>) {
@@ -77,7 +78,7 @@ export const AuthComponent = observer(() => {
       return
     }
 
-    persistExistingStats()
+    await persistExistingStats()
   }
 
   return (

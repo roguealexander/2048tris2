@@ -11,7 +11,7 @@ export const Queue = observer(() => {
         <YStack w="$12" h="$12" bw={4} boc="$border" ai="center" jc="center">
           <Tile size={state$.queue[0]} />
         </YStack>
-        {[1, 2, 3, 4].map((index) => {
+        {[1, 2, 3].map((index) => {
           return (
             <YStack key={index} w={105} h={105} ai="center" jc="center">
               <Tile size={state$.queue[index]} />

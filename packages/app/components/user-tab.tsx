@@ -1,5 +1,5 @@
-import { Memo, observer } from '@legendapp/state/react'
-import { TButton, TSizableText, XStack, YStack } from '@my/ui'
+import { Memo, observer, useObservable } from '@legendapp/state/react'
+import { Spinner, TButton, TSizableText, XStack, YStack } from '@my/ui'
 import { colors } from 'app/colors'
 import { TabContainer } from './tab-container'
 import { useUser } from 'app/utils/useUser'
@@ -7,6 +7,7 @@ import { useSupabase } from 'app/utils/supabase/useSupabase'
 import { AuthComponent } from 'app/features/auth/auth-component'
 import { stats$, statsActions$ } from 'app/statsState'
 import { User } from '@supabase/supabase-js'
+import { api } from 'app/utils/api'
 
 const Header = observer(() => {
   return (
@@ -92,9 +93,19 @@ const LeaderboardStatsTable = observer(() => {
 })
 
 const ResetStatsButton = observer(() => {
+  const resetting = useObservable<boolean>(false)
+  const resetStatsMutation = api.tris.resetUserStats.useMutation()
+
+  const resetStats = async () => {
+    resetting.set(true)
+    await resetStatsMutation.mutateAsync()
+    statsActions$.resetStats()
+    resetting.set(false)
+  }
   return (
-    <TButton ml="$2" onPress={() => statsActions$.resetStats()}>
+    <TButton ml="$2" onPress={resetStats}>
       RESET USER STATS
+      {resetting.get() && <Spinner color="$background" />}
     </TButton>
   )
 })

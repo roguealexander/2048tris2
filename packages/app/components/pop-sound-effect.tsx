@@ -4,7 +4,7 @@ import useSound from 'use-sound'
 
 export const PopSoundEffect = observer(() => {
   const [playPop] = useSound('../sounds/pop.mp3', {
-    volume: 0.3,
+    volume: 0.4,
     playbackRate: 1,
   })
 
