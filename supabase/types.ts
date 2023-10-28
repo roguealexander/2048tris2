@@ -12,39 +12,39 @@ export interface Database {
       users: {
         Row: {
           ballsDropped: number
-          efficiency2048: number | null
-          efficiency4096: number | null
-          efficiency8192: number | null
+          efficiency2048: number
+          efficiency4096: number
+          efficiency8192: number
           gamesPlayed: number
           id: string
           muted: boolean
-          name: string | null
-          scoreHigh: number | null
-          scoreLow: number | null
+          name: string
+          scoreHigh: number
+          scoreLow: number
         }
         Insert: {
           ballsDropped?: number
-          efficiency2048?: number | null
-          efficiency4096?: number | null
-          efficiency8192?: number | null
+          efficiency2048?: number
+          efficiency4096?: number
+          efficiency8192?: number
           gamesPlayed?: number
           id: string
           muted?: boolean
-          name?: string | null
-          scoreHigh?: number | null
-          scoreLow?: number | null
+          name: string
+          scoreHigh?: number
+          scoreLow?: number
         }
         Update: {
           ballsDropped?: number
-          efficiency2048?: number | null
-          efficiency4096?: number | null
-          efficiency8192?: number | null
+          efficiency2048?: number
+          efficiency4096?: number
+          efficiency8192?: number
           gamesPlayed?: number
           id?: string
           muted?: boolean
-          name?: string | null
-          scoreHigh?: number | null
-          scoreLow?: number | null
+          name?: string
+          scoreHigh?: number
+          scoreLow?: number
         }
         Relationships: [
           {

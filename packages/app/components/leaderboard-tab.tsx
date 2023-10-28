@@ -166,8 +166,8 @@ const Row = observer(
           <XStack fullscreen bg={colors.tile['2']} o={0.5} zi={-1} />
         )}
         <XStack ai="center" jc="center" gap="$4">
-          <TSizableText w={40}>{score == null ? '' : rank + 1}</TSizableText>
-          <TSizableText fontWeight="bold">{score == null ? '' : name ?? 'ANON'}</TSizableText>
+          <TSizableText w={40}>{rank + 1}</TSizableText>
+          <TSizableText fontWeight="bold">{name ?? 'ANON'}</TSizableText>
         </XStack>
         <TSizableText>{score ?? ' '}</TSizableText>
       </XStack>
@@ -221,16 +221,15 @@ const extractRows = (type: LeaderboardType, data: LeaderboardQueryData | undefin
 const extractRowData = (
   type: LeaderboardType,
   row: LeaderboardQueryData[0]
-): { id: string; name: string | null; value: string | null } => {
+): { id: string; name: string; value: string } => {
   return {
     id: row.id,
     name: row.name,
     value: extractRowValue(type, row),
   }
 }
-const extractRowValue = (type: LeaderboardType, row: LeaderboardQueryData[0]): string | null => {
-  const value = (row as any)[type] as number | null
-  if (value == null) return null
+const extractRowValue = (type: LeaderboardType, row: LeaderboardQueryData[0]): string => {
+  const value = (row as any)[type] as number
   switch (type) {
     case 'scoreHigh':
     case 'scoreLow':

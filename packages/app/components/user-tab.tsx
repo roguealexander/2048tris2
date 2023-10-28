@@ -65,28 +65,39 @@ const LeaderboardStatsTable = observer(() => {
       <Header />
       <br />
       <TSizableText size="$3">POINTS:</TSizableText>
-      <Row key={0} rank={1} leaderboard="HIGH SCORE" score={`${scoreHigh ?? '--'}`} />
-      <Row key={1} rank={2} leaderboard="LOW SCORE" score={`${scoreLow ?? '--'}`} highlight />
+      <Row
+        key={0}
+        rank={1}
+        leaderboard="HIGH SCORE"
+        score={scoreHigh === 0 ? '--' : `${scoreHigh}`}
+      />
+      <Row
+        key={1}
+        rank={2}
+        leaderboard="LOW SCORE"
+        score={scoreLow === 100000 ? '--' : `${scoreLow}`}
+        highlight
+      />
       <br />
       <TSizableText size="$3">EFFICIENCY:</TSizableText>
       <Row
         key={2}
         rank={3}
         leaderboard="2048 EFFICIENCY"
-        score={efficiency2048 ? `${efficiency2048}%` : '--'}
+        score={efficiency2048 === 0 ? '--' : `${efficiency2048}%`}
       />
       <Row
         key={3}
         rank={4}
         leaderboard="4096 EFFICIENCY"
-        score={efficiency4096 ? `${efficiency2048}%` : '--'}
+        score={efficiency4096 === 0 ? '--' : `${efficiency4096}%`}
         highlight
       />
       <Row
         key={4}
         rank={5}
         leaderboard="8192 EFFICIENCY"
-        score={efficiency8192 ? `${efficiency2048}%` : '--'}
+        score={efficiency8192 === 0 ? '--' : `${efficiency8192}%`}
       />
     </YStack>
   )

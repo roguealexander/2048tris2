@@ -4,6 +4,8 @@ import { state$, actions$ } from 'app/state'
 import { ActiveTilesHistogram } from './active-tile-histogram'
 import { Score, Efficiency } from './stats'
 import { stats$ } from 'app/statsState'
+import { appState$ } from 'app/appState'
+import { useUser } from 'app/utils/useUser'
 
 const TopOutTitle = observer(
   ({ isHighScore, isLowScore }: { isHighScore: boolean; isLowScore: boolean }) => {
@@ -42,6 +44,12 @@ const TopOutLowScoreSubtitle = observer(() => {
   )
 })
 
+const JoinLeaderboardButton = observer(() => {
+  const { user } = useUser()
+  if (user != null) return
+  return <TButton onPress={() => appState$.tab.set('user')}>SIGN UP TO JOIN LEADERBOARD</TButton>
+})
+
 export const TopOutPanel = observer(() => {
   if (!state$.toppedOut.get()) return null
 
@@ -58,6 +66,8 @@ export const TopOutPanel = observer(() => {
         {isHighScore && <TopOutHighScoreSubtitle />}
         {isLowScore && <TopOutLowScoreSubtitle />}
       </YStack>
+
+      <JoinLeaderboardButton />
 
       <XStack w="100%" h={2} bg="$border" />
 

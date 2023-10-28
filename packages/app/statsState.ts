@@ -1,4 +1,4 @@
-import { mergeIntoObservable, observable } from '@legendapp/state'
+import { observable } from '@legendapp/state'
 import { configureObservablePersistence, persistObservable } from '@legendapp/state/persist'
 import { z } from 'zod'
 import { StatsSchema } from '../api/src/routers/tris'
@@ -13,12 +13,12 @@ const statsInit: Stats = {
   gamesPlayed: 0,
   ballsDropped: 0,
 
-  scoreHigh: null,
-  scoreLow: null,
+  scoreHigh: 0,
+  scoreLow: 100000,
 
-  efficiency2048: null,
-  efficiency4096: null,
-  efficiency8192: null,
+  efficiency2048: 0,
+  efficiency4096: 0,
+  efficiency8192: 0,
 }
 
 export const stats$ = observable<Stats>({ ...statsInit })

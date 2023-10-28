@@ -6,12 +6,12 @@ export const StatsSchema = z.object({
   gamesPlayed: z.number(),
   ballsDropped: z.number(),
 
-  scoreHigh: z.number().nullable(),
-  scoreLow: z.number().nullable(),
+  scoreHigh: z.number(),
+  scoreLow: z.number(),
 
-  efficiency2048: z.number().nullable(),
-  efficiency4096: z.number().nullable(),
-  efficiency8192: z.number().nullable(),
+  efficiency2048: z.number(),
+  efficiency4096: z.number(),
+  efficiency8192: z.number(),
 })
 type Stats = z.infer<typeof StatsSchema>
 
@@ -28,28 +28,17 @@ const statsSelect =
 
 export type LeaderboardType = z.infer<typeof LeaderboardTypeSchema>
 
-const mergeNullable = (
-  a: number | null,
-  b: number | null,
-  mergeFn: (a: number, b: number) => number
-) => {
-  if (a == null && b == null) return null
-  if (a == null) return b
-  if (b == null) return a
-  return mergeFn(a, b)
-}
-
 const mergeStats = (a: Stats, b: Stats): Stats => {
   return {
     gamesPlayed: Math.max(a.gamesPlayed, b.gamesPlayed),
     ballsDropped: Math.max(a.ballsDropped, b.ballsDropped),
 
-    scoreHigh: mergeNullable(a.scoreHigh, b.scoreHigh, Math.max),
-    scoreLow: mergeNullable(a.scoreLow, b.scoreLow, Math.min),
+    scoreHigh: Math.max(a.scoreHigh, b.scoreHigh),
+    scoreLow: Math.min(a.scoreLow, b.scoreLow),
 
-    efficiency2048: mergeNullable(a.efficiency2048, b.efficiency2048, Math.max),
-    efficiency4096: mergeNullable(a.efficiency4096, b.efficiency4096, Math.max),
-    efficiency8192: mergeNullable(a.efficiency8192, b.efficiency8192, Math.max),
+    efficiency2048: Math.max(a.efficiency2048, b.efficiency2048),
+    efficiency4096: Math.max(a.efficiency4096, b.efficiency4096),
+    efficiency8192: Math.max(a.efficiency8192, b.efficiency8192),
   }
 }
 
@@ -74,11 +63,11 @@ export const trisRouter = createTRPCRouter({
       .update({
         gamesPlayed: 0,
         ballsDropped: 0,
-        scoreHigh: null,
-        scoreLow: null,
-        efficiency2048: null,
-        efficiency4096: null,
-        efficiency8192: null,
+        scoreHigh: 0,
+        scoreLow: 100000,
+        efficiency2048: 0,
+        efficiency4096: 0,
+        efficiency8192: 0,
       })
       .eq('id', session.user.id)
 
