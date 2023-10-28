@@ -1,9 +1,11 @@
 import { Memo, Show, observer } from '@legendapp/state/react'
-import { TSizableText, XStack, YStack } from '@my/ui'
+import { Spinner, TSizableText, XStack, YStack } from '@my/ui'
 import { LeaderboardType } from 'app/types'
 import { computed, observable } from '@legendapp/state'
 import { colors } from 'app/colors'
 import { TabContainer } from './tab-container'
+import { api } from 'app/utils/api'
+import { RouterOutputs } from '@my/api'
 
 const leaderboard$ = observable<LeaderboardType>('scoreHigh')
 const leaderboardTitle$ = computed(() => {
@@ -154,8 +156,8 @@ const Row = observer(
     highlight,
   }: {
     rank: number
-    name: string
-    score: string
+    name: string | null | undefined
+    score: string | null | undefined
     highlight?: boolean
   }) => {
     return (
@@ -164,31 +166,103 @@ const Row = observer(
           <XStack fullscreen bg={colors.tile['2']} o={0.5} zi={-1} />
         )}
         <XStack ai="center" jc="center" gap="$4">
-          <TSizableText w={40}>{rank}</TSizableText>
-          <TSizableText fontWeight="bold">{name}</TSizableText>
+          <TSizableText w={40}>{score == null ? '' : rank + 1}</TSizableText>
+          <TSizableText fontWeight="bold">{score == null ? '' : name ?? 'ANON'}</TSizableText>
         </XStack>
-        <TSizableText>{score}</TSizableText>
+        <TSizableText>{score ?? ' '}</TSizableText>
       </XStack>
     )
   }
 )
-const Table = observer(() => {
-  return (
-    <YStack w="100%">
-      <Header />
-      <Row key={0} rank={1} name="NAME" score="100%" />
-      <Row key={1} rank={2} name="NAME" score="100%" />
-      <Row key={2} rank={3} name="NAME" score="100%" />
-      <Row key={3} rank={4} name="NAME" score="100%" />
-      <Row key={4} rank={5} name="NAME" score="100%" />
-      <Row key={5} rank={6} name="NAME" score="100%" />
-      <Row key={6} rank={7} name="NAME" score="100%" />
-      <Row key={7} rank={8} name="NAME" score="100%" />
-      <Row key={8} rank={9} name="NAME" score="100%" />
-      <Row key={9} rank={10} name="NAME" score="100%" />
-    </YStack>
-  )
+
+type LeaderboardQueryData = RouterOutputs['tris']['getLeaderboard']
+
+const Leaderboard = observer(() => {
+  const leaderboardType = leaderboard$.get()
+  switch (leaderboardType) {
+    case 'scoreHigh':
+      return <ScoreHighLeaderboard />
+    case 'scoreLow':
+      return <ScoreLowLeaderboard />
+    case 'efficiency2048':
+      return <Efficiency2048Leaderboard />
+    case 'efficiency4096':
+      return <Efficiency4096Leaderboard />
+    case 'efficiency8192':
+      return <Efficiency8192Leaderboard />
+  }
 })
+
+const ScoreHighLeaderboard = observer(() => {
+  const { data, isLoading } = api.tris.getHighScoreLeaderboard.useQuery()
+  return <Table data={data} isLoading={isLoading} />
+})
+const ScoreLowLeaderboard = observer(() => {
+  const { data, isLoading } = api.tris.getLowScoreLeaderboard.useQuery()
+  return <Table data={data} isLoading={isLoading} />
+})
+const Efficiency2048Leaderboard = observer(() => {
+  const { data, isLoading } = api.tris.getEfficiency2048Leaderboard.useQuery()
+  return <Table data={data} isLoading={isLoading} />
+})
+const Efficiency4096Leaderboard = observer(() => {
+  const { data, isLoading } = api.tris.getEfficiency4096Leaderboard.useQuery()
+  return <Table data={data} isLoading={isLoading} />
+})
+const Efficiency8192Leaderboard = observer(() => {
+  const { data, isLoading } = api.tris.getEfficiency8192Leaderboard.useQuery()
+  return <Table data={data} isLoading={isLoading} />
+})
+
+const extractRows = (type: LeaderboardType, data: LeaderboardQueryData | undefined) => {
+  if (data == null) return []
+  return data.map((row) => extractRowData(type, row))
+}
+const extractRowData = (
+  type: LeaderboardType,
+  row: LeaderboardQueryData[0]
+): { id: string; name: string | null; value: string | null } => {
+  return {
+    id: row.id,
+    name: row.name,
+    value: extractRowValue(type, row),
+  }
+}
+const extractRowValue = (type: LeaderboardType, row: LeaderboardQueryData[0]): string | null => {
+  const value = row[type] as number | null
+  if (value == null) return null
+  switch (type) {
+    case 'scoreHigh':
+    case 'scoreLow':
+      return `${value}`
+    case 'efficiency2048':
+    case 'efficiency4096':
+    case 'efficiency8192':
+      return `${value}%`
+  }
+}
+
+const Table = observer(
+  ({ data, isLoading }: { data: LeaderboardQueryData | undefined; isLoading: boolean }) => {
+    const values = extractRows(leaderboard$.get(), data)
+    return (
+      <YStack w="100%" pos="relative" ai="center" jc="center">
+        <Header />
+        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((rank) => {
+          return (
+            <Row key={rank} rank={rank} name={values[rank]?.name} score={values[rank]?.value} />
+          )
+        })}
+        {isLoading && (
+          <>
+            <XStack fullscreen bg="$background" o={0.5} />
+            <Spinner color="$text" pos="absolute" />
+          </>
+        )}
+      </YStack>
+    )
+  }
+)
 
 export const LeaderboardTab = observer(() => {
   return (
@@ -199,7 +273,8 @@ export const LeaderboardTab = observer(() => {
       <br />
       <TSizableText>Top 10:</TSizableText>
       <br />
-      <Table />
+      <Leaderboard />
+      {/* <Table /> */}
       <br />
       <TSizableText>Personal Record:</TSizableText>
       <br />

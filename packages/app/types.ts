@@ -1,3 +1,6 @@
+import { LeaderboardTypeSchema } from '@my/api/src/routers/tris'
+import { z } from 'zod'
+
 export const TilePowerList = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] as const
 export type TilePower = (typeof TilePowerList)[number]
 
@@ -28,12 +31,7 @@ export type TileData = {
   textColor: string
 }
 
-export type LeaderboardType =
-  | 'scoreHigh'
-  | 'scoreLow'
-  | 'efficiency2048'
-  | 'efficiency4096'
-  | 'efficiency8192'
+export type LeaderboardType = z.infer<typeof LeaderboardTypeSchema>
 
 export type TileQueue = [TileSize, TileSize, TileSize, TileSize, TileSize, TileSize]
 export type EfficiencyTile = '2048' | '4096' | '8192'

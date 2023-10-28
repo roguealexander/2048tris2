@@ -1,4 +1,4 @@
-import { inferRouterContext, inferRouterInputs, inferRouterOutputs } from '@trpc/server'
+import { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 import { createTRPCRouter } from '../trpc'
 import { greetingRouter } from './greeting'
 import { trisRouter } from './tris'

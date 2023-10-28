@@ -9,7 +9,7 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      stats: {
+      users: {
         Row: {
           ballsDropped: number
           efficiency2048: number | null
@@ -17,6 +17,8 @@ export interface Database {
           efficiency8192: number | null
           gamesPlayed: number
           id: string
+          muted: boolean
+          name: string | null
           scoreHigh: number | null
           scoreLow: number | null
         }
@@ -27,6 +29,8 @@ export interface Database {
           efficiency8192?: number | null
           gamesPlayed?: number
           id: string
+          muted?: boolean
+          name?: string | null
           scoreHigh?: number | null
           scoreLow?: number | null
         }
@@ -37,12 +41,14 @@ export interface Database {
           efficiency8192?: number | null
           gamesPlayed?: number
           id?: string
+          muted?: boolean
+          name?: string | null
           scoreHigh?: number | null
           scoreLow?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "stats_id_fkey"
+            foreignKeyName: "users_id_fkey"
             columns: ["id"]
             referencedRelation: "users"
             referencedColumns: ["id"]

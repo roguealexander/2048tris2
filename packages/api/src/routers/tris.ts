@@ -1,5 +1,5 @@
 import { TRPCError } from '@trpc/server'
-import { createTRPCRouter, protectedProcedure } from '../trpc'
+import { createTRPCRouter, protectedProcedure, publicProcedure } from '../trpc'
 import { z } from 'zod'
 
 export const StatsSchema = z.object({
@@ -14,6 +14,16 @@ export const StatsSchema = z.object({
   efficiency8192: z.number().nullable(),
 })
 type Stats = z.infer<typeof StatsSchema>
+
+export const LeaderboardTypeSchema = z.union([
+  z.literal('scoreHigh'),
+  z.literal('scoreLow'),
+  z.literal('efficiency2048'),
+  z.literal('efficiency4096'),
+  z.literal('efficiency8192'),
+])
+
+export type LeaderboardType = z.infer<typeof LeaderboardTypeSchema>
 
 const mergeNullable = (
   a: number | null,
@@ -43,7 +53,7 @@ const mergeStats = (a: Stats, b: Stats): Stats => {
 export const trisRouter = createTRPCRouter({
   getUserStats: protectedProcedure.query(async ({ ctx: { supabase, session } }) => {
     const { data, error } = await supabase
-      .from('stats')
+      .from('users')
       .select('*')
       .match({ id: session.user.id })
       .limit(1)
@@ -59,7 +69,7 @@ export const trisRouter = createTRPCRouter({
     .input(StatsSchema)
     .mutation(async ({ ctx: { supabase, session }, input }) => {
       const { data: existingStats, error: existingStatsError } = await supabase
-        .from('stats')
+        .from('users')
         .select('*')
         .match({ id: session.user.id })
         .limit(1)
@@ -70,7 +80,7 @@ export const trisRouter = createTRPCRouter({
       }
 
       const { error } = await supabase
-        .from('stats')
+        .from('users')
         .update(mergeStats(existingStats, input))
         .eq('id', session.user.id)
 
@@ -78,4 +88,68 @@ export const trisRouter = createTRPCRouter({
         throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
       }
     }),
+  getLeaderboard: publicProcedure
+    .input(LeaderboardTypeSchema)
+    .query(async ({ ctx: { supabase }, input }) => {
+      const { data, error } = await supabase.from('users').select(`id, name, ${input}`).limit(10)
+      if (error != null) {
+        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+      }
+      return data
+    }),
+  getHighScoreLeaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, name, scoreHigh')
+      .order('scoreHigh', { ascending: false, nullsFirst: false })
+      .limit(10)
+    if (error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    }
+    return data
+  }),
+  getLowScoreLeaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, name, scoreLow')
+      .order('scoreLow', { ascending: true, nullsFirst: false })
+      .limit(10)
+    if (error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    }
+    return data
+  }),
+  getEfficiency2048Leaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, name, efficiency2048')
+      .order('efficiency2048', { ascending: false, nullsFirst: false })
+      .limit(10)
+    if (error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    }
+    return data
+  }),
+  getEfficiency4096Leaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, name, efficiency4096')
+      .order('efficiency4096', { ascending: false, nullsFirst: false })
+      .limit(10)
+    if (error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    }
+    return data
+  }),
+  getEfficiency8192Leaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
+    const { data, error } = await supabase
+      .from('users')
+      .select('id, name, efficiency8192')
+      .order('efficiency8192', { ascending: false, nullsFirst: false })
+      .limit(10)
+    if (error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    }
+    return data
+  }),
 })
