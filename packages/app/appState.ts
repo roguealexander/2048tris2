@@ -1,6 +1,6 @@
 import { observable } from '@legendapp/state'
 
-export type Tab = '2048tris' | 'rules' | 'leaderboard' | 'user'
+export type Tab = '2048tris' | 'how-to-play' | 'leaderboard' | 'user'
 
 type AppState = {
   tab: Tab

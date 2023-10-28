@@ -1,6 +1,5 @@
 import { observer } from '@legendapp/state/react'
-import { ScrollView, TSizableText, XStack, YStack } from '@my/ui'
-import { appState$ } from 'app/appState'
+import { TSizableText, XStack, YStack } from '@my/ui'
 import { TileSize } from 'app/types'
 import { Tile } from './tile'
 import { computed, observable } from '@legendapp/state'
@@ -34,7 +33,7 @@ const TileDropPositioner = observer(({ children }: { children: ReactNode }) => {
   )
 })
 
-const RulesDropExample = observer(() => {
+const DropExample = observer(() => {
   const dropProgress = useSharedValue(1)
   const releaseX = useSharedValue(0)
 
@@ -82,7 +81,7 @@ const RulesDropExample = observer(() => {
 const heldTile = observable<TileSize>('16')
 const holdPressed = observable(false)
 
-const RulesHoldExample = observer(() => {
+const HoldExample = observer(() => {
   const onHoldDown = () => {
     holdPressed.set(true)
   }
@@ -124,7 +123,7 @@ const RulesHoldExample = observer(() => {
   )
 })
 
-const RulesCombineExample = () => {
+const CombineExample = () => {
   return (
     <XStack ai="center" gap="$8" w="100%" jc="space-between">
       <YStack h={250} w={125} gap="$2" jc="space-around" ai="center">
@@ -141,25 +140,25 @@ const RulesCombineExample = () => {
   )
 }
 
-export const RulesTab = observer(() => {
+export const HowToPlayTab = observer(() => {
   return (
-    <TabContainer tab="rules">
+    <TabContainer tab="how-to-play">
       <TSizableText size="$5">HOW TO PLAY:</TSizableText>
       <br />
       <TSizableText>
         <b>Hover</b> to position, <b>Click</b> to drop
       </TSizableText>
-      <RulesDropExample />
+      <DropExample />
       <br />
       <br />
       <TSizableText>
         <b>Space</b> to put a tile in the hold
       </TSizableText>
-      <RulesHoldExample />
+      <HoldExample />
       <br />
       <br />
       <TSizableText>Combine tiles</TSizableText>
-      <RulesCombineExample />
+      <CombineExample />
     </TabContainer>
   )
 })

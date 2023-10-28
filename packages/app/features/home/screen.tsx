@@ -8,7 +8,7 @@ import { GameplayHoldListener } from 'app/components/hold-listener'
 import { LeaderboardTab } from 'app/components/leaderboard-tab'
 import { NewGameButton } from 'app/components/new-game-button'
 import { Queue } from 'app/components/queue'
-import { RulesTab } from 'app/components/rules-tab'
+import { HowToPlayTab } from 'app/components/how-to-play-tab'
 import { Efficiency, Score } from 'app/components/stats'
 import { StatsPersistor } from 'app/components/stats-persistor'
 import { TopOutPanel } from 'app/components/top-out-panel'
@@ -60,7 +60,7 @@ export function HomeScreen() {
       <ActiveRightPanel />
 
       {/* OVERLAY */}
-      <RulesTab />
+      <HowToPlayTab />
       <LeaderboardTab />
       <UserTab />
     </XStack>

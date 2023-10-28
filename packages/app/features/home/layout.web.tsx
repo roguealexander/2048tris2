@@ -39,14 +39,14 @@ const Tabs = observer(() => {
         ai="center"
         pos="relative"
         cursor="pointer"
-        onPress={() => appState$.tab.set('rules')}
+        onPress={() => appState$.tab.set('how-to-play')}
       >
-        <Show if={appState$.tab.get() === 'rules'}>
+        <Show if={appState$.tab.get() === 'how-to-play'}>
           <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[64]} />
         </Show>
         <TSizableText
           zi={2}
-          color={appState$.tab.get() === 'rules' ? colors.background : colors.text}
+          color={appState$.tab.get() === 'how-to-play' ? colors.background : colors.text}
         >
           How to Play
         </TSizableText>
