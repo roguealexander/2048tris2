@@ -6,6 +6,8 @@ import { colors } from 'app/colors'
 import { TabContainer } from './tab-container'
 import { api } from 'app/utils/api'
 import { RouterOutputs } from '@my/api'
+import { stats$ } from 'app/statsState'
+import { useUser } from 'app/utils/useUser'
 
 const leaderboard$ = observable<LeaderboardType>('scoreHigh')
 const leaderboardTitle$ = computed(() => {
@@ -166,8 +168,8 @@ const Row = observer(
           <XStack fullscreen bg={colors.tile['2']} o={0.5} zi={-1} />
         )}
         <XStack ai="center" jc="center" gap="$4">
-          <TSizableText w={40}>{rank + 1}</TSizableText>
-          <TSizableText fontWeight="bold">{name ?? 'ANON'}</TSizableText>
+          <TSizableText w={40}>{name == null ? '' : rank + 1}</TSizableText>
+          <TSizableText fontWeight="bold">{name}</TSizableText>
         </XStack>
         <TSizableText>{score ?? ' '}</TSizableText>
       </XStack>
@@ -216,7 +218,22 @@ const Efficiency8192Leaderboard = observer(() => {
 
 const extractRows = (type: LeaderboardType, data: LeaderboardQueryData | undefined) => {
   if (data == null) return []
-  return data.map((row) => extractRowData(type, row))
+  return data.filter((row) => filterRow(type, row)).map((row) => extractRowData(type, row))
+}
+const filterRow = (type: LeaderboardType, row: LeaderboardQueryData[0]): boolean => {
+  const value = (row as any)[type] as number
+  return filterValue(type, value)
+}
+const filterValue = (type: LeaderboardType, value: number): boolean => {
+  switch (type) {
+    case 'scoreHigh':
+    case 'efficiency2048':
+    case 'efficiency4096':
+    case 'efficiency8192':
+      return value !== 0
+    case 'scoreLow':
+      return value !== 100000
+  }
 }
 const extractRowData = (
   type: LeaderboardType,
@@ -230,6 +247,9 @@ const extractRowData = (
 }
 const extractRowValue = (type: LeaderboardType, row: LeaderboardQueryData[0]): string => {
   const value = (row as any)[type] as number
+  return rowValueString(type, value)
+}
+const rowValueString = (type: LeaderboardType, value: number): string => {
   switch (type) {
     case 'scoreHigh':
     case 'scoreLow':
@@ -263,6 +283,22 @@ const Table = observer(
   }
 )
 
+const PersonalRecordRow = observer(() => {
+  const { user } = useUser()
+  const leaderboardType = leaderboard$.get()
+  const score = stats$[leaderboardType].get()
+  const value = rowValueString(leaderboardType, score)
+  const filtered = filterValue(leaderboardType, score)
+  return (
+    <Row
+      rank={531}
+      name={user == null ? 'SIGN UP TO SET NAME' : user.user_metadata['name']}
+      score={filtered ? value : '--'}
+      highlight
+    />
+  )
+})
+
 export const LeaderboardTab = observer(() => {
   return (
     <TabContainer tab="leaderboard">
@@ -277,7 +313,7 @@ export const LeaderboardTab = observer(() => {
       <br />
       <TSizableText>Personal Record:</TSizableText>
       <br />
-      <Row rank={531} name="Rogue Rotkosky" score="50.65%" highlight />
+      <PersonalRecordRow />
     </TabContainer>
   )
 })
