@@ -300,6 +300,7 @@ const PersonalRecordRow = observer(() => {
 })
 
 export const LeaderboardTab = observer(() => {
+  api.tris.getUserScoreHighRank.useQuery()
   return (
     <TabContainer tab="leaderboard">
       <TSizableText>Select Leaderboard:</TSizableText>

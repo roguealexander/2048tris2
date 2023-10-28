@@ -60,7 +60,106 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_efficiency_2048_leaderboard: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+          efficiency2048: number
+          rank: number
+        }[]
+      }
+      get_efficiency_4096_leaderboard: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+          efficiency4096: number
+          rank: number
+        }[]
+      }
+      get_efficiency_8192_leaderboard: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+          efficiency8192: number
+          rank: number
+        }[]
+      }
+      get_score_high_leaderboard: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+          scoreHigh: number
+          rank: number
+        }[]
+      }
+      get_score_low_leaderboard: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+          scoreLow: number
+          rank: number
+        }[]
+      }
+      get_user_efficiency_2048_leaderboard: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          id: string
+          name: string
+          efficiency2048: number
+          rank: number
+        }[]
+      }
+      get_user_efficiency_4096_leaderboard: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          id: string
+          name: string
+          efficiency4096: number
+          rank: number
+        }[]
+      }
+      get_user_efficiency_8192_leaderboard: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          id: string
+          name: string
+          efficiency8192: number
+          rank: number
+        }[]
+      }
+      get_user_high_score_leaderboard: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          id: string
+          name: string
+          scoreHigh: number
+          rank: number
+        }[]
+      }
+      get_user_low_score_leaderboard: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          id: string
+          name: string
+          scoreLow: number
+          rank: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

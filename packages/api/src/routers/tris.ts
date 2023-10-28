@@ -171,4 +171,15 @@ export const trisRouter = createTRPCRouter({
     }
     return data
   }),
+  getUserScoreHighRank: protectedProcedure.query(async ({ ctx: { supabase, session } }) => {
+    const { data, error } = await supabase.rpc('get_efficiency_2048_leaderboard')
+    console.log({
+      data,
+      error,
+    })
+    if (error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    }
+    return data
+  }),
 })
