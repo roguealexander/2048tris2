@@ -152,32 +152,39 @@ const Header = observer(() => {
 
 const Row = observer(
   ({
-    rank,
-    name,
-    score,
+    index,
+    data,
     highlight,
   }: {
-    rank: number
-    name: string | null | undefined
-    score: string | null | undefined
+    index: number
+    data: RowData | undefined
     highlight?: boolean
   }) => {
     return (
       <XStack pos="relative" h="$4" w="100%" ai="center" jc="space-between" px="$4">
-        {(highlight || rank % 2 === 0) && (
+        {(highlight || index % 2 === 0) && (
           <XStack fullscreen bg={colors.tile['2']} o={0.5} zi={-1} />
         )}
-        <XStack ai="center" jc="center" gap="$4">
-          <TSizableText w={40}>{name == null ? '' : rank + 1}</TSizableText>
-          <TSizableText fontWeight="bold">{name}</TSizableText>
-        </XStack>
-        <TSizableText>{score ?? ' '}</TSizableText>
+        {data != null && (
+          <>
+            <XStack ai="center" jc="center" gap="$4">
+              <TSizableText w={40}>{data.rank}</TSizableText>
+              <TSizableText fontWeight="bold">{data.name}</TSizableText>
+            </XStack>
+            <TSizableText>{data.value}</TSizableText>
+          </>
+        )}
       </XStack>
     )
   }
 )
 
-type LeaderboardQueryData = RouterOutputs['tris']['getLeaderboard']
+type LeaderboardQueryData =
+  | RouterOutputs['tris']['getHighScoreLeaderboard']
+  | RouterOutputs['tris']['getLowScoreLeaderboard']
+  | RouterOutputs['tris']['getEfficiency2048Leaderboard']
+  | RouterOutputs['tris']['getEfficiency4096Leaderboard']
+  | RouterOutputs['tris']['getEfficiency8192Leaderboard']
 
 const Leaderboard = observer(() => {
   const leaderboardType = leaderboard$.get()
@@ -216,13 +223,11 @@ const Efficiency8192Leaderboard = observer(() => {
   return <Table data={data} isLoading={isLoading} />
 })
 
+type RowData = { id: string; rank: number; name: string; value: string }
+
 const extractRows = (type: LeaderboardType, data: LeaderboardQueryData | undefined) => {
   if (data == null) return []
-  return data.filter((row) => filterRow(type, row)).map((row) => extractRowData(type, row))
-}
-const filterRow = (type: LeaderboardType, row: LeaderboardQueryData[0]): boolean => {
-  const value = (row as any)[type] as number
-  return filterValue(type, value)
+  return data.map((row) => extractRowData(type, row))
 }
 const filterValue = (type: LeaderboardType, value: number): boolean => {
   switch (type) {
@@ -235,13 +240,11 @@ const filterValue = (type: LeaderboardType, value: number): boolean => {
       return value !== 100000
   }
 }
-const extractRowData = (
-  type: LeaderboardType,
-  row: LeaderboardQueryData[0]
-): { id: string; name: string; value: string } => {
+const extractRowData = (type: LeaderboardType, row: LeaderboardQueryData[0]): RowData => {
   return {
     id: row.id,
     name: row.name,
+    rank: row.rank,
     value: extractRowValue(type, row),
   }
 }
@@ -263,14 +266,12 @@ const rowValueString = (type: LeaderboardType, value: number): string => {
 
 const Table = observer(
   ({ data, isLoading }: { data: LeaderboardQueryData | undefined; isLoading: boolean }) => {
-    const values = extractRows(leaderboard$.get(), data)
+    const rows = extractRows(leaderboard$.get(), data)
     return (
       <YStack w="100%" pos="relative" ai="center" jc="center">
         <Header />
-        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((rank) => {
-          return (
-            <Row key={rank} rank={rank} name={values[rank]?.name} score={values[rank]?.value} />
-          )
+        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((index) => {
+          return <Row key={index} index={index} data={rows[index]} />
         })}
         {isLoading && (
           <>
@@ -283,21 +284,21 @@ const Table = observer(
   }
 )
 
-const PersonalRecordRow = observer(() => {
-  const { user } = useUser()
-  const leaderboardType = leaderboard$.get()
-  const score = stats$[leaderboardType].get()
-  const value = rowValueString(leaderboardType, score)
-  const filtered = filterValue(leaderboardType, score)
-  return (
-    <Row
-      rank={531}
-      name={user == null ? 'SIGN UP TO SET NAME' : user.user_metadata['name']}
-      score={filtered ? value : '--'}
-      highlight
-    />
-  )
-})
+// const PersonalRecordRow = observer(() => {
+//   const { user } = useUser()
+//   const leaderboardType = leaderboard$.get()
+//   const score = stats$[leaderboardType].get()
+//   const value = rowValueString(leaderboardType, score)
+//   const filtered = filterValue(leaderboardType, score)
+//   return (
+//     <Row
+//       rank={531}
+//       name={user == null ? 'SIGN UP TO SET NAME' : user.user_metadata['name']}
+//       score={filtered ? value : '--'}
+//       highlight
+//     />
+//   )
+// })
 
 export const LeaderboardTab = observer(() => {
   api.tris.getUserScoreHighRank.useQuery()
@@ -314,7 +315,7 @@ export const LeaderboardTab = observer(() => {
       <br />
       <TSizableText>Personal Record:</TSizableText>
       <br />
-      <PersonalRecordRow />
+      {/* <PersonalRecordRow /> */}
     </TabContainer>
   )
 })

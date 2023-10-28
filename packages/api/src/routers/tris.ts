@@ -117,55 +117,35 @@ export const trisRouter = createTRPCRouter({
       return data
     }),
   getHighScoreLeaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
-    const { data, error } = await supabase
-      .from('users')
-      .select('id, name, scoreHigh')
-      .order('scoreHigh', { ascending: false, nullsFirst: false })
-      .limit(10)
+    const { data, error } = await supabase.rpc('get_score_high_leaderboard')
     if (error != null) {
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
     }
     return data
   }),
   getLowScoreLeaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
-    const { data, error } = await supabase
-      .from('users')
-      .select('id, name, scoreLow')
-      .order('scoreLow', { ascending: true, nullsFirst: false })
-      .limit(10)
+    const { data, error } = await supabase.rpc('get_score_low_leaderboard')
     if (error != null) {
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
     }
     return data
   }),
   getEfficiency2048Leaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
-    const { data, error } = await supabase
-      .from('users')
-      .select('id, name, efficiency2048')
-      .order('efficiency2048', { ascending: false, nullsFirst: false })
-      .limit(10)
+    const { data, error } = await supabase.rpc('get_efficiency_2048_leaderboard')
     if (error != null) {
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
     }
     return data
   }),
   getEfficiency4096Leaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
-    const { data, error } = await supabase
-      .from('users')
-      .select('id, name, efficiency4096')
-      .order('efficiency4096', { ascending: false, nullsFirst: false })
-      .limit(10)
+    const { data, error } = await supabase.rpc('get_efficiency_4096_leaderboard')
     if (error != null) {
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
     }
     return data
   }),
   getEfficiency8192Leaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
-    const { data, error } = await supabase
-      .from('users')
-      .select('id, name, efficiency8192')
-      .order('efficiency8192', { ascending: false, nullsFirst: false })
-      .limit(10)
+    const { data, error } = await supabase.rpc('get_efficiency_8192_leaderboard')
     if (error != null) {
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
     }
