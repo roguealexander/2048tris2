@@ -420,7 +420,7 @@ export const BoardComp = observer(() => {
           const tileBodies = createTile(mergedSize, position, velocity)
 
           // Pop sound effect
-          appActions$.triggerPopSound(power + 1, sensorA.id)
+          appActions$.triggerPopSound((power ?? 0) + 1, sensorA.id)
           // playPopTileSound.current(power + 1)
 
           // Update efficiency score
