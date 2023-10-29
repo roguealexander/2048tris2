@@ -43,7 +43,9 @@ const mergeStats = (a: Stats, b: Stats): Stats => {
 }
 
 export const trisRouter = createTRPCRouter({
-  getUserStats: protectedProcedure.query(async ({ ctx: { supabase, session } }) => {
+  getUserStats: publicProcedure.query(async ({ ctx: { supabase, session } }) => {
+    if (session?.user == null) return null
+
     const { data, error } = await supabase
       .from('users')
       .select(statsSelect)
@@ -164,8 +166,10 @@ export const trisRouter = createTRPCRouter({
     }
     return data
   }),
-  getUserLeaderboards: protectedProcedure.query(async ({ ctx: { supabase, session } }) => {
-    const user_id = session.user.id
+  getUserLeaderboards: publicProcedure.query(async ({ ctx: { supabase, session } }) => {
+    const user_id = session?.user.id
+    if (user_id == null) return null
+
     const [
       { data: highScoreData, error: highScoreError },
       { data: lowScoreData, error: lowScoreError },

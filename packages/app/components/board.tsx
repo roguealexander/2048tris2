@@ -411,6 +411,7 @@ export const BoardComp = observer(() => {
       pairs.forEach((pair) => {
         const { id, bodyA, bodyB } = pair
 
+        // Escape if not sensor
         if (
           bodyA.collisionFilter.category == null ||
           bodyA.collisionFilter.category === categoryPhysics ||

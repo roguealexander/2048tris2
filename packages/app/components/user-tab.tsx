@@ -40,11 +40,11 @@ const Row = observer(
     highlight?: boolean
   }) => {
     return (
-      <XStack pos="relative" h="$4" w="100%" ai="center" jc="space-between" px="$4">
+      <XStack pos="relative" h="$3" w="100%" ai="center" jc="space-between" px="$4">
         <XStack fullscreen bg={colors.tile['2']} o={highlight ? 0.6 : 0.4} zi={-1} />
         <TSizableText>{leaderboard}</TSizableText>
         <XStack ai="center" jc="center" gap="$4">
-          <TSizableText>{rank}</TSizableText>
+          <TSizableText>{score === '--' || rank == null ? '--' : rank}</TSizableText>
           <TSizableText w={80} textAlign="right">
             {score}
           </TSizableText>
@@ -56,6 +56,11 @@ const Row = observer(
 
 const LeaderboardStatsTable = observer(() => {
   const { data: leaderboards } = api.tris.getUserLeaderboards.useQuery()
+  const scoreHigh = stats$.scoreHigh.get()
+  const scoreLow = stats$.scoreLow.get()
+  const efficiency2048 = stats$.efficiency2048.get()
+  const efficiency4096 = stats$.efficiency4096.get()
+  const efficiency8192 = stats$.efficiency8192.get()
 
   return (
     <YStack w="100%" pl="$2">
@@ -66,17 +71,13 @@ const LeaderboardStatsTable = observer(() => {
         key={0}
         rank={leaderboards?.scoreHigh?.rank}
         leaderboard="HIGH SCORE"
-        score={
-          leaderboards?.scoreHigh?.scoreHigh === 0 ? '--' : `${leaderboards?.scoreHigh?.scoreHigh}`
-        }
+        score={scoreHigh === 0 ? '--' : `${scoreHigh}`}
       />
       <Row
         key={1}
         rank={leaderboards?.scoreLow?.rank}
         leaderboard="LOW SCORE"
-        score={
-          leaderboards?.scoreLow?.scoreLow === 100000 ? '--' : `${leaderboards?.scoreLow?.scoreLow}`
-        }
+        score={scoreLow === 100000 ? '--' : `${scoreLow}`}
         highlight
       />
       <br />
@@ -85,32 +86,20 @@ const LeaderboardStatsTable = observer(() => {
         key={2}
         rank={leaderboards?.efficiency2048?.rank}
         leaderboard="2048 EFFICIENCY"
-        score={
-          leaderboards?.efficiency2048?.efficiency2048 === 0
-            ? '--'
-            : `${leaderboards?.efficiency2048?.efficiency2048}%`
-        }
+        score={efficiency2048 === 0 ? '--' : `${efficiency2048}%`}
       />
       <Row
         key={3}
         rank={leaderboards?.efficiency4096?.rank}
         leaderboard="4096 EFFICIENCY"
-        score={
-          leaderboards?.efficiency4096?.efficiency4096 === 0
-            ? '--'
-            : `${leaderboards?.efficiency4096?.efficiency4096}%`
-        }
+        score={efficiency4096 === 0 ? '--' : `${efficiency4096}%`}
         highlight
       />
       <Row
         key={4}
         rank={leaderboards?.efficiency8192?.rank}
         leaderboard="8192 EFFICIENCY"
-        score={
-          leaderboards?.efficiency8192?.efficiency8192 === 0
-            ? '--'
-            : `${leaderboards?.efficiency8192?.efficiency8192}%`
-        }
+        score={efficiency8192 === 0 ? '--' : `${efficiency8192}%`}
       />
     </YStack>
   )
@@ -136,8 +125,10 @@ const ResetStatsButton = observer(() => {
 
 const SignOutButton = observer(() => {
   const supabase = useSupabase()
+  const utils = api.useContext()
   const signOut = async () => {
     await supabase.auth.signOut()
+    utils.invalidate()
     statsActions$.resetStats()
   }
   return (

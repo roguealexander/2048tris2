@@ -1,5 +1,5 @@
 import { Memo, Show, observer } from '@legendapp/state/react'
-import { Spinner, TSizableText, XStack, YStack } from '@my/ui'
+import { Spinner, TButton, TSizableText, XStack, YStack } from '@my/ui'
 import { LeaderboardType } from 'app/types'
 import { computed, observable } from '@legendapp/state'
 import { colors } from 'app/colors'
@@ -8,6 +8,7 @@ import { api } from 'app/utils/api'
 import { RouterOutputs } from '@my/api'
 import { stats$ } from 'app/statsState'
 import { useUser } from 'app/utils/useUser'
+import { appState$ } from 'app/appState'
 
 const leaderboard$ = observable<LeaderboardType>('scoreHigh')
 const leaderboardTitle$ = computed(() => {
@@ -161,7 +162,7 @@ const Row = observer(
     highlight?: boolean
   }) => {
     return (
-      <XStack pos="relative" h="$4" w="100%" ai="center" jc="space-between" px="$4">
+      <XStack pos="relative" h="$3" w="100%" ai="center" jc="space-between" px="$4">
         {(highlight || index % 2 === 0) && (
           <XStack fullscreen bg={colors.tile['2']} o={0.5} zi={-1} />
         )}
@@ -229,10 +230,6 @@ const extractRows = (type: LeaderboardType, data: LeaderboardQueryData | undefin
   if (data == null) return []
   return data.map((row) => extractRowData(type, row))
 }
-const filterRow = (type: LeaderboardType, row: LeaderboardQueryData[0]): boolean => {
-  const value = (row as any)[type] as number
-  return filterValue(type, value)
-}
 const filterValue = (type: LeaderboardType, value: number): boolean => {
   switch (type) {
     case 'scoreHigh':
@@ -293,37 +290,50 @@ const PersonalRecordRow = observer(() => {
   const { data: userLeaderboards } = api.tris.getUserLeaderboards.useQuery()
 
   const leaderboardType = leaderboard$.get()
+  const statValue = stats$[leaderboardType].get()
   const userRow = userLeaderboards?.[leaderboardType]
-  const userRowValue =
-    userRow != null ? ((userRow as any)[leaderboardType] as number | undefined) : undefined
-  const rowFiltered = userRowValue == null ? false : filterValue(leaderboardType, userRowValue)
+  const rowFiltered = statValue == null ? false : filterValue(leaderboardType, statValue)
 
   const rowData = {
     id: userRow?.id ?? 'anon',
-    name: user?.user_metadata?.name ?? 'SIGN UP TO SET NAME',
+    name: user?.user_metadata?.name ?? 'YOU',
     rank: rowFiltered ? userRow?.rank : undefined,
-    value: rowFiltered ? rowValueString(leaderboardType, userRowValue!) : '--',
+    value: rowFiltered ? rowValueString(leaderboardType, statValue!) : '--',
   }
 
   return <Row index={0} highlight data={rowData} />
 })
 
+const JoinLeaderboardButton = observer(() => {
+  const { user, isLoading } = useUser()
+  if (isLoading || user != null) return null
+  return (
+    <>
+      <br />
+      <TButton w="100%" onPress={() => appState$.tab.set('user')}>
+        JOIN LEADERBOARD
+      </TButton>
+    </>
+  )
+})
+
 export const LeaderboardTab = observer(() => {
-  api.tris.getUserScoreHighRank.useQuery()
   return (
     <TabContainer tab="leaderboard">
-      <TSizableText>Select Leaderboard:</TSizableText>
+      <TSizableText size="$5">SELECT LEADERBOARD:</TSizableText>
       <br />
       <LeaderboardSelect />
       <br />
-      <TSizableText>Top 10:</TSizableText>
+      <br />
+      <TSizableText size="$5">TOP 10:</TSizableText>
       <br />
       <Leaderboard />
-      {/* <Table /> */}
       <br />
-      <TSizableText>Personal Record:</TSizableText>
+      <br />
+      <TSizableText size="$5">PERSONAL RECORD:</TSizableText>
       <br />
       <PersonalRecordRow />
+      <JoinLeaderboardButton />
     </TabContainer>
   )
 })
