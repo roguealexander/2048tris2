@@ -94,6 +94,14 @@ let handledCollisions: Record<string, boolean> = {}
 let tileId = 450
 const topOutSensorLabel = 'top-out-sensor'
 
+type CreateTileData = {
+  size: TileSize
+  position: { x: number; y: number }
+  velocity?: { x: number; y: number }
+}
+let tilesToCreate: Record<string, CreateTileData> = {}
+let collidedTiles: Record<string, true> = {}
+
 const createBounds = (cw: number, ch: number) => {
   return [
     // Top Sensor
@@ -151,11 +159,9 @@ const createBounds = (cw: number, ch: number) => {
   ]
 }
 
-const createTile = (
-  size: TileSize,
-  position: { x: number; y: number },
-  velocity?: { x: number; y: number }
-) => {
+const createTile = (data: CreateTileData) => {
+  const { size, position, velocity } = data
+
   const radius = getTileRadius(size) / 2
   const power = getTilePower(size)
   const density = getTileDensity(size)
@@ -306,7 +312,7 @@ export const BoardComp = observer(() => {
           Composite.remove(engine.current.world, bodies[i]!)
           const power = (bodies[i]?.collisionFilter.group ?? 3) as TilePower
           if (power >= 4) {
-            appActions$.triggerPopSound(power, bodies[i]?.id ?? power)
+            appActions$.triggerPopSound(getTileSizeFromPower(power), bodies[i]?.id ?? power)
             // playPopTileSound.current(power)
           }
           await sleep(25)
@@ -316,6 +322,8 @@ export const BoardComp = observer(() => {
       Composite.clear(engine.current!.world, false)
 
       handledCollisions = {}
+      collidedTiles = {}
+      tilesToCreate = {}
 
       const cw = (width + 64 * 2) * WorldScale
       const ch = (height + 64 * 2) * WorldScale
@@ -352,6 +360,23 @@ export const BoardComp = observer(() => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       runner.current.deltaMin = runner.current.fps > 60 ? 1000 / runner.current.fps : 1000 / 120
+
+      // Create tiles
+      Object.entries(tilesToCreate).forEach(([collisionId, createTileData]) => {
+        const tileBodies = createTile(createTileData)
+
+        // Pop sound effect
+        appActions$.triggerPopSound(createTileData.size, collisionId)
+
+        // Update efficiency score
+        if (createTileData.size === state$.targetEfficiency.peek()) {
+          actions$.triggerHighEfficiencyCheck(createTileData.size)
+        }
+
+        World.add(engine.current.world, tileBodies)
+      })
+
+      tilesToCreate = {}
     }
     Events.on(runner.current, 'tick', tickCallback)
 
@@ -359,7 +384,7 @@ export const BoardComp = observer(() => {
     Render.run(render)
 
     const collisionActiveCallback = (event: Matter.IEventCollision<Engine>) => {
-      // Prevent topout after game ends and before reset complete
+      // Prevent top-out after game ends and before reset complete
       if (state$.toppedOut.peek() || state$.resetting.peek()) return
 
       const { pairs } = event
@@ -407,6 +432,9 @@ export const BoardComp = observer(() => {
           const position = Vector.div(Vector.add(sensorA.position, sensorB.position), 2)
           const velocity = Vector.div(Vector.add(sensorA.velocity, sensorB.velocity), 3)
 
+          // ESCAPE IF TILES ALREADY COLLIDED
+          if (collidedTiles[sensorA.id] || collidedTiles[sensorB.id]) return
+
           World.remove(engine.current.world, [
             sensorA,
             ...(sensorA.cascadeDelete ?? []),
@@ -417,18 +445,30 @@ export const BoardComp = observer(() => {
           // Created merged tile
           const size = getTileSizeFromPower(power as TilePower)
           const mergedSize = getMergedTileSize(size)
-          const tileBodies = createTile(mergedSize, position, velocity)
 
-          // Pop sound effect
-          appActions$.triggerPopSound((power ?? 0) + 1, sensorA.id)
-          // playPopTileSound.current(power + 1)
-
-          // Update efficiency score
-          if (mergedSize === state$.targetEfficiency.peek()) {
-            actions$.triggerHighEfficiencyCheck(mergedSize)
+          tilesToCreate[id] = {
+            size: mergedSize,
+            position,
+            velocity,
           }
+          collidedTiles[sensorA.id] = true
+          collidedTiles[sensorB.id] = true
+          // const tileBodies = createTile({
+          //   size: mergedSize,
+          //   position,
+          //   velocity,
+          // })
 
-          World.add(engine.current.world, tileBodies)
+          // // Pop sound effect
+          // appActions$.triggerPopSound((power ?? 0) + 1, sensorA.id)
+          // // playPopTileSound.current(power + 1)
+
+          // // Update efficiency score
+          // if (mergedSize === state$.targetEfficiency.peek()) {
+          //   actions$.triggerHighEfficiencyCheck(mergedSize)
+          // }
+
+          // World.add(engine.current.world, tileBodies)
         }
       })
     }
@@ -458,11 +498,11 @@ export const BoardComp = observer(() => {
     if (state$.gameInteractionPaused.get()) return
     // if (releaseDelay.value > 0) return
 
-    const tileBodies = createTile(
-      state$.activeTile.peek(),
-      { x: dropX.value * WorldScale, y: 64 * WorldScale },
-      { x: 0.01, y: 0 * WorldScale }
-    )
+    const tileBodies = createTile({
+      size: state$.activeTile.peek(),
+      position: { x: dropX.value * WorldScale, y: 64 * WorldScale },
+      velocity: { x: 0.01, y: 0 * WorldScale },
+    })
 
     World.add(engine.current.world, tileBodies)
 
@@ -512,7 +552,6 @@ export const BoardComp = observer(() => {
         t={-64}
       ></YStack>
       {/* </GestureDetector> */}
-      {/* <StartGameButton onPress={() => appActions$.)} /> */}
 
       {/* TESTING POP SOUNDS */}
       {/* {TileList.map((size) => {
@@ -524,23 +563,6 @@ export const BoardComp = observer(() => {
         )
       })} */}
     </YStack>
-  )
-})
-
-const StartGameButton = observer(({ onPress }: { onPress: () => void }) => {
-  if (state$.started.get()) return null
-  return (
-    <XStack fullscreen ai="center" jc="center">
-      <TButton
-        onPress={() => {
-          actions$.start()
-          onPress()
-        }}
-        w={200}
-      >
-        START
-      </TButton>
-    </XStack>
   )
 })
 

@@ -1,4 +1,5 @@
 import { observable } from '@legendapp/state'
+import { TileSize } from './types'
 
 export type Tab = '2048tris' | 'how-to-play' | 'leaderboard' | 'user'
 
@@ -6,7 +7,7 @@ type AppState = {
   tab: Tab
 
   popSound: {
-    power: number
+    size: TileSize
     key: string | number
   } | null
 }
@@ -17,13 +18,13 @@ export const appState$ = observable<AppState>({
 })
 
 type AppActions = {
-  triggerPopSound: (power: number, key: string | number) => void
+  triggerPopSound: (size: TileSize, key: string | number) => void
 }
 
 export const appActions$ = observable<AppActions>({
-  triggerPopSound: (power: number, key: string | number) => {
+  triggerPopSound: (size: TileSize, key: string | number) => {
     appState$.popSound.set({
-      power,
+      size,
       key,
     })
   },

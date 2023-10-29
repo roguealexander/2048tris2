@@ -8,7 +8,7 @@ export const NewGameButton = observer(() => {
     <TButton
       w="100%"
       onPress={() => {
-        appActions$.triggerPopSound(3, state$.resetCount.peek())
+        appActions$.triggerPopSound('8', state$.resetCount.peek())
         actions$.reset()
       }}
     >
