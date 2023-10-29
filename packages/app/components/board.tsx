@@ -21,7 +21,6 @@ import {
   getTileRadius,
   getTileSizeFromPower,
 } from '../tiles'
-import { useSound } from 'use-sound'
 
 import ball2 from '../assets/2.png'
 import ball4 from '../assets/4.png'
@@ -36,15 +35,14 @@ import ball1024 from '../assets/1024.png'
 import ball2048 from '../assets/2048.png'
 import ball4096 from '../assets/4096.png'
 import ball8192 from '../assets/8192.png'
-import { TileList, TilePower, TileRecord, TileSize } from '../types'
-import { Spacer, TButton, XStack, YStack } from '@my/ui'
+import { TilePower, TileRecord, TileSize } from '../types'
+import { YStack } from '@my/ui'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   SharedValue,
   useDerivedValue,
 } from 'react-native-reanimated'
-import { randNumber } from '@ngneat/falso'
 import { appActions$ } from 'app/appState'
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -421,6 +419,7 @@ export const BoardComp = observer(() => {
         )
           return
 
+        // Escape if collision already handled
         if (handledCollisions[id]) return
         handledCollisions[id] = true
 
@@ -429,18 +428,18 @@ export const BoardComp = observer(() => {
 
           const sensorA = bodyA as BodyWithCascadeDelete
           const sensorB = bodyB as BodyWithCascadeDelete
-          const position = Vector.div(Vector.add(sensorA.position, sensorB.position), 2)
+          const lowestVelocitySensor =
+            Vector.magnitude(sensorA.velocity) < Vector.magnitude(sensorB.velocity)
+              ? sensorA
+              : sensorB
+          const positionCenter = Vector.div(Vector.add(sensorA.position, sensorB.position), 2)
+          const position = Vector.div(Vector.add(positionCenter, lowestVelocitySensor.position), 2)
           const velocity = Vector.div(Vector.add(sensorA.velocity, sensorB.velocity), 3)
 
-          // ESCAPE IF TILES ALREADY COLLIDED
+          // Escape if tiles already collided
           if (collidedTiles[sensorA.id] || collidedTiles[sensorB.id]) return
 
-          World.remove(engine.current.world, [
-            sensorA,
-            ...(sensorA.cascadeDelete ?? []),
-            sensorB,
-            ...(sensorB.cascadeDelete ?? []),
-          ])
+          collidedTiles[sensorB.id] = true
 
           // Created merged tile
           const size = getTileSizeFromPower(power as TilePower)
@@ -451,24 +450,15 @@ export const BoardComp = observer(() => {
             position,
             velocity,
           }
-          collidedTiles[sensorA.id] = true
-          collidedTiles[sensorB.id] = true
-          // const tileBodies = createTile({
-          //   size: mergedSize,
-          //   position,
-          //   velocity,
-          // })
 
-          // // Pop sound effect
-          // appActions$.triggerPopSound((power ?? 0) + 1, sensorA.id)
-          // // playPopTileSound.current(power + 1)
-
-          // // Update efficiency score
-          // if (mergedSize === state$.targetEfficiency.peek()) {
-          //   actions$.triggerHighEfficiencyCheck(mergedSize)
-          // }
-
-          // World.add(engine.current.world, tileBodies)
+          // Remove tiles
+          World.remove(engine.current.world, [
+            sensorA,
+            ...(sensorA.cascadeDelete ?? []),
+            sensorB,
+            ...(sensorB.cascadeDelete ?? []),
+          ])
+          state$.activeTileCount[size].set((count) => count - 2)
         }
       })
     }
@@ -537,7 +527,6 @@ export const BoardComp = observer(() => {
       style={{ boxSizing: 'content-box' }}
     >
       {/* <GestureDetector gesture={gesture}> */}
-
       <TileDropPositioner dropX={dropX}>
         <Tile size={state$.activeTile} />
       </TileDropPositioner>
@@ -552,16 +541,6 @@ export const BoardComp = observer(() => {
         t={-64}
       ></YStack>
       {/* </GestureDetector> */}
-
-      {/* TESTING POP SOUNDS */}
-      {/* {TileList.map((size) => {
-        const power = getTilePower(size)
-        return (
-          <TButton key={size} onPress={() => playPopTileSound.current(power as TilePower)}>
-            {size}
-          </TButton>
-        )
-      })} */}
     </YStack>
   )
 })
