@@ -35,7 +35,7 @@ const Row = observer(
     highlight,
   }: {
     leaderboard: string
-    rank: number
+    rank: number | undefined
     score: string
     highlight?: boolean
   }) => {
@@ -55,11 +55,8 @@ const Row = observer(
 )
 
 const LeaderboardStatsTable = observer(() => {
-  const scoreHigh = stats$.scoreHigh.get()
-  const scoreLow = stats$.scoreLow.get()
-  const efficiency2048 = stats$.efficiency2048.get()
-  const efficiency4096 = stats$.efficiency4096.get()
-  const efficiency8192 = stats$.efficiency8192.get()
+  const { data: leaderboards } = api.tris.getUserLeaderboards.useQuery()
+
   return (
     <YStack w="100%" pl="$2">
       <Header />
@@ -67,37 +64,53 @@ const LeaderboardStatsTable = observer(() => {
       <TSizableText size="$3">POINTS:</TSizableText>
       <Row
         key={0}
-        rank={1}
+        rank={leaderboards?.scoreHigh?.rank}
         leaderboard="HIGH SCORE"
-        score={scoreHigh === 0 ? '--' : `${scoreHigh}`}
+        score={
+          leaderboards?.scoreHigh?.scoreHigh === 0 ? '--' : `${leaderboards?.scoreHigh?.scoreHigh}`
+        }
       />
       <Row
         key={1}
-        rank={2}
+        rank={leaderboards?.scoreLow?.rank}
         leaderboard="LOW SCORE"
-        score={scoreLow === 100000 ? '--' : `${scoreLow}`}
+        score={
+          leaderboards?.scoreLow?.scoreLow === 100000 ? '--' : `${leaderboards?.scoreLow?.scoreLow}`
+        }
         highlight
       />
       <br />
       <TSizableText size="$3">EFFICIENCY:</TSizableText>
       <Row
         key={2}
-        rank={3}
+        rank={leaderboards?.efficiency2048?.rank}
         leaderboard="2048 EFFICIENCY"
-        score={efficiency2048 === 0 ? '--' : `${efficiency2048}%`}
+        score={
+          leaderboards?.efficiency2048?.efficiency2048 === 0
+            ? '--'
+            : `${leaderboards?.efficiency2048?.efficiency2048}%`
+        }
       />
       <Row
         key={3}
-        rank={4}
+        rank={leaderboards?.efficiency4096?.rank}
         leaderboard="4096 EFFICIENCY"
-        score={efficiency4096 === 0 ? '--' : `${efficiency4096}%`}
+        score={
+          leaderboards?.efficiency4096?.efficiency4096 === 0
+            ? '--'
+            : `${leaderboards?.efficiency4096?.efficiency4096}%`
+        }
         highlight
       />
       <Row
         key={4}
-        rank={5}
+        rank={leaderboards?.efficiency8192?.rank}
         leaderboard="8192 EFFICIENCY"
-        score={efficiency8192 === 0 ? '--' : `${efficiency8192}%`}
+        score={
+          leaderboards?.efficiency8192?.efficiency8192 === 0
+            ? '--'
+            : `${leaderboards?.efficiency8192?.efficiency8192}%`
+        }
       />
     </YStack>
   )

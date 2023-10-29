@@ -152,7 +152,9 @@ export const trisRouter = createTRPCRouter({
     return data
   }),
   getUserScoreHighRank: protectedProcedure.query(async ({ ctx: { supabase, session } }) => {
-    const { data, error } = await supabase.rpc('get_efficiency_2048_leaderboard')
+    const { data, error } = await supabase.rpc('get_user_high_score_leaderboard', {
+      user_id: session.user.id,
+    })
     console.log({
       data,
       error,
@@ -161,5 +163,45 @@ export const trisRouter = createTRPCRouter({
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
     }
     return data
+  }),
+  getUserLeaderboards: protectedProcedure.query(async ({ ctx: { supabase, session } }) => {
+    const user_id = session.user.id
+    const [
+      { data: highScoreData, error: highScoreError },
+      { data: lowScoreData, error: lowScoreError },
+      { data: efficiency2048Data, error: efficiency2048Error },
+      { data: efficiency4096Data, error: efficiency4096Error },
+      { data: efficiency8192Data, error: efficiency8192Error },
+    ] = await Promise.all([
+      supabase.rpc('get_user_high_score_leaderboard', { user_id }).limit(1).single(),
+      supabase.rpc('get_user_low_score_leaderboard', { user_id }).limit(1).single(),
+      supabase.rpc('get_user_efficiency_2048_leaderboard', { user_id }).limit(1).single(),
+      supabase.rpc('get_user_efficiency_4096_leaderboard', { user_id }).limit(1).single(),
+      supabase.rpc('get_user_efficiency_8192_leaderboard', { user_id }).limit(1).single(),
+    ])
+
+    if (highScoreError != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: highScoreError.message })
+    }
+    if (lowScoreError != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: lowScoreError.message })
+    }
+    if (efficiency2048Error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: efficiency2048Error.message })
+    }
+    if (efficiency4096Error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: efficiency4096Error.message })
+    }
+    if (efficiency8192Error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: efficiency8192Error.message })
+    }
+
+    return {
+      scoreHigh: highScoreData,
+      scoreLow: lowScoreData,
+      efficiency2048: efficiency2048Data,
+      efficiency4096: efficiency4096Data,
+      efficiency8192: efficiency8192Data,
+    }
   }),
 })

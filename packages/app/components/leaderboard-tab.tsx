@@ -157,7 +157,7 @@ const Row = observer(
     highlight,
   }: {
     index: number
-    data: RowData | undefined
+    data: Partial<RowData> | undefined
     highlight?: boolean
   }) => {
     return (
@@ -168,10 +168,10 @@ const Row = observer(
         {data != null && (
           <>
             <XStack ai="center" jc="center" gap="$4">
-              <TSizableText w={40}>{data.rank}</TSizableText>
-              <TSizableText fontWeight="bold">{data.name}</TSizableText>
+              <TSizableText w={40}>{data.rank ?? '--'}</TSizableText>
+              <TSizableText fontWeight="bold">{data.name ?? ''}</TSizableText>
             </XStack>
-            <TSizableText>{data.value}</TSizableText>
+            <TSizableText>{data.value ?? ''}</TSizableText>
           </>
         )}
       </XStack>
@@ -229,6 +229,10 @@ const extractRows = (type: LeaderboardType, data: LeaderboardQueryData | undefin
   if (data == null) return []
   return data.map((row) => extractRowData(type, row))
 }
+const filterRow = (type: LeaderboardType, row: LeaderboardQueryData[0]): boolean => {
+  const value = (row as any)[type] as number
+  return filterValue(type, value)
+}
 const filterValue = (type: LeaderboardType, value: number): boolean => {
   switch (type) {
     case 'scoreHigh':
@@ -284,21 +288,25 @@ const Table = observer(
   }
 )
 
-// const PersonalRecordRow = observer(() => {
-//   const { user } = useUser()
-//   const leaderboardType = leaderboard$.get()
-//   const score = stats$[leaderboardType].get()
-//   const value = rowValueString(leaderboardType, score)
-//   const filtered = filterValue(leaderboardType, score)
-//   return (
-//     <Row
-//       rank={531}
-//       name={user == null ? 'SIGN UP TO SET NAME' : user.user_metadata['name']}
-//       score={filtered ? value : '--'}
-//       highlight
-//     />
-//   )
-// })
+const PersonalRecordRow = observer(() => {
+  const { user } = useUser()
+  const { data: userLeaderboards } = api.tris.getUserLeaderboards.useQuery()
+
+  const leaderboardType = leaderboard$.get()
+  const userRow = userLeaderboards?.[leaderboardType]
+  const userRowValue =
+    userRow != null ? ((userRow as any)[leaderboardType] as number | undefined) : undefined
+  const rowFiltered = userRowValue == null ? false : filterValue(leaderboardType, userRowValue)
+
+  const rowData = {
+    id: userRow?.id ?? 'anon',
+    name: user?.user_metadata?.name ?? 'SIGN UP TO SET NAME',
+    rank: rowFiltered ? userRow?.rank : undefined,
+    value: rowFiltered ? rowValueString(leaderboardType, userRowValue!) : '--',
+  }
+
+  return <Row index={0} highlight data={rowData} />
+})
 
 export const LeaderboardTab = observer(() => {
   api.tris.getUserScoreHighRank.useQuery()
@@ -315,7 +323,7 @@ export const LeaderboardTab = observer(() => {
       <br />
       <TSizableText>Personal Record:</TSizableText>
       <br />
-      {/* <PersonalRecordRow /> */}
+      <PersonalRecordRow />
     </TabContainer>
   )
 })
