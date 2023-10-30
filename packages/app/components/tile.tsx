@@ -1,4 +1,4 @@
-import { XStack, TSizableText, StackProps, useMedia } from '@my/ui'
+import { XStack, TSizableText, StackProps } from '@my/ui'
 import { getTileData, getTileRadius } from '../tiles'
 import { TileSize } from '../types'
 import { Observable, ObservableComputed } from '@legendapp/state'
@@ -36,7 +36,7 @@ export const Tile = observer(
         pe="none"
         {...stackProps}
       >
-        <TSizableText size="$7" color={tileData.textColor}>
+        <TSizableText size="$7" color={tileData.textColor} selectable={false}>
           {tileData.size}
         </TSizableText>
       </XStack>
