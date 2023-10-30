@@ -14,7 +14,6 @@ type GameState = {
   holdShakeKey: string | null
   queue: TileQueue
   holdAvailable: boolean
-  score: number
   ballsDropped: number
 
   activeTileCount: TileRecord<number>
@@ -22,12 +21,14 @@ type GameState = {
   activeHighEfficiencyPanel: EfficiencyTile | null
 }
 type GameStateComputed = {
+  score: number
+  efficiency: number
+
   gamePhysicsPaused: boolean
   gameInteractionPaused: boolean
 
   maxTilesCount: number
   largestTile: TileSize
-  efficiency: number
   targetHighEfficiency: number
   activeHighEfficiencyValue: number | null
 }
@@ -64,7 +65,6 @@ const getInitGameState = (): Omit<GameState, 'started' | 'resetCount' | 'holdSha
   heldTile: null,
   queue: constructInitialQueue(),
   holdAvailable: true,
-  score: 0,
   ballsDropped: 0,
 
   activeTileCount: {
@@ -86,6 +86,12 @@ const getInitGameState = (): Omit<GameState, 'started' | 'resetCount' | 'holdSha
   targetEfficiency: '2048',
   activeHighEfficiencyPanel: null,
 })
+
+const getScoreFromTiles = (activeTiles: TileRecord<number>) => {
+  return TileList.reduce((acc, tile) => {
+    return acc + activeTiles[tile] * parseInt(tile)
+  }, 0)
+}
 
 export const state$ = observable<GameState & GameStateComputed>({
   // STATE
@@ -123,8 +129,11 @@ export const state$ = observable<GameState & GameStateComputed>({
       .reverse()
       .find((size) => state$.activeTileCount[size as TileSize].peek() > 0) ?? '2') as TileSize
   }),
+  score: computed((): number => getScoreFromTiles(state$.activeTileCount.get())),
   efficiency: computed((): number => {
     const activeTileCount = state$.activeTileCount.get()
+
+    const score = getScoreFromTiles(activeTileCount)
 
     const largestTile =
       [...TileList].reverse().find((size) => {
@@ -135,7 +144,7 @@ export const state$ = observable<GameState & GameStateComputed>({
 
     if (largestTilePoints === 0) return 0
 
-    return Math.round(10000 * (largestTilePoints / state$.score.get())) / 100
+    return Math.round(10000 * (largestTilePoints / score)) / 100
   }),
   targetHighEfficiency: computed((): number => {
     switch (state$.targetEfficiency.get()) {
@@ -184,10 +193,6 @@ const setHeldTile = (tile: TileSize) => {
   state$.heldTile.set(tile)
 }
 
-const addPoints = (additional: number) => {
-  state$.score.set((points) => points + additional)
-}
-
 const resetHoldAvailable = () => {
   state$.holdAvailable.set(true)
 }
@@ -206,9 +211,6 @@ export const actions$ = observable<GameActions>({
   },
   drop: () => {
     batch(() => {
-      const activeTile = state$.activeTile.peek()
-
-      addPoints(parseInt(activeTile))
       pullActiveTileFromQueue()
       advanceQueue()
       resetHoldAvailable()
