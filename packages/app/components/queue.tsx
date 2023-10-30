@@ -5,7 +5,7 @@ import { TSizableText, YStack, useMedia } from '@my/ui'
 
 export const Queue = observer(() => {
   const { md } = useMedia()
-  const scale = md ? 0.6 : 1
+
   return (
     <YStack>
       <TSizableText>Next:</TSizableText>
@@ -16,22 +16,22 @@ export const Queue = observer(() => {
         ai="center"
         bg="$playarea"
         $gtMd={{ w: '$12', pb: '$2' }}
-        $md={{ fd: 'row', h: '$9', pr: '$2' }}
+        $md={{ fd: 'row', h: '$10', pr: '$2' }}
       >
         <YStack
           $gtMd={{ w: '$12', h: '$12' }}
-          $md={{ w: '$9', h: '$9' }}
+          $md={{ w: '$10', h: '$10' }}
           bw={4}
           boc="$border"
           ai="center"
           jc="center"
         >
-          <Tile size={state$.queue[0]} stackProps={{ scale }} />
+          <Tile size={state$.queue[0]} fixedSize={md ? '4' : undefined} />
         </YStack>
         {[1, 2, 3].map((index) => {
           return (
-            <YStack key={index} w={105 * scale} h={105 * scale} ai="center" jc="center">
-              <Tile size={state$.queue[index]} stackProps={{ scale }} />
+            <YStack key={index} w={md ? 68 : 105} h={105} ai="center" jc="center">
+              <Tile size={state$.queue[index]} fixedSize={md ? '4' : undefined} />
             </YStack>
           )
         })}

@@ -1,10 +1,9 @@
 import { observer } from '@legendapp/state/react'
 import { TButton } from '@my/ui'
 import { ButtonProps } from '@tamagui/button'
-import { appActions$ } from 'app/appState'
-import { actions$, state$ } from 'app/state'
+import { appState$ } from 'app/appState'
 
-export const NewGameButton = observer(({ ...props }: ButtonProps) => {
+export const ShowStatsButton = observer(({ ...props }: ButtonProps) => {
   return (
     <TButton
       w="100%"
@@ -12,11 +11,10 @@ export const NewGameButton = observer(({ ...props }: ButtonProps) => {
       onPress={(event) => {
         event.preventDefault()
         event.stopPropagation()
-        appActions$.triggerPopSound('8', state$.resetCount.peek())
-        actions$.reset()
+        appState$.statsPanelOpen.set(true)
       }}
     >
-      NEW GAME
+      STATS
     </TButton>
   )
 })

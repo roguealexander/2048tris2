@@ -13,16 +13,18 @@ export const PlaceholderTile = () => {
 export const Tile = observer(
   ({
     size,
+    fixedSize,
     stackProps,
   }: {
     size?: Observable<TileSize | null> | ObservableComputed<TileSize | null>
+    fixedSize?: TileSize
     stackProps?: StackProps
   }) => {
     const tileSize = size?.get()
     if (tileSize == null) return <PlaceholderTile />
 
     const tileData = getTileData(tileSize)!
-    const tileRadius = getTileRadius(tileSize)
+    const tileRadius = getTileRadius(fixedSize || tileSize)
 
     return (
       <XStack

@@ -1,5 +1,5 @@
-import { Show, observer } from '@legendapp/state/react'
-import { Stack, TSizableText, XStack, YStack, useIsTouchDevice, useMedia } from '@my/ui'
+import { Memo, Show, observer } from '@legendapp/state/react'
+import { Stack, TSizableText, XStack, YStack, useMedia } from '@my/ui'
 import { ActiveTilesHistogram } from 'app/components/active-tile-histogram'
 import { Board } from 'app/components/board'
 import { HighEfficiencyPanel } from 'app/components/high-efficiency-panel'
@@ -21,6 +21,8 @@ import { appState$ } from 'app/appState'
 import { UserCircle2 } from '@tamagui/lucide-icons'
 import { colors } from 'app/colors'
 import { Dimensions } from 'react-native'
+import { ShowStatsButton } from 'app/components/show-stats-button'
+import { StatsPanel } from 'app/components/stats-panel'
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 
 const ActiveLeftPanel = observer(() => {
@@ -53,7 +55,7 @@ const ActiveRightPanel = observer(() => {
 
 const ActiveBottomPanel = observer(() => {
   const { gtMd } = useMedia()
-  if (gtMd || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null) return null
+  if (gtMd) return null
   return (
     <XStack gap="$2" w={450} jc="space-between">
       <Hold />
@@ -62,15 +64,42 @@ const ActiveBottomPanel = observer(() => {
   )
 })
 
+const ActiveTopPanel = observer(() => {
+  const { gtMd } = useMedia()
+  if (gtMd || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null) return null
+  return (
+    <XStack mt={-22} mb={2} zi={3} gap="$2" w={450} jc="space-between">
+      <YStack w="$50%">
+        <TSizableText>
+          Score:{' '}
+          <TSizableText size="$5" fontWeight="bold">
+            <Memo>{state$.score}</Memo>
+          </TSizableText>
+        </TSizableText>
+        <TSizableText>
+          Efficiency:{' '}
+          <TSizableText size="$5" fontWeight="bold">
+            <Memo>{state$.efficiency}</Memo>%
+          </TSizableText>
+        </TSizableText>
+      </YStack>
+      <XStack w="50%" gap="$2">
+        <ShowStatsButton w={undefined} f={1} />
+        <NewGameButton w={undefined} f={1} />
+      </XStack>
+    </XStack>
+  )
+})
+
 const Container = observer(({ children }: { children: ReactNode }) => {
   const media = useMedia()
   const widthScale = Math.min(1, screenWidth / 462)
-  const heightScale = Math.min(1, screenHeight / (media.gtMd ? 820 : 960))
+  const heightScale = Math.min(1, screenHeight / (media.gtMd ? 820 : 1000))
   const scale = Math.min(widthScale, heightScale)
   appState$.scale.set(scale)
   return (
     <Stack
-      $md={{ fd: 'column', gap: '$4', jc: 'flex-start', ai: 'center' }}
+      $md={{ fd: 'column', gap: '$2', jc: 'flex-start', ai: 'center' }}
       $gtMd={{ fd: 'row', gap: 64, ai: 'flex-start', jc: 'center' }}
       miw={462}
       w="100%"
@@ -179,7 +208,7 @@ const Tabs = observer(() => {
   )
 })
 
-const HappyBirthday = () => {
+export const HappyBirthday = () => {
   const birthday = 'McKenzie'
   if (birthday == null) return null
   return (
@@ -213,8 +242,12 @@ export function HomeScreen() {
 
         {/* LEFT */}
         <TopOutPanel />
+        <StatsPanel />
         <HighEfficiencyPanel />
         <ActiveLeftPanel />
+
+        {/* TOP */}
+        <ActiveTopPanel />
 
         {/* BOARD */}
         <Board />
@@ -225,11 +258,11 @@ export function HomeScreen() {
         {/* RIGHT */}
         <ActiveRightPanel />
 
-        {/* OVERLAY */}
+        {/* TABS */}
         <HowToPlayTab />
         <LeaderboardTab />
         <UserTab />
-        <HappyBirthday />
+        {/* <HappyBirthday /> */}
       </Container>
     </>
   )

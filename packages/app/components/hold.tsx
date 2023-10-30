@@ -5,14 +5,13 @@ import { Shake, TSizableText, XStack, YStack, useMedia } from '@my/ui'
 
 export const Hold = observer(() => {
   const { md } = useMedia()
-  const scale = md ? 0.6 : 1
 
   return (
     <YStack>
       <TSizableText>Hold:</TSizableText>
       <XStack
         $gtMd={{ w: '$12', h: '$12' }}
-        $md={{ w: '$9', h: '$9' }}
+        $md={{ w: '$10', h: '$10' }}
         jc="center"
         ai="center"
         bg="$playarea"
@@ -23,7 +22,7 @@ export const Hold = observer(() => {
       >
         <Shake shakeKey={state$.holdShakeKey.get()} shakeDistance={12} shakeTimes={5}>
           <XStack o={state$.holdAvailable.get() ? 1 : 0.5}>
-            <Tile size={state$.heldTile} stackProps={{ scale }} />
+            <Tile size={state$.heldTile} fixedSize={md ? '4' : undefined} />
           </XStack>
         </Shake>
       </XStack>

@@ -6,6 +6,7 @@ import { Score, Efficiency } from './stats'
 import { stats$ } from 'app/statsState'
 import { appState$ } from 'app/appState'
 import { useUser } from 'app/utils/useUser'
+import { PanelOrOverlayContainer } from './panel-or-overlay-container'
 
 const TopOutTitle = observer(
   ({ isHighScore, isLowScore }: { isHighScore: boolean; isLowScore: boolean }) => {
@@ -57,8 +58,7 @@ export const TopOutPanel = observer(() => {
   const isLowScore = !isHighScore && state$.score.peek() === stats$.scoreLow.peek()
 
   return (
-    <YStack gap="$4" ai="center" jc="center" h={700}>
-      <br />
+    <PanelOrOverlayContainer>
       <YStack ai="center">
         <TSizableText size="$10" zi={1} textAlign="center">
           <TopOutTitle isHighScore={isHighScore} isLowScore={isLowScore} />
@@ -71,7 +71,7 @@ export const TopOutPanel = observer(() => {
 
       <XStack w="100%" h={2} bg="$border" />
 
-      <TSizableText>Stats:</TSizableText>
+      <TSizableText zi={1}>Stats:</TSizableText>
       <XStack zi={1} gap="$8" jc="flex-start" ai="flex-start">
         <YStack w="$12" gap="$6" ai="flex-start">
           <Score />
@@ -88,6 +88,6 @@ export const TopOutPanel = observer(() => {
       <TButton zi={1} br="$0" onPress={actions$.reset}>
         New Game
       </TButton>
-    </YStack>
+    </PanelOrOverlayContainer>
   )
 })

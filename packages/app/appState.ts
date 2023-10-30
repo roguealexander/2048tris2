@@ -12,12 +12,14 @@ type AppState = {
   } | null
 
   scale: number
+  statsPanelOpen: boolean
 }
 
 export const appState$ = observable<AppState>({
   tab: '2048tris',
   popSound: null,
   scale: 1,
+  statsPanelOpen: false,
 })
 
 type AppActions = {
