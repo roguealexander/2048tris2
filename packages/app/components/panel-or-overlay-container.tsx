@@ -11,8 +11,10 @@ export const PanelOrOverlayContainer = ({ children }: { children: ReactNode }) =
       $gtMd={{ h: 700 }}
       $md={{ fullscreen: true, zi: 4, pt: 64 }}
     >
-      {media.md && <YStack fullscreen bg="$background" o={0.7} />}
-      {children}
+      {media.md && <YStack fullscreen bg="$background" o={0.7} zi={1} />}
+      <YStack w="100%" gap="$4" ai="center" jc="center" zi={2}>
+        {children}
+      </YStack>
     </YStack>
   )
 }

@@ -4,6 +4,7 @@ import { state$, actions$ } from 'app/state'
 import { ActiveTilesHistogram } from './active-tile-histogram'
 import { useUser } from 'app/utils/useUser'
 import { appState$ } from 'app/appState'
+import { PanelOrOverlayContainer } from './panel-or-overlay-container'
 
 const JoinLeaderboardButton = observer(() => {
   const { user } = useUser()
@@ -18,7 +19,7 @@ export const HighEfficiencyPanel = observer(() => {
   if (activeHighEfficiencyPanel == null) return null
 
   return (
-    <YStack gap="$4" ai="center" jc="center" pt={27} h="100%" mr="$12">
+    <PanelOrOverlayContainer>
       <YStack ai="center">
         <TSizableText size="$9" zi={1} textAlign="center">
           NEW
@@ -46,9 +47,9 @@ export const HighEfficiencyPanel = observer(() => {
 
       <XStack w="100%" h={2} bg="$border" />
 
-      <Button zi={1} br="$0" onPress={() => actions$.closeActiveHighEfficiencyPanel()}>
-        Continue
-      </Button>
-    </YStack>
+      <TButton zi={1} onPress={() => actions$.closeActiveHighEfficiencyPanel()}>
+        Continue Game
+      </TButton>
+    </PanelOrOverlayContainer>
   )
 })
