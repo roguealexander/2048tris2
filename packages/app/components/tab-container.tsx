@@ -16,6 +16,7 @@ export const TabContainer = observer(({ tab, children }: { tab: Tab; children: R
       pt={86}
       pb={64}
       zi={5}
+      w="100%"
     >
       <YStack ai="flex-start" miw={450}>
         {children}

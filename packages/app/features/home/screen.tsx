@@ -16,7 +16,6 @@ import { UserTab } from 'app/components/user-tab'
 import { state$ } from 'app/state'
 import React, { ReactNode } from 'react'
 import { PopSoundEffect } from 'app/components/pop-sound-effect'
-import { ScreenWidthUpdater } from 'app/components/screen-width-updater'
 import { appState$ } from 'app/appState'
 import { UserCircle2 } from '@tamagui/lucide-icons'
 import { colors } from 'app/colors'
@@ -96,11 +95,6 @@ const Container = observer(({ children }: { children: ReactNode }) => {
   const widthScale = Math.min(1, screenWidth / 462)
   const heightScale = Math.min(1, screenHeight / (media.gtMd ? 820 : 1000))
   const scale = Math.min(widthScale, heightScale)
-  console.log({
-    widthScale,
-    heightScale,
-    scale,
-  })
   appState$.scale.set(scale)
   return (
     <Stack
