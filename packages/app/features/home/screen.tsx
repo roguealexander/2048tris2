@@ -179,6 +179,28 @@ const Tabs = observer(() => {
   )
 })
 
+const HappyBirthday = () => {
+  const birthday = 'McKenzie'
+  if (birthday == null) return null
+  return (
+    <TSizableText
+      pos="absolute"
+      margin="auto"
+      t={300}
+      rotate="45deg"
+      fontSize={108}
+      lineHeight={200}
+      textAlign="center"
+      pointerEvents="none"
+      opacity={0.8}
+    >
+      HAPPY BIRTHDAY
+      <br />
+      {birthday.toUpperCase()}!!1!
+    </TSizableText>
+  )
+}
+
 export function HomeScreen() {
   return (
     <>
@@ -207,6 +229,7 @@ export function HomeScreen() {
         <HowToPlayTab />
         <LeaderboardTab />
         <UserTab />
+        <HappyBirthday />
       </Container>
     </>
   )
