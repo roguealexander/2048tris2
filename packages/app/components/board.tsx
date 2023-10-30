@@ -282,6 +282,8 @@ const TilePositionDetector = ({
 }
 
 export const BoardComp = observer(() => {
+  const isTouchDevice = useIsTouchDevice()
+
   // MATTER-JS
   const scene = useRef<HTMLDivElement | null>(null)
   const engine = useRef(
@@ -514,7 +516,7 @@ export const BoardComp = observer(() => {
       </TileDropPositioner>
       <TilePositionDetector mouseX={mouseX} release={releaseBall}>
         <YStack ref={scene} pos="absolute" w={width - 8} height={height + 128} l={0} t={-128}>
-          {appState$.layoutDimension.get() === 'horizontal' && (
+          {appState$.layoutDimension.get() === 'horizontal' && !isTouchDevice && (
             <>
               <YStack pos="absolute" l={-64} w={64} t={0} b={0} onPress={releaseBall} />
               <YStack pos="absolute" r={-64} w={64} t={0} b={0} onPress={releaseBall} />
