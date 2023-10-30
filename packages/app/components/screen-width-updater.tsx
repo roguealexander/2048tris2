@@ -5,9 +5,8 @@ import { appState$ } from 'app/appState'
 export const ScreenWidthUpdater = observer(() => {
   return (
     <XStack
-      onLayout={(event) => appState$.boardScale.set(event.nativeEvent.layout.width / 450)}
-      w={450}
-      maw="100%"
+      onLayout={(event) => appState$.scale.set(Math.min(1, event.nativeEvent.layout.width / 462))}
+      w="100%"
       h={2}
       pos="absolute"
     />

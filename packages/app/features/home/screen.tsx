@@ -1,5 +1,5 @@
-import { observer } from '@legendapp/state/react'
-import { Stack, XStack, YStack, useMedia } from '@my/ui'
+import { Show, observer } from '@legendapp/state/react'
+import { Stack, TSizableText, XStack, YStack, useIsTouchDevice, useMedia } from '@my/ui'
 import { ActiveTilesHistogram } from 'app/components/active-tile-histogram'
 import { Board } from 'app/components/board'
 import { HighEfficiencyPanel } from 'app/components/high-efficiency-panel'
@@ -18,12 +18,16 @@ import React, { ReactNode } from 'react'
 import { PopSoundEffect } from 'app/components/pop-sound-effect'
 import { ScreenWidthUpdater } from 'app/components/screen-width-updater'
 import { appState$ } from 'app/appState'
+import { UserCircle2 } from '@tamagui/lucide-icons'
+import { colors } from 'app/colors'
+import { Dimensions } from 'react-native'
+const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 
 const ActiveLeftPanel = observer(() => {
   const { md } = useMedia()
   if (md || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null) return null
   return (
-    <YStack w="$12" gap="$4" mt={30}>
+    <YStack w="$12" gap="$4" mt={23}>
       <NewGameButton />
       <XStack w="100%" h={2} bg="$border" />
       <Score />
@@ -59,23 +63,119 @@ const ActiveBottomPanel = observer(() => {
 })
 
 const Container = observer(({ children }: { children: ReactNode }) => {
+  const media = useMedia()
+  const widthScale = Math.min(1, screenWidth / 462)
+  const heightScale = Math.min(1, screenHeight / (media.gtMd ? 820 : 960))
+  const scale = Math.min(widthScale, heightScale)
+  appState$.scale.set(scale)
   return (
     <Stack
       $md={{ fd: 'column', gap: '$4', jc: 'flex-start', ai: 'center' }}
       $gtMd={{ fd: 'row', gap: 64, ai: 'flex-start', jc: 'center' }}
-      miw={450}
+      miw={462}
       w="100%"
-      mih="100vh"
       f={1}
-      pt={64}
+      pt={84}
       px="$2"
-      scale={appState$.boardScale.get()}
+      scale={scale}
+      overflow="visible"
       style={{
-        overflowX: 'hidden',
+        transformOrigin: 'top',
       }}
     >
       {children}
     </Stack>
+  )
+})
+
+const Tabs = observer(() => {
+  return (
+    <XStack
+      zi={10}
+      h="$4"
+      f={1}
+      $md={{ w: 450 }}
+      $gtMd={{ w: 866 }}
+      flexWrap="wrap"
+      ai="center"
+      pos="absolute"
+      t={0}
+    >
+      <XStack fullscreen o={0.9} bg="$background" />
+      <XStack
+        h="$3"
+        px="$3"
+        ai="center"
+        pos="relative"
+        cursor="pointer"
+        onPress={() => appState$.tab.set('2048tris')}
+      >
+        <Show if={appState$.tab.get() === '2048tris'}>
+          <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[2048]} />
+        </Show>
+        <TSizableText
+          size="$5"
+          zi={2}
+          color={appState$.tab.get() === '2048tris' ? colors.background : colors.text}
+        >
+          2048tris
+        </TSizableText>
+      </XStack>
+      <XStack
+        h="$3"
+        px="$3"
+        ai="center"
+        pos="relative"
+        cursor="pointer"
+        onPress={() => appState$.tab.set('how-to-play')}
+      >
+        <Show if={appState$.tab.get() === 'how-to-play'}>
+          <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[64]} />
+        </Show>
+        <TSizableText
+          zi={2}
+          color={appState$.tab.get() === 'how-to-play' ? colors.background : colors.text}
+        >
+          How to Play
+        </TSizableText>
+      </XStack>
+      <XStack
+        h="$3"
+        px="$3"
+        ai="center"
+        pos="relative"
+        cursor="pointer"
+        onPress={() => appState$.tab.set('leaderboard')}
+      >
+        <Show if={appState$.tab.get() === 'leaderboard'}>
+          <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[32]} />
+        </Show>
+        <TSizableText
+          zi={2}
+          color={appState$.tab.get() === 'leaderboard' ? colors.background : colors.text}
+        >
+          Leaderboard
+        </TSizableText>
+      </XStack>
+      <XStack
+        ml="auto"
+        h="$3"
+        w="$3"
+        ai="center"
+        jc="center"
+        pos="relative"
+        cur="pointer"
+        onPress={() => appState$.tab.set('user')}
+      >
+        <Show if={appState$.tab.get() === 'user'}>
+          <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[16]} />
+        </Show>
+        <UserCircle2
+          style={{ zIndex: 2 }}
+          color={appState$.tab.get() === 'user' ? colors.background : colors.text}
+        />
+      </XStack>
+    </XStack>
   )
 })
 
@@ -84,6 +184,7 @@ export function HomeScreen() {
     <>
       <ScreenWidthUpdater />
       <Container>
+        <Tabs />
         <StatsPersistor />
         <GameplayHoldListener />
         <PopSoundEffect />

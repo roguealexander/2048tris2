@@ -11,13 +11,13 @@ type AppState = {
     key: string | number
   } | null
 
-  boardScale: number
+  scale: number
 }
 
 export const appState$ = observable<AppState>({
   tab: '2048tris',
   popSound: null,
-  boardScale: 1,
+  scale: 1,
 })
 
 type AppActions = {

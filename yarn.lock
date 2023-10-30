@@ -10493,6 +10493,7 @@ __metadata:
     lodash: "npm:^4.17.21"
     matter-js: "npm:^0.19.0"
     react-hook-form: "npm:^7.46.1"
+    react-native-gesture-handler: "npm:^2.13.4"
     react-native-mmkv: "npm:^2.10.2"
     react-native-safe-area-context: "npm:4.6.3"
     react-native-use-sound: "npm:^1.2.2"
@@ -23377,6 +23378,22 @@ __metadata:
   peerDependencies:
     "@babel/runtime": ^7.20.6
   checksum: 87675dda6b3142944413cd0570ce2208f9f25a3996d3b1b6ac43fca4ef0bb1543f19f931d8df492c28ce013f3354f28df365e29030fdd5ac8120f9e3b25f99e6
+  languageName: node
+  linkType: hard
+
+"react-native-gesture-handler@npm:^2.13.4":
+  version: 2.13.4
+  resolution: "react-native-gesture-handler@npm:2.13.4"
+  dependencies:
+    "@egjs/hammerjs": "npm:^2.0.17"
+    hoist-non-react-statics: "npm:^3.3.0"
+    invariant: "npm:^2.2.4"
+    lodash: "npm:^4.17.21"
+    prop-types: "npm:^15.7.2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 697e25e44d1fcd9da9f1e9139f8f6cdb946dde54f33795f395e0b57cd8c821e1eb79f9777e8a20f032b4e6749778c2c0ab1eb3bfad75e80d4dc80c5dc596e330
   languageName: node
   linkType: hard
 

@@ -296,7 +296,7 @@ const PersonalRecordRow = observer(() => {
 
   const rowData = {
     id: userRow?.id ?? 'anon',
-    name: user?.user_metadata?.name ?? 'YOU',
+    name: user?.user_metadata?.name ?? 'YOU (anonymous)',
     rank: rowFiltered ? userRow?.rank : undefined,
     value: rowFiltered ? rowValueString(leaderboardType, statValue!) : '--',
   }

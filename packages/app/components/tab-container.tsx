@@ -13,7 +13,7 @@ export const TabContainer = observer(({ tab, children }: { tab: Tab; children: R
       bg="$background"
       ai="center"
       jc="flex-start"
-      pt={64}
+      pt={86}
       pb={64}
       zi={5}
     >
