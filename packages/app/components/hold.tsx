@@ -1,5 +1,5 @@
 import { observer } from '@legendapp/state/react'
-import { state$ } from '../state'
+import { actions$, state$ } from '../state'
 import { Tile } from './tile'
 import { Shake, TSizableText, XStack, YStack, useMedia } from '@my/ui'
 
@@ -18,6 +18,8 @@ export const Hold = observer(() => {
         bg="$playarea"
         bw={4}
         boc="$border"
+        cur="pointer"
+        onPress={() => actions$.hold()}
       >
         <Shake shakeKey={state$.holdShakeKey.get()} shakeDistance={12} shakeTimes={5}>
           <XStack o={state$.holdAvailable.get() ? 1 : 0.5}>

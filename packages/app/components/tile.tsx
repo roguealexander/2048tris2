@@ -32,6 +32,7 @@ export const Tile = observer(
         bg={tileData.color}
         jc="center"
         ai="center"
+        pe="none"
         {...stackProps}
       >
         <TSizableText size="$7" color={tileData.textColor}>

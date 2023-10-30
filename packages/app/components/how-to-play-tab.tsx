@@ -183,16 +183,16 @@ const HoldExample = observer(() => {
   return (
     <>
       <TSizableText>
-        {isTouchDevice ? (
+        <TSizableText fontWeight="bold">Click</TSizableText> the hold area
+        {!isTouchDevice && (
           <>
-            <TSizableText fontWeight="bold">Click</TSizableText> the hold area to put a tile in the
-            hold
+            <br />
+            - or -
+            <br />
+            Press <TSizableText fontWeight="bold">Space</TSizableText>
           </>
-        ) : (
-          <>
-            <TSizableText fontWeight="bold">Space</TSizableText> to put a tile in the hold
-          </>
-        )}
+        )}{' '}
+        to put a tile in the hold
       </TSizableText>
       <XStack ai="center" jc="space-between" gap="$6" pt="$4" w="100%">
         <BaseHoldListener onHold={onHold} onHoldDown={onHoldDown} />
@@ -205,22 +205,20 @@ const HoldExample = observer(() => {
           bw={4}
           boc="$border"
           pos="relative"
-          onPress={() => {
-            if (!isTouchDevice) return
-            swapActiveAndHoldTile()
-          }}
+          cur="pointer"
+          onPress={swapActiveAndHoldTile}
         >
           <Tile size={heldTile} />
-          {isTouchDevice && (
-            <XStack pos="absolute" t={0} r={-90} py="$1" ai="center" jc="center" gap="$2">
-              <ArrowDownLeft size={24} color="$text" />
-              <TSizableText size="$4" fontWeight="bold" zi={2} pb={24}>
-                CLICK
-              </TSizableText>
-            </XStack>
-          )}
+          <XStack pos="absolute" t={0} r={-90} py="$1" ai="center" jc="center" gap="$2" pe="none">
+            <ArrowDownLeft size={24} color="$text" />
+            <TSizableText size="$4" zi={2} pb={24}>
+              CLICK
+            </TSizableText>
+          </XStack>
         </XStack>
-        <YStack ai="center" jc="center" gap="$4">
+        <YStack ai="center" jc="center" gap="$2">
+          <ArrowLeftRight color="$text" />
+
           {!isTouchDevice && (
             <XStack
               py="$1"
@@ -237,8 +235,6 @@ const HoldExample = observer(() => {
               <TSizableText zi={2}>SPACE</TSizableText>
             </XStack>
           )}
-
-          <ArrowLeftRight color="$text" />
         </YStack>
         <XStack w={125} h={125} ai="center" jc="center">
           <Tile size={activeTile} />
