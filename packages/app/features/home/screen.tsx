@@ -259,7 +259,7 @@ export function HomeScreen() {
       <HowToPlayTab />
       <LeaderboardTab />
       <UserTab />
-      {/* <HappyBirthday /> */}
+      <HappyBirthday />
     </Container>
   )
 }
