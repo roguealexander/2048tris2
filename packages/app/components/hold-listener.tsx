@@ -1,8 +1,6 @@
 import { observer, useMount, useUnmount } from '@legendapp/state/react'
-import { actions$, state$ } from '../state'
+import { actions$ } from '../state'
 import { appState$ } from 'app/appState'
-import { useRef, useEffect } from 'react'
-import useSound from 'use-sound'
 
 export const BaseHoldListener = observer(
   ({ onHold, onHoldDown }: { onHold: () => void; onHoldDown?: () => void }) => {
