@@ -1,6 +1,4 @@
-import { YStack } from '@my/ui'
-import { Dimensions } from 'react-native'
-const screenHeight = Dimensions.get('window').height
+import { YStack, useWindowDimensions } from '@my/ui'
 
 export type HomeLayoutProps = {
   children?: React.ReactNode
@@ -9,11 +7,9 @@ export type HomeLayoutProps = {
 }
 
 export const HomeLayout = ({ children, fullPage = false, padded = false }: HomeLayoutProps) => {
-  console.log({
-    screenHeight,
-  })
+  const dimensions = useWindowDimensions()
   return (
-    <YStack f={1} height="100vh" overflow="hidden">
+    <YStack h={dimensions.height} mih={dimensions.height} mah={dimensions.height} overflow="hidden">
       <YStack
         {...(fullPage && { flex: 1 })}
         {...(padded && {

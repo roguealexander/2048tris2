@@ -2,16 +2,17 @@ import { observer } from '@legendapp/state/react'
 import { actions$, state$ } from '../state'
 import { Tile } from './tile'
 import { Shake, TSizableText, XStack, YStack, useMedia } from '@my/ui'
+import { appState$ } from 'app/appState'
 
 export const Hold = observer(() => {
-  const { md } = useMedia()
+  const horizontal = appState$.layoutDimension.get() === 'horizontal'
 
   return (
     <YStack>
       <TSizableText>Hold:</TSizableText>
       <XStack
-        $gtMd={{ w: '$12', h: '$12' }}
-        $md={{ w: '$10', h: '$10' }}
+        w={horizontal ? '$12' : '$10'}
+        h={horizontal ? '$12' : '$10'}
         jc="center"
         ai="center"
         bg="$playarea"
@@ -22,7 +23,7 @@ export const Hold = observer(() => {
       >
         <Shake shakeKey={state$.holdShakeKey.get()} shakeDistance={12} shakeTimes={5}>
           <XStack o={state$.holdAvailable.get() ? 1 : 0.5}>
-            <Tile size={state$.heldTile} fixedSize={md ? '4' : undefined} />
+            <Tile size={state$.heldTile} fixedSize={horizontal ? undefined : '4'} />
           </XStack>
         </Shake>
       </XStack>

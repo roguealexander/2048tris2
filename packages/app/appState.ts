@@ -2,9 +2,11 @@ import { observable } from '@legendapp/state'
 import { TileSize } from './types'
 
 export type Tab = '2048tris' | 'how-to-play' | 'leaderboard' | 'user'
+export type LayoutDimension = 'vertical' | 'horizontal'
 
 type AppState = {
   tab: Tab
+  layoutDimension: LayoutDimension
 
   popSound: {
     size: TileSize
@@ -17,6 +19,7 @@ type AppState = {
 
 export const appState$ = observable<AppState>({
   tab: '2048tris',
+  layoutDimension: 'horizontal',
   popSound: null,
   scale: 1,
   statsPanelOpen: false,

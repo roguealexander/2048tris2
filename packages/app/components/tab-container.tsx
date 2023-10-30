@@ -8,15 +8,17 @@ export const TabContainer = observer(({ tab, children }: { tab: Tab; children: R
 
   return (
     <ScrollView
-      fullscreen
+      pos="absolute"
+      t={0}
       mah="100%"
+      mih="100%"
       bg="$background"
       ai="center"
       jc="flex-start"
       pt={86}
       pb={64}
       zi={5}
-      w="100%"
+      w={appState$.layoutDimension.get() === 'horizontal' ? 906 : 468}
     >
       <YStack ai="flex-start" miw={450}>
         {children}

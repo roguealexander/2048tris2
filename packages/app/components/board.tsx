@@ -516,7 +516,7 @@ export const BoardComp = observer(() => {
       </TileDropPositioner>
       <TilePositionDetector mouseX={mouseX} release={releaseBall}>
         <YStack ref={scene} pos="absolute" w={width - 8} height={height + 128} l={0} t={-128}>
-          {media.gtMd && (
+          {appState$.layoutDimension.get() === 'horizontal' && (
             <>
               <YStack pos="absolute" l={-64} w={64} t={0} b={0} onPress={releaseBall} />
               <YStack pos="absolute" r={-64} w={64} t={0} b={0} onPress={releaseBall} />

@@ -1,5 +1,5 @@
 import { Memo, Show, observer } from '@legendapp/state/react'
-import { Stack, TSizableText, XStack, YStack, useMedia } from '@my/ui'
+import { Stack, TSizableText, XStack, YStack, useMedia, useWindowDimensions } from '@my/ui'
 import { ActiveTilesHistogram } from 'app/components/active-tile-histogram'
 import { Board } from 'app/components/board'
 import { HighEfficiencyPanel } from 'app/components/high-efficiency-panel'
@@ -19,14 +19,14 @@ import { PopSoundEffect } from 'app/components/pop-sound-effect'
 import { appState$ } from 'app/appState'
 import { UserCircle2 } from '@tamagui/lucide-icons'
 import { colors } from 'app/colors'
-import { Dimensions } from 'react-native'
 import { ShowStatsButton } from 'app/components/show-stats-button'
 import { StatsPanel } from 'app/components/stats-panel'
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window')
 
 const ActiveLeftPanel = observer(() => {
-  const { md } = useMedia()
-  if (md || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null) return null
+  const horizontal = appState$.layoutDimension.get() === 'horizontal'
+  const vertical = !horizontal
+  if (vertical || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null)
+    return null
   return (
     <YStack w="$12" gap="$4" mt={23}>
       <NewGameButton />
@@ -41,8 +41,10 @@ const ActiveLeftPanel = observer(() => {
 })
 
 const ActiveRightPanel = observer(() => {
-  const { md } = useMedia()
-  if (md || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null) return null
+  const horizontal = appState$.layoutDimension.get() === 'horizontal'
+  const vertical = !horizontal
+  if (vertical || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null)
+    return null
   return (
     <YStack gap="$2" ai="flex-start">
       <Hold />
@@ -53,8 +55,8 @@ const ActiveRightPanel = observer(() => {
 })
 
 const ActiveBottomPanel = observer(() => {
-  const { gtMd } = useMedia()
-  if (gtMd) return null
+  const horizontal = appState$.layoutDimension.get() === 'horizontal'
+  if (horizontal) return null
   return (
     <XStack gap="$2" w={450} jc="space-between">
       <Hold />
@@ -64,8 +66,9 @@ const ActiveBottomPanel = observer(() => {
 })
 
 const ActiveTopPanel = observer(() => {
-  const { gtMd } = useMedia()
-  if (gtMd || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null) return null
+  const horizontal = appState$.layoutDimension.get() === 'horizontal'
+  if (horizontal || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null)
+    return null
   return (
     <XStack mt={-22} mb={2} zi={3} gap="$2" w={450} jc="space-between">
       <YStack w="$50%">
@@ -90,16 +93,44 @@ const ActiveTopPanel = observer(() => {
   )
 })
 
+const XPaddingSide = 6
+const XPadding = XPaddingSide * 2
+const HorizontalAspectRatio = (866 + XPadding) / 820
+const VerticalAspectRatio = (450 + XPadding) / 1000
+
 const Container = observer(({ children }: { children: ReactNode }) => {
-  const media = useMedia()
-  const widthScale = Math.min(1, screenWidth / 462)
-  const heightScale = Math.min(1, screenHeight / (media.gtMd ? 820 : 1000))
-  const scale = Math.min(widthScale, heightScale)
-  appState$.scale.set(scale)
+  const dimensions = useWindowDimensions()
+
+  // Layout Dimension
+  const aspectRatio = dimensions.width / dimensions.height
+  const layoutDimension = aspectRatio >= HorizontalAspectRatio ? 'horizontal' : 'vertical'
+  appState$.layoutDimension.set(layoutDimension)
+
+  // HorizontalScale
+  const horizontalScale = dimensions.height / 820
+
+  // Vertical Scale
+  const widthScale = Math.min(1, dimensions.width / (450 + XPadding))
+  const heightScale = Math.min(1, dimensions.height / 1000)
+  const verticalScale = Math.min(widthScale, heightScale)
+
+  const scale = layoutDimension === 'horizontal' ? horizontalScale : verticalScale
+
   return (
     <Stack
-      $md={{ fd: 'column', gap: '$2', jc: 'flex-start', ai: 'center' }}
-      $gtMd={{ fd: 'row', gap: 64, ai: 'flex-start', jc: 'center' }}
+      {...(layoutDimension === 'horizontal'
+        ? {
+            fd: 'row',
+            gap: 64,
+            ai: 'flex-start',
+            jc: 'center',
+          }
+        : {
+            fd: 'column',
+            gap: '$2',
+            ai: 'center',
+            fc: 'flex-start',
+          })}
       miw={462}
       w="100%"
       f={1}
@@ -122,8 +153,7 @@ const Tabs = observer(() => {
       zi={10}
       h="$4"
       f={1}
-      $md={{ w: 450 }}
-      $gtMd={{ w: 866 }}
+      w={appState$.layoutDimension.get() === 'horizontal' ? 866 : 450}
       flexWrap="wrap"
       ai="center"
       pos="absolute"
