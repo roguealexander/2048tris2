@@ -115,6 +115,7 @@ const Container = observer(({ children }: { children: ReactNode }) => {
   const verticalScale = Math.min(widthScale, heightScale)
 
   const scale = layoutDimension === 'horizontal' ? horizontalScale : verticalScale
+  appState$.scale.set(scale)
 
   return (
     <Stack

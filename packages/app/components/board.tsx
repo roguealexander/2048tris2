@@ -282,8 +282,6 @@ const TilePositionDetector = ({
 }
 
 export const BoardComp = observer(() => {
-  const media = useMedia()
-
   // MATTER-JS
   const scene = useRef<HTMLDivElement | null>(null)
   const engine = useRef(
