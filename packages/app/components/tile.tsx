@@ -4,10 +4,9 @@ import { TileSize } from '../types'
 import { Observable, ObservableComputed } from '@legendapp/state'
 import { observer } from '@legendapp/state/react'
 
-export const PlaceholderTile = () => {
-  const { md } = useMedia()
-  const scale = md ? 0.6 : 1
-  return <XStack w={60 * scale} h={60 * scale} bg="$border" o={0.5} br={60} />
+export const PlaceholderTile = ({ fixedSize }: { fixedSize?: TileSize }) => {
+  const fixedRadius = fixedSize ? getTileRadius(fixedSize) : undefined
+  return <XStack w={fixedRadius ?? 60} h={fixedRadius ?? 60} bg="$border" o={0.5} br={60} />
 }
 
 export const Tile = observer(
@@ -21,7 +20,7 @@ export const Tile = observer(
     stackProps?: StackProps
   }) => {
     const tileSize = size?.get()
-    if (tileSize == null) return <PlaceholderTile />
+    if (tileSize == null) return <PlaceholderTile fixedSize={fixedSize} />
 
     const tileData = getTileData(tileSize)!
     const tileRadius = getTileRadius(fixedSize || tileSize)

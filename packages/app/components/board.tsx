@@ -104,7 +104,7 @@ let collidedTiles: Record<string, true> = {}
 const createBounds = (cw: number, ch: number) => {
   return [
     // Top Sensor
-    Bodies.rectangle(cw / 2, -200 + 64, cw, 400, {
+    Bodies.rectangle(cw / 2, -200 + 128, cw, 400, {
       id: 100,
       isSensor: true,
       isStatic: true,
@@ -112,19 +112,6 @@ const createBounds = (cw: number, ch: number) => {
       label: topOutSensorLabel,
       collisionFilter: {
         category: categoryTopOut,
-        // mask:
-        //   categoryTile['2'] |
-        //   categoryTile['4'] |
-        //   categoryTile['8'] |
-        //   categoryTile['16'] |
-        //   categoryTile['32'] |
-        //   categoryTile['128'] |
-        //   categoryTile['256'] |
-        //   categoryTile['512'] |
-        //   categoryTile['1024'] |
-        //   categoryTile['2048'] |
-        //   categoryTile['4096'] |
-        //   categoryTile['8192'],
       },
     }),
 
@@ -138,7 +125,7 @@ const createBounds = (cw: number, ch: number) => {
       label: 'LeftBound',
     }),
     // Bottom Boundary
-    Bodies.rectangle(cw / 2, ch + 200 - 64 * WorldScale, cw, 400, {
+    Bodies.rectangle(cw / 2, ch + 200 * WorldScale, cw, 400, {
       isStatic: true,
       render: { opacity: 0 },
       friction: 0.1,
@@ -361,7 +348,7 @@ export const BoardComp = observer(() => {
     engine.current.gravity = { x: 0, y: 1, scale: 0.0015 }
 
     const cw = (width - 8) * WorldScale
-    const ch = (height - 4 + 64 * 2) * WorldScale
+    const ch = (height - 4 + 128) * WorldScale
 
     const render = Render.create({
       element: scene.current!,
@@ -513,7 +500,7 @@ export const BoardComp = observer(() => {
 
     const tileBodies = createTile({
       size: state$.activeTile.peek(),
-      position: { x: dropX.value * WorldScale, y: 64 * WorldScale },
+      position: { x: dropX.value * WorldScale, y: 128 * WorldScale },
       velocity: { x: 0.01, y: 0 * WorldScale },
     })
 
@@ -528,7 +515,7 @@ export const BoardComp = observer(() => {
         <Tile size={state$.activeTile} />
       </TileDropPositioner>
       <TilePositionDetector mouseX={mouseX} release={releaseBall}>
-        <YStack ref={scene} pos="absolute" w={width - 8} height={height + 64 * 2} l={0} t={-64}>
+        <YStack ref={scene} pos="absolute" w={width - 8} height={height + 128} l={0} t={-128}>
           {media.gtMd && (
             <>
               <YStack pos="absolute" l={-64} w={64} t={0} b={0} onPress={releaseBall} />
