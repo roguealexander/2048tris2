@@ -10,11 +10,14 @@ type AppState = {
     size: TileSize
     key: string | number
   } | null
+
+  boardScale: number
 }
 
 export const appState$ = observable<AppState>({
   tab: '2048tris',
   popSound: null,
+  boardScale: 1,
 })
 
 type AppActions = {

@@ -12,7 +12,19 @@ export type HomeLayoutProps = {
 
 const Tabs = observer(() => {
   return (
-    <XStack zi={10} h="$4" px="$4" gap="$4" ai="center" pos="absolute" t={0} l={16} r={16}>
+    <XStack
+      zi={10}
+      h="$4"
+      px="$4"
+      maw="100%"
+      flexWrap="wrap"
+      gap="$4"
+      ai="center"
+      pos="absolute"
+      t={0}
+      l={16}
+      r={16}
+    >
       <XStack fullscreen o={0.9} bg="$background" />
       <XStack
         h="$3"
@@ -102,6 +114,8 @@ export const HomeLayout = ({ children, fullPage = false, padded = false }: HomeL
           px: '$2',
           width: '100%',
         })}
+        alignItems="center"
+        justifyContent="flex-start"
       >
         <Tabs />
         {children}

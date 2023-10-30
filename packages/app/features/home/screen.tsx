@@ -1,5 +1,5 @@
 import { observer } from '@legendapp/state/react'
-import { XStack, YStack } from '@my/ui'
+import { Stack, XStack, YStack, useMedia } from '@my/ui'
 import { ActiveTilesHistogram } from 'app/components/active-tile-histogram'
 import { Board } from 'app/components/board'
 import { HighEfficiencyPanel } from 'app/components/high-efficiency-panel'
@@ -14,11 +14,14 @@ import { StatsPersistor } from 'app/components/stats-persistor'
 import { TopOutPanel } from 'app/components/top-out-panel'
 import { UserTab } from 'app/components/user-tab'
 import { state$ } from 'app/state'
-import React from 'react'
+import React, { ReactNode } from 'react'
 import { PopSoundEffect } from 'app/components/pop-sound-effect'
+import { ScreenWidthUpdater } from 'app/components/screen-width-updater'
+import { appState$ } from 'app/appState'
 
 const ActiveLeftPanel = observer(() => {
-  if (state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null) return null
+  const { md } = useMedia()
+  if (md || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null) return null
   return (
     <YStack w="$12" gap="$4" mt={30}>
       <NewGameButton />
@@ -33,7 +36,8 @@ const ActiveLeftPanel = observer(() => {
 })
 
 const ActiveRightPanel = observer(() => {
-  if (state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null) return null
+  const { md } = useMedia()
+  if (md || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null) return null
   return (
     <YStack gap="$2" ai="flex-start">
       <Hold />
@@ -43,29 +47,67 @@ const ActiveRightPanel = observer(() => {
   )
 })
 
+const ActiveBottomPanel = observer(() => {
+  const { gtMd } = useMedia()
+  if (gtMd || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null) return null
+  return (
+    <XStack gap="$2" w={450} jc="space-between">
+      <Hold />
+      <Queue />
+    </XStack>
+  )
+})
+
+const Container = observer(({ children }: { children: ReactNode }) => {
+  return (
+    <Stack
+      $md={{ fd: 'column', gap: '$4', jc: 'flex-start', ai: 'center' }}
+      $gtMd={{ fd: 'row', gap: 64, ai: 'flex-start', jc: 'center' }}
+      miw={450}
+      w="100%"
+      mih="100vh"
+      f={1}
+      pt={64}
+      px="$2"
+      scale={appState$.boardScale.get()}
+      style={{
+        overflowX: 'hidden',
+      }}
+    >
+      {children}
+    </Stack>
+  )
+})
+
 export function HomeScreen() {
   return (
-    <XStack w="100%" mih="100vh" mah="100vh" als="center" jc="center" f={1} gap={64} pt={64}>
-      <StatsPersistor />
-      <GameplayHoldListener />
-      <PopSoundEffect />
+    <>
+      <ScreenWidthUpdater />
+      <Container>
+        <StatsPersistor />
+        <GameplayHoldListener />
+        <PopSoundEffect />
 
-      {/* LEFT */}
-      <TopOutPanel />
-      <HighEfficiencyPanel />
-      <ActiveLeftPanel />
+        {/* LEFT */}
+        <TopOutPanel />
+        <HighEfficiencyPanel />
+        <ActiveLeftPanel />
 
-      {/* BOARD */}
-      <Board />
+        {/* BOARD */}
+        <Board />
 
-      {/* RIGHT */}
-      <ActiveRightPanel />
+        {/* BOTTOM */}
+        <ActiveBottomPanel />
 
-      {/* OVERLAY */}
-      <HowToPlayTab />
-      <LeaderboardTab />
-      <UserTab />
-    </XStack>
+        {/* RIGHT */}
+        <ActiveRightPanel />
+
+        {/* OVERLAY */}
+        <HowToPlayTab />
+        <LeaderboardTab />
+        <UserTab />
+      </Container>
+    </>
   )
 }
 

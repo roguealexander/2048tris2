@@ -21,6 +21,7 @@ import {
   getTileRadius,
   getTileSizeFromPower,
 } from '../tiles'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 
 import ball2 from '../assets/2.png'
 import ball4 from '../assets/4.png'
@@ -36,14 +37,14 @@ import ball2048 from '../assets/2048.png'
 import ball4096 from '../assets/4096.png'
 import ball8192 from '../assets/8192.png'
 import { TilePower, TileRecord, TileSize } from '../types'
-import { YStack } from '@my/ui'
+import { XStack, YStack, useMedia } from '@my/ui'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   SharedValue,
   useDerivedValue,
 } from 'react-native-reanimated'
-import { appActions$ } from 'app/appState'
+import { appActions$, appState$ } from 'app/appState'
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -257,21 +258,7 @@ const TileDropPositioner = observer(
 )
 
 export const BoardComp = observer(() => {
-  // // SOUND
-  // const [playPop] = useSound('../sounds/pop.mp3', {
-  //   volume: 0.3,
-  //   playbackRate: 1,
-  // })
-  // const playPopTileSound = useRef((power: TilePower) => {
-  //   const rate = Math.max(0.5, 2 - 0.15 * power)
-  //   playPop({ playbackRate: rate })
-  // })
-  // useEffect(() => {
-  //   playPopTileSound.current = (power: TilePower) => {
-  //     const rate = Math.max(0.5, 2 - 0.15 * power)
-  //     playPop({ playbackRate: rate })
-  //   }
-  // }, [playPop])
+  const media = useMedia()
 
   // MATTER-JS
   const scene = useRef<HTMLDivElement | null>(null)
@@ -293,7 +280,7 @@ export const BoardComp = observer(() => {
   const mouseX = useSharedValue(0)
   const dropX = useDerivedValue(() => {
     const radius = getTileRadius(state$.activeTile.get())
-    return Math.min(Math.max(64 + radius / 2, mouseX.value), 64 + 450 - radius / 2)
+    return Math.min(Math.max(64 + radius / 2, mouseX.value), 64 + width - 8 - radius / 2)
   }, [mouseX, state$.activeTile.get()])
 
   runner.current.enabled = !state$.gamePhysicsPaused.get()
@@ -323,8 +310,8 @@ export const BoardComp = observer(() => {
       collidedTiles = {}
       tilesToCreate = {}
 
-      const cw = (width + 64 * 2) * WorldScale
-      const ch = (height + 64 * 2) * WorldScale
+      const cw = (width - 8 + 64 * 2) * WorldScale
+      const ch = (height - 4 + 64 * 2) * WorldScale
 
       World.add(engine.current.world, createBounds(cw, ch))
 
@@ -337,8 +324,8 @@ export const BoardComp = observer(() => {
     engine.current.velocityIterations = 12
     engine.current.gravity = { x: 0, y: 1, scale: 0.0015 }
 
-    const cw = (width + 64 * 2) * WorldScale
-    const ch = (height + 64 * 2) * WorldScale
+    const cw = (width - 8 + 64 * 2) * WorldScale
+    const ch = (height - 4 + 64 * 2) * WorldScale
 
     const render = Render.create({
       element: scene.current!,
@@ -508,41 +495,45 @@ export const BoardComp = observer(() => {
   }
 
   // Native gesture handler
-  // const gesture = Gesture.Pan()
-  // 	.onBegin((event) => {
-  // 		state$.mouseX.set(event.x)
-  // 	})
-  //   .onChange((event) => {
-  //     state$.mouseX.set(event.x)
-  //   })
-  //   .onFinalize(releaseBall)
+  const gesture = Gesture.Pan()
+    .enabled(media.md)
+    .onBegin((event) => {
+      mouseX.value = event.x / appState$.boardScale.peek()
+    })
+    .onChange((event) => {
+      mouseX.value = event.x / appState$.boardScale.peek()
+    })
+    .onFinalize(releaseBall)
 
   return (
-    <YStack
-      bg="$playarea"
-      bw={4}
-      btw={0}
-      boc="$border"
-      w={width}
-      h={height}
-      style={{ boxSizing: 'content-box' }}
-    >
-      {/* <GestureDetector gesture={gesture}> */}
-      <TileDropPositioner dropX={dropX}>
-        <Tile size={state$.activeTile} />
-      </TileDropPositioner>
-      <YStack
-        ref={scene}
-        onPress={releaseBall}
-        onPointerMove={moveBall}
-        pos="absolute"
-        w={width + 64 * 2}
-        h={height + 64 * 2}
-        l={-64}
-        t={-64}
-      ></YStack>
-      {/* </GestureDetector> */}
-    </YStack>
+    <>
+      {/* <YStack
+        scale={appState$.boardScale.get()}
+        ai="center"
+        jc="center"
+        w={width}
+        h={height * appState$.boardScale.get()}
+        maw="100%"
+      > */}
+      <YStack bg="$playarea" bw={4} btw={0} boc="$border" w={width} h={height}>
+        <TileDropPositioner dropX={dropX}>
+          <Tile size={state$.activeTile} />
+        </TileDropPositioner>
+        <GestureDetector gesture={gesture}>
+          <YStack
+            ref={scene}
+            onPress={media.md ? undefined : releaseBall}
+            onPointerMove={media.md ? undefined : moveBall}
+            pos="absolute"
+            w={width - 8 + 64 * 2}
+            height={height + 64 * 2}
+            l={-64}
+            t={-64}
+          ></YStack>
+        </GestureDetector>
+      </YStack>
+      {/* </YStack> */}
+    </>
   )
 })
 
