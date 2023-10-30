@@ -96,6 +96,11 @@ const Container = observer(({ children }: { children: ReactNode }) => {
   const widthScale = Math.min(1, screenWidth / 462)
   const heightScale = Math.min(1, screenHeight / (media.gtMd ? 820 : 1000))
   const scale = Math.min(widthScale, heightScale)
+  console.log({
+    widthScale,
+    heightScale,
+    scale,
+  })
   appState$.scale.set(scale)
   return (
     <Stack
@@ -232,39 +237,36 @@ export const HappyBirthday = () => {
 
 export function HomeScreen() {
   return (
-    <>
-      <ScreenWidthUpdater />
-      <Container>
-        <Tabs />
-        <StatsPersistor />
-        <GameplayHoldListener />
-        <PopSoundEffect />
+    <Container>
+      <Tabs />
+      <StatsPersistor />
+      <GameplayHoldListener />
+      <PopSoundEffect />
 
-        {/* LEFT */}
-        <TopOutPanel />
-        <StatsPanel />
-        <HighEfficiencyPanel />
-        <ActiveLeftPanel />
+      {/* LEFT */}
+      <TopOutPanel />
+      <StatsPanel />
+      <HighEfficiencyPanel />
+      <ActiveLeftPanel />
 
-        {/* TOP */}
-        <ActiveTopPanel />
+      {/* TOP */}
+      <ActiveTopPanel />
 
-        {/* BOARD */}
-        <Board />
+      {/* BOARD */}
+      <Board />
 
-        {/* BOTTOM */}
-        <ActiveBottomPanel />
+      {/* BOTTOM */}
+      <ActiveBottomPanel />
 
-        {/* RIGHT */}
-        <ActiveRightPanel />
+      {/* RIGHT */}
+      <ActiveRightPanel />
 
-        {/* TABS */}
-        <HowToPlayTab />
-        <LeaderboardTab />
-        <UserTab />
-        {/* <HappyBirthday /> */}
-      </Container>
-    </>
+      {/* TABS */}
+      <HowToPlayTab />
+      <LeaderboardTab />
+      <UserTab />
+      {/* <HappyBirthday /> */}
+    </Container>
   )
 }
 
