@@ -1,5 +1,5 @@
 import { Memo, Show, observer } from '@legendapp/state/react'
-import { Stack, TSizableText, XStack, YStack, useMedia, useWindowDimensions } from '@my/ui'
+import { Spacer, Stack, TSizableText, XStack, YStack, useMedia, useWindowDimensions } from '@my/ui'
 import { ActiveTilesHistogram } from 'app/components/active-tile-histogram'
 import { Board } from 'app/components/board'
 import { HighEfficiencyPanel } from 'app/components/high-efficiency-panel'
@@ -48,7 +48,7 @@ const ActiveRightPanel = observer(() => {
   return (
     <YStack gap="$2" ai="flex-start">
       <Hold />
-      <br />
+      <Spacer />
       <Queue />
     </YStack>
   )
@@ -254,7 +254,7 @@ export const HappyBirthday = () => {
       opacity={0.8}
     >
       HAPPY BIRTHDAY
-      <br />
+      {'\n'}
       {birthday.toUpperCase()}!!1!
     </TSizableText>
   )

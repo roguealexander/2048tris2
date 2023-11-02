@@ -14,7 +14,7 @@ const TopOutTitle = observer(
       return (
         <>
           NEW HIGH
-          <br />
+          {'\n'}
           SCORE
         </>
       )
@@ -22,7 +22,7 @@ const TopOutTitle = observer(
       return (
         <>
           NEW LOW
-          <br />
+          {'\n'}
           SCORE
         </>
       )

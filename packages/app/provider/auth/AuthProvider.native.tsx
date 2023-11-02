@@ -17,7 +17,7 @@ export const AuthProvider = ({ children, initialSession }: AuthProviderProps) =>
   const [session, setSession] = useState<Session | null>(initialSession || null)
   const [error, setError] = useState<AuthError | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  useProtectedRoute(session?.user ?? null)
+  // useProtectedRoute(session?.user ?? null)
   useEffect(() => {
     setIsLoading(true)
     supabase.auth

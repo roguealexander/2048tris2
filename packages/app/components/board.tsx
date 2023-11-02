@@ -1,4 +1,4 @@
-import { observer, useObserve } from '@legendapp/state/react'
+import { observer, useObserveEffect } from '@legendapp/state/react'
 import { actions$, state$ } from '../state'
 import { Tile } from './tile'
 import {
@@ -37,7 +37,7 @@ import ball2048 from '../assets/2048.png'
 import ball4096 from '../assets/4096.png'
 import ball8192 from '../assets/8192.png'
 import { TilePower, TileRecord, TileSize } from '../types'
-import { XStack, YStack, useIsTouchDevice, useMedia } from '@my/ui'
+import { YStack, useIsTouchDevice } from '@my/ui'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -254,24 +254,25 @@ const TilePositionDetector = ({
   children: ReactNode
 }) => {
   const isTouchDevice = useIsTouchDevice()
+  const scale = appState$.scale.get()
 
   const hoverGesture = Gesture.Hover()
     .onBegin((event) => {
       if (isTouchDevice) return
-      mouseX.value = event.x / appState$.scale.peek()
+      mouseX.value = event.x / scale
     })
     .onChange((event) => {
       if (isTouchDevice) return
-      mouseX.value = event.x / appState$.scale.peek()
+      mouseX.value = event.x / scale
     })
   const panGesture = Gesture.Pan()
     .onBegin((event) => {
       if (!isTouchDevice) return
-      mouseX.value = event.x / appState$.scale.peek()
+      mouseX.value = event.x / scale
     })
     .onChange((event) => {
       if (!isTouchDevice) return
-      mouseX.value = event.x / appState$.scale.peek()
+      mouseX.value = event.x / scale
     })
     .onFinalize(() => {
       release()
@@ -302,14 +303,15 @@ export const BoardComp = observer(() => {
 
   // const releaseDelay = useSharedValue(0)
   const mouseX = useSharedValue(0)
+  const activeTile = state$.activeTile.get()
   const dropX = useDerivedValue(() => {
-    const radius = getTileRadius(state$.activeTile.get())
+    const radius = getTileRadius(activeTile)
     return Math.min(Math.max(radius / 2, mouseX.value), width - 8 - radius / 2)
-  }, [mouseX, state$.activeTile.get()])
+  }, [mouseX, activeTile])
 
   runner.current.enabled = !state$.gamePhysicsPaused.get()
 
-  useObserve(
+  useObserveEffect(
     () => state$.resetCount.get(),
     async ({ value }) => {
       if (value === 0 || engine.current == null) return
@@ -531,7 +533,7 @@ export const BoardComp = observer(() => {
 export const Board = observer(() => {
   return (
     <YStack gap="$2" pos="relative" ai="flex-start" mt={23}>
-      <BoardComp />
+      {/* <BoardComp /> */}
     </YStack>
   )
 })

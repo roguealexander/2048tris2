@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "myapp",
-    "slug": "myapp",
-    "scheme": "myapp",
+    "name": "2048tris",
+    "slug": "2048tris",
+    "scheme": "2048tris",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -19,7 +19,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.acme.myapp"
+      "bundleIdentifier": "com.roguerotkosky.2048tris"
     },
     "android": {
       "softwareKeyboardLayoutMode": "pan",
@@ -27,7 +27,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.acme.myapp",
+      "package": "com.roguerotkosky.2048tris",
       "permissions": ["android.permission.RECORD_AUDIO"]
     },
     "web": {
@@ -35,21 +35,21 @@
       "bundler": "metro"
     },
     "plugins": [
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/icon.png",
-          "color": "#ffffff"
-        }
-      ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "The app accesses your photos to let you share them with your friends."
-        }
-      ],
+      // [
+      //   "expo-notifications",
+      //   {
+      //     "icon": "./assets/icon.png",
+      //     "color": "#ffffff"
+      //   }
+      // ],
+      // [
+      //   "expo-image-picker",
+      //   {
+      //     "photosPermission": "The app accesses your photos to let you share them with your friends."
+      //   }
+      // ],
       "expo-router",
-      "expo-apple-authentication",
+      // "expo-apple-authentication",
       "@vonovak/react-native-theme-control"
     ],
     "extra": {

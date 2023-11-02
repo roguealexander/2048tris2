@@ -12,14 +12,14 @@ export const Score = observer(() => {
     <YStack gap="$2" w="100%">
       <TSizableText>
         Score:
-        <br />
+        {'\n'}
         <b>
           <Memo>{state$.score}</Memo>
         </b>
       </TSizableText>
       <TSizableText>
         Record:
-        <br />
+        {'\n'}
         <b>
           <HighScoreValue />
         </b>
@@ -38,14 +38,14 @@ export const Efficiency = observer(() => {
     <YStack gap="$2" w="100%">
       <TSizableText>
         Efficiency:
-        <br />
+        {'\n'}
         <b>
           <Memo>{state$.efficiency}</Memo>%
         </b>
       </TSizableText>
       <TSizableText>
         Record:
-        <br />
+        {'\n'}
         <b>
           <HighEfficiencyValue /> (<Memo>{state$.targetEfficiency}</Memo>)
         </b>

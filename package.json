@@ -1,5 +1,5 @@
 {
-  "name": "unistack",
+  "name": "2048tris",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -55,6 +55,7 @@
     "dotenv": "^16.0.3",
     "dotenv-cli": "^6.0.0",
     "eslint": "^8.46.0",
+    "expo-dev-client": "~2.4.11",
     "node-gyp": "^9.3.1",
     "prettier": "^2.7.1",
     "turbo": "^1.10.14",

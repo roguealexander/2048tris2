@@ -1,4 +1,4 @@
-import { observer, useObserve } from '@legendapp/state/react'
+import { observer, useObserveEffect } from '@legendapp/state/react'
 import { appState$ } from 'app/appState'
 import { getTilePower } from 'app/tiles'
 import useSound from 'use-sound'
@@ -9,7 +9,7 @@ export const PopSoundEffect = observer(() => {
     playbackRate: 1,
   })
 
-  useObserve(appState$.popSound, ({ value }) => {
+  useObserveEffect(appState$.popSound, ({ value }) => {
     if (value == null) return
     const { size } = value
     const power = getTilePower(size)

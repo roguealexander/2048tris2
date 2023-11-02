@@ -1,5 +1,5 @@
 import { Memo, observer, useObservable } from '@legendapp/state/react'
-import { Spinner, TButton, TSizableText, XStack, YStack } from '@my/ui'
+import { Spacer, Spinner, TButton, TSizableText, XStack, YStack } from '@my/ui'
 import { colors } from 'app/colors'
 import { TabContainer } from './tab-container'
 import { useUser } from 'app/utils/useUser'
@@ -65,7 +65,7 @@ const LeaderboardStatsTable = observer(() => {
   return (
     <YStack w="100%" pl="$2">
       <Header />
-      <br />
+      <Spacer />
       <TSizableText size="$3">POINTS:</TSizableText>
       <Row
         key={0}
@@ -80,7 +80,7 @@ const LeaderboardStatsTable = observer(() => {
         score={scoreLow === 100000 ? '--' : `${scoreLow}`}
         highlight
       />
-      <br />
+      <Spacer />
       <TSizableText size="$3">EFFICIENCY:</TSizableText>
       <Row
         key={2}
@@ -154,22 +154,22 @@ export const UserTab = observer(() => {
   const { user } = useUser()
   return (
     <TabContainer tab="user">
-      <br />
+      <Spacer />
       {user == null && (
         <>
           <AuthComponent />
-          <br />
-          <br />
+          <Spacer />
+          <Spacer />
           <XStack w="100%" h={2} bg="$border" />
-          <br />
-          <br />
+          <Spacer />
+          <Spacer />
         </>
       )}
 
       {user != null && (
         <>
           <AuthedUser user={user} />
-          <br />
+          <Spacer />
         </>
       )}
       <TSizableText>
@@ -184,12 +184,12 @@ export const UserTab = observer(() => {
           <Memo>{stats$.ballsDropped}</Memo>
         </TSizableText>
       </TSizableText>
-      <br />
-      <br />
+      <Spacer />
+      <Spacer />
 
       <XStack w="100%" h={2} bg="$border" />
-      <br />
-      <br />
+      <Spacer />
+      <Spacer />
 
       <TSizableText>
         User{' '}
@@ -198,25 +198,25 @@ export const UserTab = observer(() => {
         </TSizableText>{' '}
         Stats:
       </TSizableText>
-      <br />
+      <Spacer />
       <LeaderboardStatsTable />
-      <br />
-      <br />
+      <Spacer />
+      <Spacer />
 
       <XStack w="100%" h={2} bg="$border" />
-      <br />
-      <br />
+      <Spacer />
+      <Spacer />
 
       <TSizableText>Reset Stats:</TSizableText>
-      <br />
+      <Spacer />
       <ResetStatsButton />
 
       {user != null && (
         <>
-          <br />
-          <br />
+          <Spacer />
+          <Spacer />
           <TSizableText>Sign Out:</TSizableText>
-          <br />
+          <Spacer />
           <SignOutButton />
         </>
       )}

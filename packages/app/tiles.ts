@@ -138,35 +138,45 @@ export const mergedSize: TileRecord<TileSize> = {
 }
 
 export const getTileData = (size: TileSize | null): TileData | null => {
+  'worklet'
   if (size == null) return null
   return tiles[size]
 }
 export const getTileSizeFromPower = (power: TilePower): TileSize => {
+  'worklet'
   return `${2 ** power}` as TileSize
 }
 export const getTileDensity = (size: TileSize): number => {
+  'worklet'
   return tiles[size].density
 }
 export const getTilePower = (size: TileSize): TilePower => {
+  'worklet'
   return tiles[size].power
 }
 export const getTileRadius = (size: TileSize): number => {
+  'worklet'
   return 30 + 15 * getTileData(size)!.radius
 }
 export const getTileSizeFromRadius = (radius: number): TileSize => {
+  'worklet'
   const power = ((radius - 30) / 15) as TilePower
   return getTileSizeFromPower(power)
 }
 export const getMergedTileSize = (size: TileSize): TileSize => {
+  'worklet'
   return mergedSize[size]
 }
 export const getTileColor = (size: TileSize): string => {
+  'worklet'
   return tiles[size].color
 }
 export const getTileTextColor = (size: TileSize): string => {
+  'worklet'
   return tiles[size].textColor
 }
 export const getTileStyle = (data: TileData) => {
+  'worklet'
   return {
     backgroundColor: data.color,
     width: getTileRadius(data.size),

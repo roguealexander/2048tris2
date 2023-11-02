@@ -1,5 +1,5 @@
 import { observer } from '@legendapp/state/react'
-import { Button, TButton, TSizableText, XStack, YStack } from '@my/ui'
+import { Button, Spacer, TButton, TSizableText, XStack, YStack } from '@my/ui'
 import { state$, actions$ } from 'app/state'
 import { ActiveTilesHistogram } from './active-tile-histogram'
 import { useUser } from 'app/utils/useUser'
@@ -22,13 +22,9 @@ export const HighEfficiencyPanel = observer(() => {
     <PanelOrOverlayContainer>
       <YStack ai="center">
         <TSizableText size="$9" zi={1} textAlign="center">
-          NEW
-          <br />
-          EFFICIENCY
-          <br />
-          RECORD
+          NEW{'\n'}EFFICIENCY{'\n'}RECORD
         </TSizableText>
-        <br />
+        <Spacer />
         <TSizableText size="$8" fontStyle="italic">
           Size: {activeHighEfficiencyPanel}
         </TSizableText>

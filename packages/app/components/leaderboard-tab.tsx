@@ -1,5 +1,5 @@
 import { Memo, Show, observer } from '@legendapp/state/react'
-import { Spinner, TButton, TSizableText, XStack, YStack } from '@my/ui'
+import { Spacer, Spinner, TButton, TSizableText, XStack, YStack } from '@my/ui'
 import { LeaderboardType } from 'app/types'
 import { computed, observable } from '@legendapp/state'
 import { colors } from 'app/colors'
@@ -309,7 +309,7 @@ const JoinLeaderboardButton = observer(() => {
   if (isLoading || user != null) return null
   return (
     <>
-      <br />
+      <Spacer />
       <TButton w="100%" onPress={() => appState$.tab.set('user')}>
         JOIN LEADERBOARD
       </TButton>
@@ -321,17 +321,17 @@ export const LeaderboardTab = observer(() => {
   return (
     <TabContainer tab="leaderboard">
       <TSizableText size="$5">SELECT LEADERBOARD:</TSizableText>
-      <br />
+      <Spacer />
       <LeaderboardSelect />
-      <br />
-      <br />
+      <Spacer />
+      <Spacer />
       <TSizableText size="$5">TOP 10:</TSizableText>
-      <br />
+      <Spacer />
       <Leaderboard />
-      <br />
-      <br />
+      <Spacer />
+      <Spacer />
       <TSizableText size="$5">PERSONAL RECORD:</TSizableText>
-      <br />
+      <Spacer />
       <PersonalRecordRow />
       <JoinLeaderboardButton />
     </TabContainer>
