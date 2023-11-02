@@ -101,6 +101,10 @@ const VerticalAspectRatio = (450 + XPadding) / 1000
 const Container = observer(({ children }: { children: ReactNode }) => {
   const dimensions = useWindowDimensions()
 
+  console.log({
+    dimensions,
+  })
+
   // Layout Dimension
   const aspectRatio = dimensions.width / dimensions.height
   const layoutDimension = aspectRatio >= HorizontalAspectRatio ? 'horizontal' : 'vertical'
@@ -132,12 +136,14 @@ const Container = observer(({ children }: { children: ReactNode }) => {
             ai: 'center',
             fc: 'flex-start',
           })}
-      miw={462}
-      w="100%"
+      // miw={462}
+      // w={dimensions.width}
+      // maw={dimensions.width}
       f={1}
+      width={200}
       pt={84}
       px="$2"
-      scale={scale}
+      transform={[{ scale }]}
       overflow="visible"
       style={{
         transformOrigin: 'top',

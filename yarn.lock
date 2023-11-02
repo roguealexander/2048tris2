@@ -10515,7 +10515,6 @@ __metadata:
     lodash: "npm:^4.17.21"
     matter-js: "npm:^0.19.0"
     react-hook-form: "npm:^7.46.1"
-    react-native-game-engine: "npm:^1.2.0"
     react-native-gesture-handler: "npm:^2.13.4"
     react-native-mmkv: "npm:^2.10.2"
     react-native-safe-area-context: "npm:4.6.3"
@@ -23406,18 +23405,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-game-engine@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "react-native-game-engine@npm:1.2.0"
-  dependencies:
-    rxjs: "npm:^6.2.2"
-  peerDependencies:
-    react: ">= 16.3.0"
-    react-native: "*"
-  checksum: d82d2a1a373ba6e1dd883421ff4350b39e4bf311dfc3dcc224ce7f3f2a4d606fe2786393e6a455f3f4d786e8bed68a932c01bf66c386ec670784b64398512006
-  languageName: node
-  linkType: hard
-
 "react-native-gesture-handler@npm:^2.13.4":
   version: 2.13.4
   resolution: "react-native-gesture-handler@npm:2.13.4"
@@ -24465,7 +24452,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rxjs@npm:^6.2.2, rxjs@npm:^6.4.0, rxjs@npm:^6.6.0":
+"rxjs@npm:^6.4.0, rxjs@npm:^6.6.0":
   version: 6.6.7
   resolution: "rxjs@npm:6.6.7"
   dependencies:

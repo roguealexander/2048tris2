@@ -5,7 +5,7 @@ import { supabase } from 'app/utils/supabase/client.native'
 import { useFonts } from 'expo-font'
 import { SplashScreen, Stack, useSegments } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
 
 export default function Page() {
   const segments = useSegments()
@@ -52,7 +52,9 @@ export default function Page() {
     <View style={styles.container}>
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
         <Provider initialSession={initialSession}>
-          <HomeScreen />
+          <SafeAreaView>
+            <HomeScreen />
+          </SafeAreaView>
         </Provider>
       </View>
     </View>
@@ -63,7 +65,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    padding: 24,
   },
   main: {
     flex: 1,

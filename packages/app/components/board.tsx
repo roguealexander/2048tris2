@@ -43,9 +43,16 @@ import Animated, {
   useSharedValue,
   SharedValue,
   useDerivedValue,
+  runOnJS,
 } from 'react-native-reanimated'
 import { appActions$, appState$ } from 'app/appState'
+import { RigidBodies } from './rnge'
+import { GameEngine } from 'app/react-native-game-engine'
+import { Physics } from './rnge/systems'
+import { GameTile } from './GameTile'
+import Matter from 'matter-js'
 
+Matter.Common.isElement = () => false //-- Overriding this function because the original references HTMLElement
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 const WorldScale = 1
@@ -97,8 +104,10 @@ type CreateTileData = {
   size: TileSize
   position: { x: number; y: number }
   velocity?: { x: number; y: number }
+  viaMerge: boolean
 }
 let tilesToCreate: Record<string, CreateTileData> = {}
+let bodiesToRemove: Record<string, Body | Constraint> = {}
 let collidedTiles: Record<string, true> = {}
 
 const createBounds = (cw: number, ch: number) => {
@@ -215,6 +224,49 @@ const createTile = (data: CreateTileData) => {
   return [ballTile, ballSensor, ballConstraint]
 }
 
+const CreateTileSystem = (state) => {
+  Object.entries(tilesToCreate).forEach(([collisionId, createTileData]) => {
+    const tileBodies = createTile(createTileData)
+
+    // Pop sound effect
+    if (createTileData.viaMerge) {
+      appActions$.triggerPopSound(createTileData.size, collisionId)
+    }
+
+    // Update efficiency score
+    if (createTileData.viaMerge && createTileData.size === state$.targetEfficiency.peek()) {
+      actions$.triggerHighEfficiencyCheck(createTileData.size)
+    }
+
+    World.add(state['physics'].world, tileBodies)
+
+    // Index in state by sensor
+    state[tileBodies[0]!.id] = {
+      body: tileBodies[0]!, // ballTile itself
+      size: createTileData.size,
+      renderer: GameTile,
+    }
+  })
+
+  tilesToCreate = {}
+
+  return state
+}
+
+const RemoveTileSystem = (state) => {
+  Object.keys(bodiesToRemove).forEach((bodyId) => {
+    if (bodyId in state) {
+      delete state[bodyId]
+    }
+  })
+
+  // Remove from world
+  World.remove(state['physics'].world, Object.values(bodiesToRemove))
+
+  bodiesToRemove = {}
+  return state
+}
+
 const TileDropPositioner = observer(
   ({ dropX, children }: { dropX: SharedValue<number>; children: ReactNode }) => {
     const animatedStyle = useAnimatedStyle(() => {
@@ -275,7 +327,7 @@ const TilePositionDetector = ({
       mouseX.value = event.x / scale
     })
     .onFinalize(() => {
-      release()
+      runOnJS(release)()
     })
   const gesture = Gesture.Simultaneous(hoverGesture, panGesture)
 
@@ -286,7 +338,6 @@ export const BoardComp = observer(() => {
   const isTouchDevice = useIsTouchDevice()
 
   // MATTER-JS
-  const scene = useRef<HTMLDivElement | null>(null)
   const engine = useRef(
     Engine.create({
       positionIterations: 12,
@@ -294,11 +345,14 @@ export const BoardComp = observer(() => {
       gravity: { x: 0, y: 1, scale: 0.0015 },
     })
   )
-  const runner = useRef(
-    Runner.create({
-      isFixed: false,
-      delta: 1000 / 60,
-    })
+  // const runner = useRef(
+  //   Runner.create({
+  //     isFixed: false,
+  //     delta: 1000 / 60,
+  //   })
+  // )
+  const boundBodies = useRef(
+    createBounds((width - 8) * WorldScale, (height - 4 + 128) * WorldScale)
   )
 
   // const releaseDelay = useSharedValue(0)
@@ -309,7 +363,7 @@ export const BoardComp = observer(() => {
     return Math.min(Math.max(radius / 2, mouseX.value), width - 8 - radius / 2)
   }, [mouseX, activeTile])
 
-  runner.current.enabled = !state$.gamePhysicsPaused.get()
+  // runner.current.enabled = !state$.gamePhysicsPaused.get()
 
   useObserveEffect(
     () => state$.resetCount.get(),
@@ -320,7 +374,7 @@ export const BoardComp = observer(() => {
 
       for (let i = bodies.length - 1; i >= 0; i--) {
         if (bodies[i]!.label === 'Tile') {
-          Composite.remove(engine.current.world, bodies[i]!)
+          bodiesToRemove[bodies[i]!.id] = bodies[i]!
           const power = (bodies[i]?.collisionFilter.group ?? 3) as TilePower
           if (power >= 4) {
             appActions$.triggerPopSound(getTileSizeFromPower(power), bodies[i]?.id ?? power)
@@ -352,46 +406,46 @@ export const BoardComp = observer(() => {
     const cw = (width - 8) * WorldScale
     const ch = (height - 4 + 128) * WorldScale
 
-    const render = Render.create({
-      element: scene.current!,
-      engine: engine.current,
-      options: {
-        width: cw,
-        height: ch,
-        wireframes: false,
-        background: 'transparent',
-        pixelRatio: 2,
-      },
-    })
+    // const render = Render.create({
+    //   element: scene.current!,
+    //   engine: engine.current,
+    //   options: {
+    //     width: cw,
+    //     height: ch,
+    //     wireframes: false,
+    //     background: 'transparent',
+    //     pixelRatio: 2,
+    //   },
+    // })
 
-    World.add(engine.current.world, createBounds(cw, ch))
+    World.add(engine.current.world, boundBodies.current)
 
-    const tickCallback = () => {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      runner.current.deltaMin = runner.current.fps > 60 ? 1000 / runner.current.fps : 1000 / 120
+    // const tickCallback = () => {
+    //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //   // @ts-ignore
+    //   runner.current.deltaMin = runner.current.fps > 60 ? 1000 / runner.current.fps : 1000 / 120
 
-      // Create tiles
-      Object.entries(tilesToCreate).forEach(([collisionId, createTileData]) => {
-        const tileBodies = createTile(createTileData)
+    //   // // Create tiles
+    //   // Object.entries(tilesToCreate).forEach(([collisionId, createTileData]) => {
+    //   //   const tileBodies = createTile(createTileData)
 
-        // Pop sound effect
-        appActions$.triggerPopSound(createTileData.size, collisionId)
+    //   //   // Pop sound effect
+    //   //   appActions$.triggerPopSound(createTileData.size, collisionId)
 
-        // Update efficiency score
-        if (createTileData.size === state$.targetEfficiency.peek()) {
-          actions$.triggerHighEfficiencyCheck(createTileData.size)
-        }
+    //   //   // Update efficiency score
+    //   //   if (createTileData.size === state$.targetEfficiency.peek()) {
+    //   //     actions$.triggerHighEfficiencyCheck(createTileData.size)
+    //   //   }
 
-        World.add(engine.current.world, tileBodies)
-      })
+    //   //   World.add(engine.current.world, tileBodies)
+    //   // })
 
-      tilesToCreate = {}
-    }
-    Events.on(runner.current, 'tick', tickCallback)
+    //   // tilesToCreate = {}
+    // }
+    // Events.on(runner.current, 'tick', tickCallback)
 
-    Runner.start(runner.current, engine.current)
-    Render.run(render)
+    // Runner.start(runner.current, engine.current)
+    // Render.run(render)
 
     const collisionActiveCallback = (event: Matter.IEventCollision<Engine>) => {
       // Prevent top-out after game ends and before reset complete
@@ -462,15 +516,20 @@ export const BoardComp = observer(() => {
             size: mergedSize,
             position,
             velocity,
+            viaMerge: true,
           }
 
           // Remove tiles
-          World.remove(engine.current.world, [
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const _bodies = [
             sensorA,
             ...(sensorA.cascadeDelete ?? []),
             sensorB,
             ...(sensorB.cascadeDelete ?? []),
-          ])
+          ].forEach((body) => {
+            bodiesToRemove[body.id] = body
+          })
+
           state$.activeTileCount[size].set((count) => count - 2)
         }
       })
@@ -478,35 +537,34 @@ export const BoardComp = observer(() => {
     Events.on(engine.current, 'collisionStart', collisionStartCallback)
 
     return () => {
-      Render.stop(render)
+      // Render.stop(render)
       World.clear(engine.current.world, false)
       Engine.clear(engine.current)
 
-      Events.off(runner.current, 'tick', tickCallback)
+      // Events.off(runner.current, 'tick', tickCallback)
       Events.off(engine.current, 'collisionActive', collisionActiveCallback)
       Events.off(engine.current, 'collisionStart', collisionStartCallback)
 
-      render.canvas.remove()
+      // render.canvas.remove()
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      render.canvas = null
+      // render.canvas = null
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      render.context = null
-      render.textures = {}
+      // render.context = null
+      // render.textures = {}
     }
   }, [])
 
   const releaseBall = () => {
     if (state$.gameInteractionPaused.get()) return
 
-    const tileBodies = createTile({
+    tilesToCreate['fresh'] = {
       size: state$.activeTile.peek(),
       position: { x: dropX.value * WorldScale, y: 128 * WorldScale },
       velocity: { x: 0.01, y: 0 * WorldScale },
-    })
-
-    World.add(engine.current.world, tileBodies)
+      viaMerge: false,
+    }
 
     actions$.drop()
   }
@@ -517,23 +575,35 @@ export const BoardComp = observer(() => {
         <Tile size={state$.activeTile} />
       </TileDropPositioner>
       <TilePositionDetector mouseX={mouseX} release={releaseBall}>
-        <YStack ref={scene} pos="absolute" w={width - 8} height={height + 128} l={0} t={-128}>
-          {appState$.layoutDimension.get() === 'horizontal' && !isTouchDevice && (
-            <>
-              <YStack pos="absolute" l={-64} w={64} t={0} b={0} onPress={releaseBall} />
-              <YStack pos="absolute" r={-64} w={64} t={0} b={0} onPress={releaseBall} />
-            </>
-          )}
-        </YStack>
+        <GameEngine
+          style={{
+            position: 'absolute',
+            width: width - 8,
+            height: height + 128,
+            left: 0,
+            top: -128,
+          }}
+          systems={[Physics, CreateTileSystem, RemoveTileSystem]}
+          entities={{
+            physics: { engine: engine.current, world: engine.current.world },
+          }}
+        />
       </TilePositionDetector>
+      {appState$.layoutDimension.get() === 'horizontal' && !isTouchDevice && (
+        <>
+          <YStack pos="absolute" l={-64} w={64} t={0} b={0} onPress={releaseBall} />
+          <YStack pos="absolute" r={-64} w={64} t={0} b={0} onPress={releaseBall} />
+        </>
+      )}
     </YStack>
   )
 })
 
 export const Board = observer(() => {
   return (
-    <YStack gap="$2" pos="relative" ai="flex-start" mt={23}>
-      {/* <BoardComp /> */}
+    <YStack gap="$2" h={700} pos="relative" ai="flex-start" mt={23}>
+      <BoardComp />
+      {/* <RigidBodies /> */}
     </YStack>
   )
 })

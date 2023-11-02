@@ -36,7 +36,7 @@ export const Tile = observer(
         pe="none"
         {...stackProps}
       >
-        <TSizableText size="$7" color={tileData.textColor} selectable={false}>
+        <TSizableText pt={2} size="$7" color={tileData.textColor} selectable={false}>
           {tileData.size}
         </TSizableText>
       </XStack>

@@ -13,16 +13,16 @@ export const Score = observer(() => {
       <TSizableText>
         Score:
         {'\n'}
-        <b>
+        <TSizableText fontWeight="bold">
           <Memo>{state$.score}</Memo>
-        </b>
+        </TSizableText>
       </TSizableText>
       <TSizableText>
         Record:
         {'\n'}
-        <b>
+        <TSizableText fontWeight="bold">
           <HighScoreValue />
-        </b>
+        </TSizableText>
       </TSizableText>
     </YStack>
   )
@@ -39,16 +39,16 @@ export const Efficiency = observer(() => {
       <TSizableText>
         Efficiency:
         {'\n'}
-        <b>
+        <TSizableText fontWeight="bold">
           <Memo>{state$.efficiency}</Memo>%
-        </b>
+        </TSizableText>
       </TSizableText>
       <TSizableText>
         Record:
         {'\n'}
-        <b>
+        <TSizableText fontWeight="bold">
           <HighEfficiencyValue /> (<Memo>{state$.targetEfficiency}</Memo>)
-        </b>
+        </TSizableText>
       </TSizableText>
     </YStack>
   )
