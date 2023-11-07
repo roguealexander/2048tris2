@@ -3,7 +3,6 @@ import { state$ } from '../state'
 import { Tile } from './tile'
 import { TSizableText, YStack } from '@my/ui'
 import { appState$ } from 'app/appState'
-import { useScale } from './useScale'
 
 const horizontalScale = 144
 const verticalScale = 104
@@ -11,7 +10,7 @@ const verticalScale = 104
 export const Queue = observer(() => {
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
   const vertical = !horizontal
-  const scale = useScale()
+  const scale = appState$.scale.get()
 
   return (
     <YStack>

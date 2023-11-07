@@ -2,11 +2,10 @@ import { observer } from '@legendapp/state/react'
 import { ScrollView } from '@my/ui'
 import { Tab, appState$ } from 'app/appState'
 import { ReactNode } from 'react'
-import { useScale } from './useScale'
 import { useSafeAreaFrame } from 'app/utils/useSafeAreaFrame'
 
 export const TabContainer = observer(({ tab, children }: { tab: Tab; children: ReactNode }) => {
-  const scale = useScale()
+  const scale = appState$.scale.get()
   const frame = useSafeAreaFrame()
   if (appState$.tab.get() !== tab) return null
 

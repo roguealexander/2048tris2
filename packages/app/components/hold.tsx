@@ -3,13 +3,12 @@ import { actions$, state$ } from '../state'
 import { Tile } from './tile'
 import { Shake, TSizableText, XStack, YStack } from '@my/ui'
 import { appState$ } from 'app/appState'
-import { useScale } from './useScale'
 
 const horizontalSize = 144
 const verticalSize = 104
 
 export const Hold = observer(() => {
-  const scale = useScale()
+  const scale = appState$.scale.get()
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
 
   return (

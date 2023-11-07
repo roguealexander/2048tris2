@@ -9,7 +9,6 @@ import { RouterOutputs } from '@my/api'
 import { stats$ } from 'app/statsState'
 import { useUser } from 'app/utils/useUser'
 import { appState$ } from 'app/appState'
-import { useScale } from './useScale'
 
 const leaderboard$ = observable<LeaderboardType>('scoreHigh')
 const leaderboardTitle$ = computed(() => {
@@ -28,7 +27,7 @@ const leaderboardTitle$ = computed(() => {
 })
 
 const LeaderboardSelect = observer(() => {
-  const scale = useScale()
+  const scale = appState$.scale.get()
   const optionWidth = scale < 0 ? 100 : 70 * scale
   return (
     <XStack w="100%" jc="center" gap={18 * scale}>

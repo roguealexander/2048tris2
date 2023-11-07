@@ -22,12 +22,11 @@ import { colors } from 'app/colors'
 import { ShowStatsButton } from 'app/components/show-stats-button'
 import { StatsPanel } from 'app/components/stats-panel'
 import { useSafeAreaFrame } from 'app/utils/useSafeAreaFrame'
-import { useScale } from 'app/components/useScale'
 
 const ActiveLeftPanel = observer(() => {
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
   const vertical = !horizontal
-  const scale = useScale()
+  const scale = appState$.scale.get()
 
   if (vertical || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null)
     return null
@@ -48,7 +47,7 @@ const ActiveLeftPanel = observer(() => {
 const ActiveRightPanel = observer(() => {
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
   const vertical = !horizontal
-  const scale = useScale()
+  const scale = appState$.scale.get()
 
   if (vertical || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null)
     return null
@@ -63,7 +62,7 @@ const ActiveRightPanel = observer(() => {
 
 const ActiveBottomPanel = observer(() => {
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
-  const scale = useScale()
+  const scale = appState$.scale.get()
   if (horizontal) return null
   return (
     <XStack gap={8 * scale} w={450 * scale} jc="space-between">
@@ -74,7 +73,7 @@ const ActiveBottomPanel = observer(() => {
 })
 
 const ActiveTopPanel = observer(() => {
-  const scale = useScale()
+  const scale = appState$.scale.get()
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
   if (horizontal || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null)
     return null
@@ -161,7 +160,7 @@ const Container = observer(({ children }: { children: ReactNode }) => {
 })
 
 const Tabs = observer(() => {
-  const scale = useScale()
+  const scale = appState$.scale.get()
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
   const tab = appState$.tab.get()
 

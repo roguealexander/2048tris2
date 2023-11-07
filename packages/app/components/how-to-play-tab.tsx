@@ -18,7 +18,7 @@ import { BaseHoldListener } from './hold-listener'
 import { ArrowDownLeft, ArrowLeftRight, Merge } from '@tamagui/lucide-icons'
 import { TabContainer } from './tab-container'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
-import { useScale } from './useScale'
+import { appState$ } from 'app/appState'
 
 // Rule drop state
 const activeTile$ = observable<TileSize>('4')
@@ -27,7 +27,7 @@ const releasedTile$ = observable<TileSize>('4')
 
 const TileDropPositioner = observer(
   ({ dropX, children }: { dropX: SharedValue<number>; children: ReactNode }) => {
-    const scale = useScale()
+    const scale = appState$.scale.get()
     const animatedStyle = useAnimatedStyle(() => {
       return {
         left: (dropX.value - 64) * scale,
@@ -55,46 +55,48 @@ const TileDropPositioner = observer(
   }
 )
 
-const TilePositionDetector = ({
-  mouseX,
-  release,
-  children,
-}: {
-  mouseX: SharedValue<number>
-  release: () => void
-  children: ReactNode
-}) => {
-  const isTouchDevice = useIsTouchDevice()
-  const scale = useScale()
+const TilePositionDetector = observer(
+  ({
+    mouseX,
+    release,
+    children,
+  }: {
+    mouseX: SharedValue<number>
+    release: () => void
+    children: ReactNode
+  }) => {
+    const isTouchDevice = useIsTouchDevice()
+    const scale = appState$.scale.get()
 
-  const hoverGesture = Gesture.Hover()
-    .onBegin((event) => {
-      if (isTouchDevice) return
-      mouseX.value = event.x / scale
-    })
-    .onChange((event) => {
-      if (isTouchDevice) return
-      mouseX.value = event.x / scale
-    })
-  const panGesture = Gesture.Pan()
-    .onBegin((event) => {
-      if (!isTouchDevice) return
-      mouseX.value = event.x / scale
-    })
-    .onChange((event) => {
-      if (!isTouchDevice) return
-      mouseX.value = event.x / scale
-    })
-    .onFinalize(() => {
-      runOnJS(release)()
-    })
-  const gesture = Gesture.Simultaneous(hoverGesture, panGesture)
+    const hoverGesture = Gesture.Hover()
+      .onBegin((event) => {
+        if (isTouchDevice) return
+        mouseX.value = event.x / scale
+      })
+      .onChange((event) => {
+        if (isTouchDevice) return
+        mouseX.value = event.x / scale
+      })
+    const panGesture = Gesture.Pan()
+      .onBegin((event) => {
+        if (!isTouchDevice) return
+        mouseX.value = event.x / scale
+      })
+      .onChange((event) => {
+        if (!isTouchDevice) return
+        mouseX.value = event.x / scale
+      })
+      .onFinalize(() => {
+        runOnJS(release)()
+      })
+    const gesture = Gesture.Simultaneous(hoverGesture, panGesture)
 
-  return <GestureDetector gesture={gesture}>{children}</GestureDetector>
-}
+    return <GestureDetector gesture={gesture}>{children}</GestureDetector>
+  }
+)
 
 const DropExample = observer(() => {
-  const scale = useScale()
+  const scale = appState$.scale.get()
   const isTouchDevice = useIsTouchDevice()
   const dropProgress = useSharedValue(1)
   const releaseX = useSharedValue(0)
@@ -184,7 +186,7 @@ const heldTile = observable<TileSize>('16')
 const holdPressed = observable(false)
 
 const HoldExample = observer(() => {
-  const scale = useScale()
+  const scale = appState$.scale.get()
   const isTouchDevice = useIsTouchDevice()
 
   const swapActiveAndHoldTile = () => {
@@ -264,8 +266,8 @@ const HoldExample = observer(() => {
   )
 })
 
-const CombineExample = () => {
-  const scale = useScale()
+const CombineExample = observer(() => {
+  const scale = appState$.scale.get()
   return (
     <>
       <TSizableText>Combine tiles</TSizableText>
@@ -283,7 +285,7 @@ const CombineExample = () => {
       </XStack>
     </>
   )
-}
+})
 
 export const HowToPlayTab = observer(() => {
   return (

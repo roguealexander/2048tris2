@@ -3,10 +3,11 @@ import { getTileData, getTileRadius } from 'app/tiles'
 import { TileSize } from 'app/types'
 import { Body } from 'matter-js'
 import Animated from 'react-native-reanimated'
-import { useScale } from './useScale'
+import { appState$ } from 'app/appState'
+import { useSelector } from '@legendapp/state/react'
 
 export const GameTile = ({ body, size }: { body: Body; size: TileSize }) => {
-  const scale = useScale()
+  const scale = useSelector(appState$.scale)
   const tileData = getTileData(size)!
   const tileRadius = getTileRadius(size)
 

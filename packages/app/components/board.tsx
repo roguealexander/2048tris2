@@ -35,12 +35,10 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated'
 import { appActions$, appState$ } from 'app/appState'
-import { RigidBodies } from './rnge'
 import { GameEngine } from 'app/react-native-game-engine'
 import { Physics } from './rnge/systems'
 import { GameTile } from './GameTile'
 import Matter from 'matter-js'
-import { useScale } from './useScale'
 import React from 'react'
 
 Matter.Common.isElement = () => false //-- Overriding this function because the original references HTMLElement
@@ -260,7 +258,7 @@ const RemoveTileSystem = (state) => {
 
 const TileDropPositioner = observer(
   ({ dropX, children }: { dropX: SharedValue<number>; children: ReactNode }) => {
-    const scale = useScale()
+    const scale = appState$.scale.get()
     const animatedStyle = useAnimatedStyle(() => {
       return {
         left: (dropX.value - 64) * scale,
@@ -288,45 +286,41 @@ const TileDropPositioner = observer(
   }
 )
 
-const TilePositionDetector = ({
-  mouseX,
-  release,
-}: {
-  mouseX: SharedValue<number>
-  release: () => void
-}) => {
-  const isTouchDevice = useIsTouchDevice()
-  const scale = useScale()
+const TilePositionDetector = observer(
+  ({ mouseX, release }: { mouseX: SharedValue<number>; release: () => void }) => {
+    const isTouchDevice = useIsTouchDevice()
+    const scale = appState$.scale.get()
 
-  const hoverGesture = Gesture.Hover()
-    .onBegin((event) => {
-      if (isTouchDevice) return
-      mouseX.value = event.x / scale
-    })
-    .onChange((event) => {
-      if (isTouchDevice) return
-      mouseX.value = event.x / scale
-    })
-  const panGesture = Gesture.Pan()
-    .onBegin((event) => {
-      if (!isTouchDevice) return
-      mouseX.value = event.x / scale
-    })
-    .onChange((event) => {
-      if (!isTouchDevice) return
-      mouseX.value = event.x / scale
-    })
-    .onFinalize(() => {
-      runOnJS(release)()
-    })
-  const gesture = Gesture.Simultaneous(hoverGesture, panGesture)
+    const hoverGesture = Gesture.Hover()
+      .onBegin((event) => {
+        if (isTouchDevice) return
+        mouseX.value = event.x / scale
+      })
+      .onChange((event) => {
+        if (isTouchDevice) return
+        mouseX.value = event.x / scale
+      })
+    const panGesture = Gesture.Pan()
+      .onBegin((event) => {
+        if (!isTouchDevice) return
+        mouseX.value = event.x / scale
+      })
+      .onChange((event) => {
+        if (!isTouchDevice) return
+        mouseX.value = event.x / scale
+      })
+      .onFinalize(() => {
+        runOnJS(release)()
+      })
+    const gesture = Gesture.Simultaneous(hoverGesture, panGesture)
 
-  return (
-    <GestureDetector gesture={gesture}>
-      <XStack fullscreen />
-    </GestureDetector>
-  )
-}
+    return (
+      <GestureDetector gesture={gesture}>
+        <XStack fullscreen />
+      </GestureDetector>
+    )
+  }
+)
 
 export const Game = observer(
   // eslint-disable-next-line react/display-name
@@ -498,7 +492,7 @@ export const Game = observer(
 )
 
 export const BoardComp = observer(() => {
-  const scale = useScale()
+  const scale = appState$.scale.get()
   const isTouchDevice = useIsTouchDevice()
 
   // MATTER-JS

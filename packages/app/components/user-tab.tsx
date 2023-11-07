@@ -8,10 +8,10 @@ import { AuthComponent } from 'app/features/auth/auth-component'
 import { stats$, statsActions$ } from 'app/statsState'
 import { User } from '@supabase/supabase-js'
 import { api } from 'app/utils/api'
-import { useScale } from './useScale'
+import { appState$ } from 'app/appState'
 
 const Header = observer(() => {
-  const scale = useScale()
+  const scale = appState$.scale.get()
   return (
     <>
       <XStack h="$4" w="100%" ai="center" jc="space-between" px={18 * scale} pos="relative">
@@ -41,7 +41,7 @@ const Row = observer(
     score: string
     highlight?: boolean
   }) => {
-    const scale = useScale()
+    const scale = appState$.scale.get()
     return (
       <XStack pos="relative" h="$3" w="100%" ai="center" jc="space-between" px={18 * scale}>
         <XStack fullscreen bg={colors.tile['2']} o={highlight ? 0.6 : 0.4} zi={-1} />
