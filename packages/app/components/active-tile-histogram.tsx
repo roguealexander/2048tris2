@@ -3,6 +3,7 @@ import { state$ } from '../state'
 import { TileList } from '../types'
 import { getTileColor } from '../tiles'
 import { TSizableText, XStack, YStack } from '@my/ui'
+import { useScale } from './useScale'
 
 export const ActiveTilesHistogram = observer(
   ({ noTargetEfficiency }: { noTargetEfficiency?: boolean }) => {
@@ -10,6 +11,7 @@ export const ActiveTilesHistogram = observer(
     const maxTilesCount = Math.max(1, maxTilesCountRaw)
     const activeTileCount = state$.activeTileCount.get()
     const targetEfficiency = state$.targetEfficiency.get()
+    const scale = useScale()
     return (
       <>
         <TSizableText>Histogram:</TSizableText>
@@ -19,7 +21,7 @@ export const ActiveTilesHistogram = observer(
               <XStack
                 key={size}
                 w="100%"
-                h={23}
+                h={23 * scale}
                 pos="relative"
                 ai="center"
                 jc="flex-start"
@@ -33,7 +35,7 @@ export const ActiveTilesHistogram = observer(
                   pos="absolute"
                   r={0}
                   t={0}
-                  h={23}
+                  h={23 * scale}
                   bg={getTileColor(size)}
                   o={activeTileCount[size] > 0 ? 1 : 0.5}
                   style={{

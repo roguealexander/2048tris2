@@ -26,7 +26,7 @@ import ball2048 from '../assets/2048.png'
 import ball4096 from '../assets/4096.png'
 import ball8192 from '../assets/8192.png'
 import { TilePower, TileRecord, TileSize } from '../types'
-import { YStack, useIsTouchDevice } from '@my/ui'
+import { XStack, YStack, useIsTouchDevice } from '@my/ui'
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -41,11 +41,12 @@ import { Physics } from './rnge/systems'
 import { GameTile } from './GameTile'
 import Matter from 'matter-js'
 import { useScale } from './useScale'
+import React from 'react'
 
 Matter.Common.isElement = () => false //-- Overriding this function because the original references HTMLElement
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
-const WorldScale = 1
+const GameScale = 1
 
 const width = 450
 const height = 700
@@ -290,11 +291,9 @@ const TileDropPositioner = observer(
 const TilePositionDetector = ({
   mouseX,
   release,
-  children,
 }: {
   mouseX: SharedValue<number>
   release: () => void
-  children: ReactNode
 }) => {
   const isTouchDevice = useIsTouchDevice()
   const scale = useScale()
@@ -322,175 +321,336 @@ const TilePositionDetector = ({
     })
   const gesture = Gesture.Simultaneous(hoverGesture, panGesture)
 
-  return <GestureDetector gesture={gesture}>{children}</GestureDetector>
+  return (
+    <GestureDetector gesture={gesture}>
+      <XStack fullscreen />
+    </GestureDetector>
+  )
 }
+
+export const Game = observer(
+  // eslint-disable-next-line react/display-name
+  React.memo(() => {
+    // MATTER-JS
+    const engine = useRef(
+      Engine.create({
+        positionIterations: 12,
+        velocityIterations: 12,
+      })
+    )
+    const boundBodies = useRef(
+      createBounds((width - 8) * GameScale, (height - 4 + 128) * GameScale)
+    )
+
+    useObserveEffect(
+      () => state$.resetCount.get(),
+      async ({ value }) => {
+        if (value === 0 || engine.current == null) return
+
+        const bodies = Composite.allBodies(engine.current!.world)
+
+        for (let i = bodies.length - 1; i >= 0; i--) {
+          if (bodies[i]!.label === 'Tile') {
+            bodiesToRemove[bodies[i]!.id] = bodies[i]!
+            const power = (bodies[i]?.collisionFilter.group ?? 3) as TilePower
+            if (power >= 4) {
+              appActions$.triggerPopSound(getTileSizeFromPower(power), bodies[i]?.id ?? power)
+            }
+            await sleep(25)
+          }
+        }
+
+        Composite.clear(engine.current!.world, false)
+
+        handledCollisions = {}
+        collidedTiles = {}
+        tilesToCreate = {}
+
+        World.add(engine.current.world, boundBodies.current)
+
+        state$.resetting.set(false)
+      }
+    )
+
+    useEffect(() => {
+      engine.current.positionIterations = 12
+      engine.current.velocityIterations = 12
+
+      World.add(engine.current.world, boundBodies.current)
+
+      const collisionActiveCallback = (event: Matter.IEventCollision<Engine>) => {
+        // Prevent top-out after game ends and before reset complete
+        if (state$.toppedOut.peek() || state$.resetting.peek()) return
+
+        const { pairs } = event
+
+        pairs.forEach((pair) => {
+          const { timeUpdated, timeCreated, bodyA, bodyB } = pair
+
+          if (
+            bodyA.collisionFilter.category === categoryTopOut ||
+            bodyB.collisionFilter.category === categoryTopOut
+          ) {
+            if (timeUpdated - timeCreated > 2000) {
+              actions$.topOut()
+            }
+          }
+        })
+      }
+      Events.on(engine.current, 'collisionActive', collisionActiveCallback)
+
+      const collisionStartCallback = (event: Matter.IEventCollision<Engine>) => {
+        // Prevent collisions after game ends
+        if (state$.toppedOut.peek() || state$.resetting.peek()) return
+
+        const { pairs } = event
+
+        pairs.forEach((pair) => {
+          const { id, bodyA, bodyB } = pair
+
+          // Escape if not sensor
+          if (
+            bodyA.collisionFilter.category == null ||
+            bodyA.collisionFilter.category === categoryPhysics ||
+            bodyB.collisionFilter.category == null ||
+            bodyB.collisionFilter.category === categoryPhysics
+          )
+            return
+
+          // Escape if collision already handled
+          if (handledCollisions[id]) return
+          handledCollisions[id] = true
+
+          if (bodyA.collisionFilter.category === bodyB.collisionFilter.category) {
+            const power = bodyA.collisionFilter.group
+
+            const sensorA = bodyA as BodyWithCascadeDelete
+            const sensorB = bodyB as BodyWithCascadeDelete
+            const lowestVelocitySensor =
+              Vector.magnitude(sensorA.velocity) < Vector.magnitude(sensorB.velocity)
+                ? sensorA
+                : sensorB
+            const positionCenter = Vector.div(Vector.add(sensorA.position, sensorB.position), 2)
+            const position = Vector.div(
+              Vector.add(positionCenter, lowestVelocitySensor.position),
+              2
+            )
+            const velocity = Vector.div(Vector.add(sensorA.velocity, sensorB.velocity), 3)
+
+            // Escape if tiles already collided
+            if (collidedTiles[sensorA.id] || collidedTiles[sensorB.id]) return
+
+            collidedTiles[sensorB.id] = true
+
+            // Created merged tile
+            const size = getTileSizeFromPower(power as TilePower)
+            const mergedSize = getMergedTileSize(size)
+
+            tilesToCreate[id] = {
+              size: mergedSize,
+              position,
+              velocity,
+              viaMerge: true,
+            }
+
+            // Remove tiles
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const _bodies = [
+              sensorA,
+              ...(sensorA.cascadeDelete ?? []),
+              sensorB,
+              ...(sensorB.cascadeDelete ?? []),
+            ].forEach((body) => {
+              bodiesToRemove[body.id] = body
+            })
+
+            state$.activeTileCount[size].set((count) => count - 2)
+          }
+        })
+      }
+      Events.on(engine.current, 'collisionStart', collisionStartCallback)
+
+      return () => {
+        World.clear(engine.current.world, false)
+        Engine.clear(engine.current)
+
+        Events.off(engine.current, 'collisionActive', collisionActiveCallback)
+        Events.off(engine.current, 'collisionStart', collisionStartCallback)
+      }
+    }, [])
+
+    return (
+      <GameEngine
+        style={{
+          position: 'absolute',
+          width: (width - 8) * GameScale,
+          height: (height - 4 + 128) * GameScale,
+          left: 0,
+          top: 0,
+        }}
+        systems={[Physics, CreateTileSystem, RemoveTileSystem]}
+        entities={{
+          physics: { engine: engine.current, world: engine.current.world },
+        }}
+      />
+    )
+  })
+)
 
 export const BoardComp = observer(() => {
   const scale = useScale()
   const isTouchDevice = useIsTouchDevice()
 
   // MATTER-JS
-  const engine = useRef(
-    Engine.create({
-      positionIterations: 12,
-      velocityIterations: 12,
-    })
-  )
-  // const runner = useRef(
-  //   Runner.create({
-  //     isFixed: false,
-  //     delta: 1000 / 60,
+  // const engine = useRef(
+  //   Engine.create({
+  //     positionIterations: 12,
+  //     velocityIterations: 12,
   //   })
   // )
-  const boundBodies = useRef(createBounds(width - 8, height - 4 + 128))
+  // const boundBodies = useRef(createBounds(width - 8, height - 4 + 128))
 
-  // const releaseDelay = useSharedValue(0)
   const mouseX = useSharedValue(0)
   const activeTile = state$.activeTile.get()
   const dropX = useDerivedValue(() => {
     const radius = getTileRadius(activeTile)
-    return Math.min(Math.max(radius / 2, mouseX.value), width - 8 - radius / 2)
+    return Math.min(Math.max(radius / 2, mouseX.value), (width - 8) * GameScale - radius / 2)
   }, [mouseX, activeTile])
 
-  // runner.current.enabled = !state$.gamePhysicsPaused.get()
+  // useObserveEffect(
+  //   () => state$.resetCount.get(),
+  //   async ({ value }) => {
+  //     if (value === 0 || engine.current == null) return
 
-  useObserveEffect(
-    () => state$.resetCount.get(),
-    async ({ value }) => {
-      if (value === 0 || engine.current == null) return
+  //     const bodies = Composite.allBodies(engine.current!.world)
 
-      const bodies = Composite.allBodies(engine.current!.world)
+  //     for (let i = bodies.length - 1; i >= 0; i--) {
+  //       if (bodies[i]!.label === 'Tile') {
+  //         bodiesToRemove[bodies[i]!.id] = bodies[i]!
+  //         const power = (bodies[i]?.collisionFilter.group ?? 3) as TilePower
+  //         if (power >= 4) {
+  //           appActions$.triggerPopSound(getTileSizeFromPower(power), bodies[i]?.id ?? power)
+  //         }
+  //         await sleep(25)
+  //       }
+  //     }
 
-      for (let i = bodies.length - 1; i >= 0; i--) {
-        if (bodies[i]!.label === 'Tile') {
-          bodiesToRemove[bodies[i]!.id] = bodies[i]!
-          const power = (bodies[i]?.collisionFilter.group ?? 3) as TilePower
-          if (power >= 4) {
-            appActions$.triggerPopSound(getTileSizeFromPower(power), bodies[i]?.id ?? power)
-          }
-          await sleep(25)
-        }
-      }
+  //     Composite.clear(engine.current!.world, false)
 
-      Composite.clear(engine.current!.world, false)
+  //     handledCollisions = {}
+  //     collidedTiles = {}
+  //     tilesToCreate = {}
 
-      handledCollisions = {}
-      collidedTiles = {}
-      tilesToCreate = {}
+  //     World.add(engine.current.world, boundBodies.current)
 
-      const cw = width - 8
-      const ch = height - 4 + 64 * 2
+  //     state$.resetting.set(false)
+  //   }
+  // )
 
-      World.add(engine.current.world, createBounds(cw, ch))
+  // useEffect(() => {
+  //   engine.current.positionIterations = 12
+  //   engine.current.velocityIterations = 12
+  //   engine.current.gravity = { x: 0, y: 1, scale: 0.0015 }
 
-      state$.resetting.set(false)
-    }
-  )
+  //   World.add(engine.current.world, boundBodies.current)
 
-  useEffect(() => {
-    engine.current.positionIterations = 12
-    engine.current.velocityIterations = 12
-    engine.current.gravity = { x: 0, y: 1, scale: 0.0015 }
+  //   const collisionActiveCallback = (event: Matter.IEventCollision<Engine>) => {
+  //     // Prevent top-out after game ends and before reset complete
+  //     if (state$.toppedOut.peek() || state$.resetting.peek()) return
 
-    World.add(engine.current.world, boundBodies.current)
+  //     const { pairs } = event
 
-    const collisionActiveCallback = (event: Matter.IEventCollision<Engine>) => {
-      // Prevent top-out after game ends and before reset complete
-      if (state$.toppedOut.peek() || state$.resetting.peek()) return
+  //     pairs.forEach((pair) => {
+  //       const { timeUpdated, timeCreated, bodyA, bodyB } = pair
 
-      const { pairs } = event
+  //       if (
+  //         bodyA.collisionFilter.category === categoryTopOut ||
+  //         bodyB.collisionFilter.category === categoryTopOut
+  //       ) {
+  //         if (timeUpdated - timeCreated > 2000) {
+  //           actions$.topOut()
+  //         }
+  //       }
+  //     })
+  //   }
+  //   Events.on(engine.current, 'collisionActive', collisionActiveCallback)
 
-      pairs.forEach((pair) => {
-        const { timeUpdated, timeCreated, bodyA, bodyB } = pair
+  //   const collisionStartCallback = (event: Matter.IEventCollision<Engine>) => {
+  //     // Prevent collisions after game ends
+  //     if (state$.toppedOut.peek() || state$.resetting.peek()) return
 
-        if (
-          bodyA.collisionFilter.category === categoryTopOut ||
-          bodyB.collisionFilter.category === categoryTopOut
-        ) {
-          if (timeUpdated - timeCreated > 2000) {
-            actions$.topOut()
-          }
-        }
-      })
-    }
-    Events.on(engine.current, 'collisionActive', collisionActiveCallback)
+  //     const { pairs } = event
 
-    const collisionStartCallback = (event: Matter.IEventCollision<Engine>) => {
-      // Prevent collisions after game ends
-      if (state$.toppedOut.peek() || state$.resetting.peek()) return
+  //     pairs.forEach((pair) => {
+  //       const { id, bodyA, bodyB } = pair
 
-      const { pairs } = event
+  //       // Escape if not sensor
+  //       if (
+  //         bodyA.collisionFilter.category == null ||
+  //         bodyA.collisionFilter.category === categoryPhysics ||
+  //         bodyB.collisionFilter.category == null ||
+  //         bodyB.collisionFilter.category === categoryPhysics
+  //       )
+  //         return
 
-      pairs.forEach((pair) => {
-        const { id, bodyA, bodyB } = pair
+  //       // Escape if collision already handled
+  //       if (handledCollisions[id]) return
+  //       handledCollisions[id] = true
 
-        // Escape if not sensor
-        if (
-          bodyA.collisionFilter.category == null ||
-          bodyA.collisionFilter.category === categoryPhysics ||
-          bodyB.collisionFilter.category == null ||
-          bodyB.collisionFilter.category === categoryPhysics
-        )
-          return
+  //       if (bodyA.collisionFilter.category === bodyB.collisionFilter.category) {
+  //         const power = bodyA.collisionFilter.group
 
-        // Escape if collision already handled
-        if (handledCollisions[id]) return
-        handledCollisions[id] = true
+  //         const sensorA = bodyA as BodyWithCascadeDelete
+  //         const sensorB = bodyB as BodyWithCascadeDelete
+  //         const lowestVelocitySensor =
+  //           Vector.magnitude(sensorA.velocity) < Vector.magnitude(sensorB.velocity)
+  //             ? sensorA
+  //             : sensorB
+  //         const positionCenter = Vector.div(Vector.add(sensorA.position, sensorB.position), 2)
+  //         const position = Vector.div(Vector.add(positionCenter, lowestVelocitySensor.position), 2)
+  //         const velocity = Vector.div(Vector.add(sensorA.velocity, sensorB.velocity), 3)
 
-        if (bodyA.collisionFilter.category === bodyB.collisionFilter.category) {
-          const power = bodyA.collisionFilter.group
+  //         // Escape if tiles already collided
+  //         if (collidedTiles[sensorA.id] || collidedTiles[sensorB.id]) return
 
-          const sensorA = bodyA as BodyWithCascadeDelete
-          const sensorB = bodyB as BodyWithCascadeDelete
-          const lowestVelocitySensor =
-            Vector.magnitude(sensorA.velocity) < Vector.magnitude(sensorB.velocity)
-              ? sensorA
-              : sensorB
-          const positionCenter = Vector.div(Vector.add(sensorA.position, sensorB.position), 2)
-          const position = Vector.div(Vector.add(positionCenter, lowestVelocitySensor.position), 2)
-          const velocity = Vector.div(Vector.add(sensorA.velocity, sensorB.velocity), 3)
+  //         collidedTiles[sensorB.id] = true
 
-          // Escape if tiles already collided
-          if (collidedTiles[sensorA.id] || collidedTiles[sensorB.id]) return
+  //         // Created merged tile
+  //         const size = getTileSizeFromPower(power as TilePower)
+  //         const mergedSize = getMergedTileSize(size)
 
-          collidedTiles[sensorB.id] = true
+  //         tilesToCreate[id] = {
+  //           size: mergedSize,
+  //           position,
+  //           velocity,
+  //           viaMerge: true,
+  //         }
 
-          // Created merged tile
-          const size = getTileSizeFromPower(power as TilePower)
-          const mergedSize = getMergedTileSize(size)
+  //         // Remove tiles
+  //         // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  //         const _bodies = [
+  //           sensorA,
+  //           ...(sensorA.cascadeDelete ?? []),
+  //           sensorB,
+  //           ...(sensorB.cascadeDelete ?? []),
+  //         ].forEach((body) => {
+  //           bodiesToRemove[body.id] = body
+  //         })
 
-          tilesToCreate[id] = {
-            size: mergedSize,
-            position,
-            velocity,
-            viaMerge: true,
-          }
+  //         state$.activeTileCount[size].set((count) => count - 2)
+  //       }
+  //     })
+  //   }
+  //   Events.on(engine.current, 'collisionStart', collisionStartCallback)
 
-          // Remove tiles
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const _bodies = [
-            sensorA,
-            ...(sensorA.cascadeDelete ?? []),
-            sensorB,
-            ...(sensorB.cascadeDelete ?? []),
-          ].forEach((body) => {
-            bodiesToRemove[body.id] = body
-          })
+  //   return () => {
+  //     World.clear(engine.current.world, false)
+  //     Engine.clear(engine.current)
 
-          state$.activeTileCount[size].set((count) => count - 2)
-        }
-      })
-    }
-    Events.on(engine.current, 'collisionStart', collisionStartCallback)
-
-    return () => {
-      World.clear(engine.current.world, false)
-      Engine.clear(engine.current)
-
-      Events.off(engine.current, 'collisionActive', collisionActiveCallback)
-      Events.off(engine.current, 'collisionStart', collisionStartCallback)
-    }
-  }, [])
+  //     Events.off(engine.current, 'collisionActive', collisionActiveCallback)
+  //     Events.off(engine.current, 'collisionStart', collisionStartCallback)
+  //   }
+  // }, [])
 
   const releaseBall = () => {
     if (state$.gameInteractionPaused.get()) return
@@ -514,11 +674,12 @@ export const BoardComp = observer(() => {
       w={width * scale}
       h={height * scale}
     >
+      <Game />
       <TileDropPositioner dropX={dropX}>
         <Tile size={state$.activeTile} />
       </TileDropPositioner>
-      <TilePositionDetector mouseX={mouseX} release={releaseBall}>
-        <GameEngine
+      <TilePositionDetector mouseX={mouseX} release={releaseBall} />
+      {/* <GameEngine
           style={{
             position: 'absolute',
             width: width - 8,
@@ -530,8 +691,8 @@ export const BoardComp = observer(() => {
           entities={{
             physics: { engine: engine.current, world: engine.current.world },
           }}
-        />
-      </TilePositionDetector>
+        /> */}
+      {/* </TilePositionDetector> */}
       {appState$.layoutDimension.get() === 'horizontal' && !isTouchDevice && (
         <>
           <YStack pos="absolute" l={-64 * scale} w={64 * scale} t={0} b={0} onPress={releaseBall} />

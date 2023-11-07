@@ -8,16 +8,18 @@ import { AuthComponent } from 'app/features/auth/auth-component'
 import { stats$, statsActions$ } from 'app/statsState'
 import { User } from '@supabase/supabase-js'
 import { api } from 'app/utils/api'
+import { useScale } from './useScale'
 
 const Header = observer(() => {
+  const scale = useScale()
   return (
     <>
-      <XStack h="$4" w="100%" ai="center" jc="space-between" px="$4" pos="relative">
+      <XStack h="$4" w="100%" ai="center" jc="space-between" px={18 * scale} pos="relative">
         <XStack fullscreen bg={colors.tile['2']} zi={-1} />
         <TSizableText fontWeight="bold">LEADERBOARD</TSizableText>
-        <XStack ai="center" jc="center" gap="$4">
+        <XStack ai="center" jc="center" gap={18 * scale}>
           <TSizableText fontWeight="bold">RANK</TSizableText>
-          <TSizableText fontWeight="bold" textAlign="right" w={80}>
+          <TSizableText fontWeight="bold" textAlign="right" w={80 * scale}>
             SCORE
           </TSizableText>
         </XStack>
@@ -39,13 +41,14 @@ const Row = observer(
     score: string
     highlight?: boolean
   }) => {
+    const scale = useScale()
     return (
-      <XStack pos="relative" h="$3" w="100%" ai="center" jc="space-between" px="$4">
+      <XStack pos="relative" h="$3" w="100%" ai="center" jc="space-between" px={18 * scale}>
         <XStack fullscreen bg={colors.tile['2']} o={highlight ? 0.6 : 0.4} zi={-1} />
         <TSizableText>{leaderboard}</TSizableText>
-        <XStack ai="center" jc="center" gap="$4">
+        <XStack ai="center" jc="center" gap={18 * scale}>
           <TSizableText>{score === '--' || rank == null ? '--' : rank}</TSizableText>
-          <TSizableText w={80} textAlign="right">
+          <TSizableText w={80 * scale} textAlign="right">
             {score}
           </TSizableText>
         </XStack>

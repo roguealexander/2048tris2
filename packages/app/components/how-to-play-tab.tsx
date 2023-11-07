@@ -18,7 +18,6 @@ import { BaseHoldListener } from './hold-listener'
 import { ArrowDownLeft, ArrowLeftRight, Merge } from '@tamagui/lucide-icons'
 import { TabContainer } from './tab-container'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
-import { appState$ } from 'app/appState'
 import { useScale } from './useScale'
 
 // Rule drop state
@@ -28,20 +27,21 @@ const releasedTile$ = observable<TileSize>('4')
 
 const TileDropPositioner = observer(
   ({ dropX, children }: { dropX: SharedValue<number>; children: ReactNode }) => {
+    const scale = useScale()
     const animatedStyle = useAnimatedStyle(() => {
       return {
-        left: dropX.value - 64,
+        left: (dropX.value - 64) * scale,
+        top: 64 - 64 * scale,
       }
-    }, [dropX])
+    }, [dropX, scale])
     return (
       <Animated.View
         style={[
           {
             position: 'absolute',
             pointerEvents: 'none',
-            top: 0,
-            width: 128,
-            height: 128,
+            width: 128 * scale,
+            height: 128 * scale,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -94,6 +94,7 @@ const TilePositionDetector = ({
 }
 
 const DropExample = observer(() => {
+  const scale = useScale()
   const isTouchDevice = useIsTouchDevice()
   const dropProgress = useSharedValue(1)
   const releaseX = useSharedValue(0)
@@ -118,11 +119,11 @@ const DropExample = observer(() => {
 
   const animatedStyle = useAnimatedStyle(() => {
     return {
-      top: dropProgress.value * 100,
-      left: releaseX.value - 64,
+      top: 64 - 64 * scale + dropProgress.value * 100,
+      left: (releaseX.value - 64) * scale,
       opacity: Math.min(1, 4 - dropProgress.value * 4),
     }
-  }, [dropProgress, releaseX])
+  }, [dropProgress, releaseX, scale])
 
   return (
     <>
@@ -143,12 +144,12 @@ const DropExample = observer(() => {
         )}
       </TSizableText>
       <TilePositionDetector mouseX={mouseX} release={releaseBall}>
-        <YStack w={450} h={128}>
+        <YStack w={450 * scale} h={128}>
           <Animated.View
             style={[
               {
-                width: 128,
-                height: 128,
+                width: 128 * scale,
+                height: 128 * scale,
                 alignItems: 'center',
                 justifyContent: 'center',
                 position: 'absolute',
@@ -160,7 +161,15 @@ const DropExample = observer(() => {
           >
             <Tile size={releasedTile$} />
           </Animated.View>
-          <XStack w="100%" h="50%" mt="auto" bg="$playarea" blw={4} brw={4} boc="$border" />
+          <XStack
+            w="100%"
+            h="50%"
+            mt="auto"
+            bg="$playarea"
+            blw={4 * scale}
+            brw={4 * scale}
+            boc="$border"
+          />
           <TileDropPositioner dropX={dropX}>
             <Tile size={activeTile$} />
           </TileDropPositioner>
@@ -175,6 +184,7 @@ const heldTile = observable<TileSize>('16')
 const holdPressed = observable(false)
 
 const HoldExample = observer(() => {
+  const scale = useScale()
   const isTouchDevice = useIsTouchDevice()
 
   const swapActiveAndHoldTile = () => {
@@ -204,24 +214,24 @@ const HoldExample = observer(() => {
         )}{' '}
         to put a tile in the hold
       </TSizableText>
-      <XStack ai="center" jc="space-between" gap="$6" pt="$4" w="100%">
+      <XStack ai="center" jc="space-between" pt="$4" w="100%">
         <BaseHoldListener onHold={onHold} onHoldDown={onHoldDown} />
         <XStack
-          w="$12"
-          h="$12"
+          w={144 * scale}
+          h={144 * scale}
           jc="center"
           ai="center"
           bg="$playarea"
-          bw={4}
+          bw={4 * scale}
           boc="$border"
           pos="relative"
           cur="pointer"
           onPress={swapActiveAndHoldTile}
         >
           <Tile size={heldTile} />
-          <XStack pos="absolute" t={0} r={-90} py="$1" ai="center" jc="center" gap="$2" pe="none">
+          <XStack pos="absolute" t={-20} r={-90} py="$1" ai="center" jc="center" gap="$2" pe="none">
             <ArrowDownLeft size={24} color="$text" />
-            <TSizableText size="$4" zi={2} pb={24}>
+            <TSizableText size="$4" zi={2} pb={12}>
               CLICK
             </TSizableText>
           </XStack>
@@ -246,7 +256,7 @@ const HoldExample = observer(() => {
             </XStack>
           )}
         </YStack>
-        <XStack w={125} h={125} ai="center" jc="center">
+        <XStack w={125 * scale} h={125 * scale} ai="center" jc="center">
           <Tile size={activeTile$} />
         </XStack>
       </XStack>
@@ -255,18 +265,19 @@ const HoldExample = observer(() => {
 })
 
 const CombineExample = () => {
+  const scale = useScale()
   return (
     <>
       <TSizableText>Combine tiles</TSizableText>
-      <XStack ai="center" gap="$8" w="100%" jc="space-between">
-        <YStack h={250} w={125} gap="$2" jc="space-around" ai="center">
+      <XStack ai="center" w="100%" jc="space-between">
+        <YStack h={250 * scale} w={125 * scale} gap={8 * scale} jc="space-around" ai="center">
           <Tile size={activeTile$} />
           <Tile size={activeTile$} />
         </YStack>
         <XStack rotate="90deg">
           <Merge />
         </XStack>
-        <YStack w={125} h={125} ai="center" jc="center">
+        <YStack w={125 * scale} h={125 * scale} ai="center" jc="center">
           <Tile size={mergedTile$} />
         </YStack>
       </XStack>

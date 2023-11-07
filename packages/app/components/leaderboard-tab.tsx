@@ -9,6 +9,7 @@ import { RouterOutputs } from '@my/api'
 import { stats$ } from 'app/statsState'
 import { useUser } from 'app/utils/useUser'
 import { appState$ } from 'app/appState'
+import { useScale } from './useScale'
 
 const leaderboard$ = observable<LeaderboardType>('scoreHigh')
 const leaderboardTitle$ = computed(() => {
@@ -27,21 +28,24 @@ const leaderboardTitle$ = computed(() => {
 })
 
 const LeaderboardSelect = observer(() => {
+  const scale = useScale()
+  const optionWidth = scale < 0 ? 100 : 70 * scale
   return (
-    <XStack w="100%" jc="center" gap="$4">
+    <XStack w="100%" jc="center" gap={18 * scale}>
       <YStack ai="center">
         <TSizableText size="$3">Score:</TSizableText>
-        <XStack gap="$2">
+        <XStack gap={8 * scale}>
           <XStack
             h="$3"
-            px="$4"
+            w={optionWidth}
             ai="center"
+            jc="center"
             pos="relative"
             cursor="pointer"
             onPress={() => leaderboard$.set('scoreHigh')}
           >
             <Show if={leaderboard$.get() === 'scoreHigh'}>
-              <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile['2048']} />
+              <XStack fullscreen h="$3" bg={colors.tile['2048']} />
             </Show>
             <TSizableText
               zi={2}
@@ -52,14 +56,15 @@ const LeaderboardSelect = observer(() => {
           </XStack>
           <XStack
             h="$3"
-            px="$4"
+            w={optionWidth}
             ai="center"
+            jc="center"
             pos="relative"
             cursor="pointer"
             onPress={() => leaderboard$.set('scoreLow')}
           >
             <Show if={leaderboard$.get() === 'scoreLow'}>
-              <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile['4096']} />
+              <XStack fullscreen h="$3" bg={colors.tile['4096']} />
             </Show>
             <TSizableText
               zi={2}
@@ -73,17 +78,18 @@ const LeaderboardSelect = observer(() => {
       <YStack h="100%" w={2} bg="$border" />
       <YStack ai="center">
         <TSizableText size="$3">Efficiency:</TSizableText>
-        <XStack gap="$2">
+        <XStack gap={8 * scale}>
           <XStack
             h="$3"
-            px="$4"
+            w={optionWidth}
             ai="center"
+            jc="center"
             pos="relative"
             cursor="pointer"
             onPress={() => leaderboard$.set('efficiency2048')}
           >
             <Show if={leaderboard$.get() === 'efficiency2048'}>
-              <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[64]} />
+              <XStack fullscreen h="$3" bg={colors.tile[64]} />
             </Show>
             <TSizableText
               zi={2}
@@ -94,14 +100,15 @@ const LeaderboardSelect = observer(() => {
           </XStack>
           <XStack
             h="$3"
-            px="$4"
+            w={optionWidth}
             ai="center"
+            jc="center"
             pos="relative"
             cursor="pointer"
             onPress={() => leaderboard$.set('efficiency4096')}
           >
             <Show if={leaderboard$.get() === 'efficiency4096'}>
-              <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[32]} />
+              <XStack fullscreen h="$3" bg={colors.tile[32]} />
             </Show>
             <TSizableText
               zi={2}
@@ -112,14 +119,15 @@ const LeaderboardSelect = observer(() => {
           </XStack>
           <XStack
             h="$3"
-            px="$4"
+            w={optionWidth}
             ai="center"
+            jc="center"
             pos="relative"
             cursor="pointer"
             onPress={() => leaderboard$.set('efficiency8192')}
           >
             <Show if={leaderboard$.get() === 'efficiency8192'}>
-              <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[16]} />
+              <XStack fullscreen h="$3" bg={colors.tile[16]} />
             </Show>
             <TSizableText
               zi={2}
@@ -142,7 +150,7 @@ const Header = observer(() => {
           <TSizableText w={40}>RANK</TSizableText>
           <TSizableText fontWeight="bold">PLAYER</TSizableText>
         </XStack>
-        <TSizableText fontWeight="bold">
+        <TSizableText fontWeight="bold" textAlign="right">
           <Memo>{leaderboardTitle$}</Memo>
         </TSizableText>
       </XStack>
@@ -296,7 +304,7 @@ const PersonalRecordRow = observer(() => {
 
   const rowData = {
     id: userRow?.id ?? 'anon',
-    name: user?.user_metadata?.name ?? 'YOU (anonymous)',
+    name: user?.user_metadata?.name ?? 'YOU (anon)',
     rank: rowFiltered ? userRow?.rank : undefined,
     value: rowFiltered ? rowValueString(leaderboardType, statValue!) : '--',
   }

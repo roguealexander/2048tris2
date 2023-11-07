@@ -24,7 +24,7 @@ export const TabContainer = observer(({ tab, children }: { tab: Tab; children: R
         alignItems: 'flex-start',
         justifyContent: 'flex-start',
         maxWidth: '100%',
-        paddingHorizontal: 8,
+        paddingHorizontal: 8 * scale,
         width: 450,
       }}
     >

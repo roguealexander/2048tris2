@@ -2,14 +2,17 @@ import { Memo, observer } from '@legendapp/state/react'
 import { state$ } from '../state'
 import { TSizableText, YStack } from '@my/ui'
 import { stats$ } from 'app/statsState'
+import { useScale } from './useScale'
 
 const HighScoreValue = observer(() => {
   const score = stats$.scoreHigh.get()
   return score == null ? '-' : score
 })
 export const Score = observer(() => {
+  const scale = useScale()
+
   return (
-    <YStack gap="$2" w="100%">
+    <YStack gap={8 * scale} w="100%">
       <TSizableText>
         Score:
         {'\n'}
@@ -34,8 +37,9 @@ const HighEfficiencyValue = observer(() => {
 })
 
 export const Efficiency = observer(() => {
+  const scale = useScale()
   return (
-    <YStack gap="$2" w="100%">
+    <YStack gap={8 * scale} w="100%">
       <TSizableText>
         Efficiency:
         {'\n'}

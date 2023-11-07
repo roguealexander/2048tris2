@@ -27,10 +27,13 @@ import { useScale } from 'app/components/useScale'
 const ActiveLeftPanel = observer(() => {
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
   const vertical = !horizontal
+  const scale = useScale()
+
   if (vertical || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null)
     return null
+
   return (
-    <YStack w="$12" gap="$4" mt={23}>
+    <YStack w={144 * scale} gap={16 * scale} mt={23}>
       <NewGameButton />
       <XStack w="100%" h={2} bg="$border" />
       <Score />
@@ -45,12 +48,14 @@ const ActiveLeftPanel = observer(() => {
 const ActiveRightPanel = observer(() => {
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
   const vertical = !horizontal
+  const scale = useScale()
+
   if (vertical || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null)
     return null
+
   return (
-    <YStack gap="$2" ai="flex-start">
+    <YStack gap={8 * scale} ai="flex-start">
       <Hold />
-      <Spacer />
       <Queue />
     </YStack>
   )
@@ -84,7 +89,7 @@ const ActiveTopPanel = observer(() => {
           </TSizableText>
         </TSizableText>
         <TSizableText>
-          Eff:{' '}
+          Efficiency:{' '}
           <TSizableText size="$5" fontWeight="bold">
             <Memo>{state$.efficiency}</Memo>%
           </TSizableText>
@@ -127,13 +132,13 @@ const Container = observer(({ children }: { children: ReactNode }) => {
       {...(layoutDimension === 'horizontal'
         ? {
             fd: 'row',
-            gap: 64,
+            gap: 64 * scale,
             ai: 'flex-start',
             jc: 'center',
           }
         : {
             fd: 'column',
-            gap: '$2',
+            gap: 8 * scale,
             ai: 'center',
             fc: 'flex-start',
           })}
@@ -142,7 +147,7 @@ const Container = observer(({ children }: { children: ReactNode }) => {
       // maw={dimensions.width}
       f={1}
       width="100%"
-      miw={462}
+      miw={462 * scale}
       pt={84}
       px="$2"
       // transform={[{ scale }]}
@@ -157,12 +162,14 @@ const Container = observer(({ children }: { children: ReactNode }) => {
 })
 
 const Tabs = observer(() => {
+  const scale = useScale()
+
   return (
     <XStack
       zi={10}
       h="$4"
       f={1}
-      w={appState$.layoutDimension.get() === 'horizontal' ? 866 : 450}
+      w={(appState$.layoutDimension.get() === 'horizontal' ? 866 : 450) * scale}
       flexWrap="wrap"
       ai="center"
       pos="absolute"
