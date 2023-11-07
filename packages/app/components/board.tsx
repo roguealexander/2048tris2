@@ -12,19 +12,6 @@ import {
 } from '../tiles'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 
-import ball2 from '../assets/2.png'
-import ball4 from '../assets/4.png'
-import ball8 from '../assets/8.png'
-import ball16 from '../assets/16.png'
-import ball32 from '../assets/32.png'
-import ball64 from '../assets/64.png'
-import ball128 from '../assets/128.png'
-import ball256 from '../assets/256.png'
-import ball512 from '../assets/512.png'
-import ball1024 from '../assets/1024.png'
-import ball2048 from '../assets/2048.png'
-import ball4096 from '../assets/4096.png'
-import ball8192 from '../assets/8192.png'
 import { TilePower, TileRecord, TileSize } from '../types'
 import { XStack, YStack, useIsTouchDevice } from '@my/ui'
 import Animated, {
@@ -67,22 +54,6 @@ const categoryTile: TileRecord<number> = {
   '2048': 0x0013,
   '4096': 0x0014,
   '8192': 0x0015,
-}
-
-const tileAsset: TileRecord<string> = {
-  '2': ball2.src,
-  '4': ball4.src,
-  '8': ball8.src,
-  '16': ball16.src,
-  '32': ball32.src,
-  '64': ball64.src,
-  '128': ball128.src,
-  '256': ball256.src,
-  '512': ball512.src,
-  '1024': ball1024.src,
-  '2048': ball2048.src,
-  '4096': ball4096.src,
-  '8192': ball8192.src,
 }
 
 let handledCollisions: Record<string, boolean> = {}
@@ -165,13 +136,6 @@ const createTile = (data: CreateTileData) => {
       friction: 0.05,
       frictionStatic: 0,
       frictionAir: 0,
-      render: {
-        sprite: {
-          texture: tileAsset[size],
-          xScale: 0.5,
-          yScale: 0.5,
-        },
-      },
       label: 'Tile',
       collisionFilter: { category: categoryPhysics, mask: categoryPhysics, group: power },
     },
@@ -560,7 +524,7 @@ export const BoardComp = observer(() => {
 
 export const Board = observer(() => {
   return (
-    <YStack gap="$2" pos="relative" ai="flex-start" mt={23}>
+    <YStack gap="$2" pos="relative" ai="flex-start" mt={24}>
       <BoardComp />
     </YStack>
   )

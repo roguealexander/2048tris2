@@ -79,24 +79,24 @@ const ActiveTopPanel = observer(() => {
     return null
 
   return (
-    <XStack mt={-22} mb={2} zi={3} gap="$2" w={450 * scale} jc="space-between" ai="center">
+    <XStack mt={-32} mb={-8} zi={3} gap="$2" w={450 * scale} jc="space-between" ai="center">
       <YStack>
-        <TSizableText>
+        <TSizableText size="$2">
           Score:{' '}
-          <TSizableText size="$5" fontWeight="bold">
+          <TSizableText size="$4" fontWeight="bold">
             <Memo>{state$.score}</Memo>
           </TSizableText>
         </TSizableText>
-        <TSizableText>
-          Efficiency:{' '}
-          <TSizableText size="$5" fontWeight="bold">
+        <TSizableText size="$2" mt={-4}>
+          Eff.:{' '}
+          <TSizableText size="$4" fontWeight="bold">
             <Memo>{state$.efficiency}</Memo>%
           </TSizableText>
         </TSizableText>
       </YStack>
       <XStack gap="$2">
-        <ShowStatsButton w={undefined} h="$3" />
-        <NewGameButton w={undefined} h="$3" />
+        <ShowStatsButton w={undefined} h="$2.5" />
+        <NewGameButton w={undefined} h="$2.5" />
       </XStack>
     </XStack>
   )
@@ -105,6 +105,43 @@ const ActiveTopPanel = observer(() => {
 const XPaddingSide = 6
 const XPadding = XPaddingSide * 2
 const HorizontalAspectRatio = (866 + XPadding) / 820
+
+const HorizontalFixedHeights = {
+  header: 44,
+  boardTopPadding: 44,
+  boardTopMargin: 24,
+}
+const HorizontalFixedHeightsTotal = Object.values(HorizontalFixedHeights).reduce(
+  (acc, h) => acc + h,
+  0
+)
+const HorizontalScalingHeights = {
+  board: 700,
+}
+const HorizontalScalingHeightsTotal = Object.values(HorizontalScalingHeights).reduce(
+  (acc, h) => acc + h,
+  0
+)
+const HorizontalHeightsTotal = HorizontalFixedHeightsTotal + HorizontalScalingHeightsTotal
+
+const VerticalFixedHeights = {
+  header: 44,
+  topPanel: 40,
+  boardTopMargin: 24,
+  bottomPanelText: 22,
+  bottomPadding: 12,
+}
+const VerticalFixedHeightsTotal = Object.values(VerticalFixedHeights).reduce((acc, h) => acc + h, 0)
+const VerticalScalingHeights = {
+  board: 700,
+  bottomGap: 8,
+  bottomPanel: 104,
+}
+const VerticalScalingHeightsTotal = Object.values(VerticalScalingHeights).reduce(
+  (acc, h) => acc + h,
+  0
+)
+const VerticalHeightsTotal = VerticalFixedHeightsTotal + VerticalScalingHeightsTotal
 
 const Container = observer(({ children }: { children: ReactNode }) => {
   const frame = useSafeAreaFrame()
@@ -115,11 +152,18 @@ const Container = observer(({ children }: { children: ReactNode }) => {
   appState$.layoutDimension.set(layoutDimension)
 
   // HorizontalScale
-  const horizontalScale = Math.min(1, frame.height / 820)
+  const horizontalScale = Math.min(
+    1,
+    (frame.height - HorizontalFixedHeightsTotal) /
+      (HorizontalHeightsTotal - HorizontalFixedHeightsTotal)
+  )
 
   // Vertical Scale
   const widthScale = Math.min(1, frame.width / (450 + XPadding))
-  const heightScale = Math.min(1, frame.height / 1000)
+  const heightScale = Math.min(
+    1,
+    (frame.height - VerticalFixedHeightsTotal) / (VerticalHeightsTotal - VerticalFixedHeightsTotal)
+  )
   const verticalScale = Math.min(widthScale, heightScale)
 
   const scale = layoutDimension === 'horizontal' ? horizontalScale : verticalScale
