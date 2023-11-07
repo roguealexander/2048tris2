@@ -1,5 +1,5 @@
 import { Memo, Show, observer } from '@legendapp/state/react'
-import { Spacer, Stack, TSizableText, XStack, YStack, useMedia, useWindowDimensions } from '@my/ui'
+import { Stack, TSizableText, XStack, YStack } from '@my/ui'
 import { ActiveTilesHistogram } from 'app/components/active-tile-histogram'
 import { Board } from 'app/components/board'
 import { HighEfficiencyPanel } from 'app/components/high-efficiency-panel'
@@ -17,7 +17,7 @@ import { state$ } from 'app/state'
 import React, { ReactNode } from 'react'
 import { PopSoundEffect } from 'app/components/pop-sound-effect'
 import { appState$ } from 'app/appState'
-import { UserCircle2 } from '@tamagui/lucide-icons'
+import { HelpCircle, Table, UserCircle2 } from '@tamagui/lucide-icons'
 import { colors } from 'app/colors'
 import { ShowStatsButton } from 'app/components/show-stats-button'
 import { StatsPanel } from 'app/components/stats-panel'
@@ -80,7 +80,7 @@ const ActiveTopPanel = observer(() => {
     return null
 
   return (
-    <XStack mt={-22} mb={2} zi={3} gap="$2" w={450 * scale} jc="space-between">
+    <XStack mt={-22} mb={2} zi={3} gap="$2" w={450 * scale} jc="space-between" ai="center">
       <YStack>
         <TSizableText>
           Score:{' '}
@@ -96,8 +96,8 @@ const ActiveTopPanel = observer(() => {
         </TSizableText>
       </YStack>
       <XStack gap="$2">
-        <ShowStatsButton w={undefined} px={6} p={scale < 0.7 ? 0 : undefined} />
-        <NewGameButton w={undefined} px={6} p={scale < 0.7 ? 0 : undefined} />
+        <ShowStatsButton w={undefined} h="$3" />
+        <NewGameButton w={undefined} h="$3" />
       </XStack>
     </XStack>
   )
@@ -106,7 +106,6 @@ const ActiveTopPanel = observer(() => {
 const XPaddingSide = 6
 const XPadding = XPaddingSide * 2
 const HorizontalAspectRatio = (866 + XPadding) / 820
-const VerticalAspectRatio = (450 + XPadding) / 1000
 
 const Container = observer(({ children }: { children: ReactNode }) => {
   const frame = useSafeAreaFrame()
@@ -163,6 +162,8 @@ const Container = observer(({ children }: { children: ReactNode }) => {
 
 const Tabs = observer(() => {
   const scale = useScale()
+  const horizontal = appState$.layoutDimension.get() === 'horizontal'
+  const tab = appState$.tab.get()
 
   return (
     <XStack
@@ -172,67 +173,80 @@ const Tabs = observer(() => {
       w={(appState$.layoutDimension.get() === 'horizontal' ? 866 : 450) * scale}
       flexWrap="wrap"
       ai="center"
+      jc="space-between"
       pos="absolute"
       t={0}
     >
       <XStack fullscreen o={0.9} bg="$background" />
-      <XStack
-        h="$3"
-        px="$3"
-        ai="center"
-        pos="relative"
-        cursor="pointer"
-        onPress={() => appState$.tab.set('2048tris')}
-      >
-        <Show if={appState$.tab.get() === '2048tris'}>
-          <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[2048]} />
-        </Show>
-        <TSizableText
-          size="$5"
-          zi={2}
-          color={appState$.tab.get() === '2048tris' ? colors.background : colors.text}
+      <XStack>
+        <XStack
+          h="$3"
+          px={8}
+          ai="center"
+          pos="relative"
+          cursor="pointer"
+          onPress={() => appState$.tab.set('2048tris')}
         >
-          2048tris
-        </TSizableText>
-      </XStack>
-      <XStack
-        h="$3"
-        px="$3"
-        ai="center"
-        pos="relative"
-        cursor="pointer"
-        onPress={() => appState$.tab.set('how-to-play')}
-      >
-        <Show if={appState$.tab.get() === 'how-to-play'}>
-          <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[64]} />
-        </Show>
-        <TSizableText
-          zi={2}
-          color={appState$.tab.get() === 'how-to-play' ? colors.background : colors.text}
+          <Show if={tab === '2048tris'}>
+            <XStack fullscreen h="$3" bg={colors.tile[2048]} />
+          </Show>
+          <TSizableText
+            size="$5"
+            zi={2}
+            color={tab === '2048tris' ? colors.background : colors.text}
+          >
+            2048tris
+          </TSizableText>
+        </XStack>
+        <XStack
+          h="$3"
+          px={horizontal ? 8 : 16}
+          ai="center"
+          pos="relative"
+          cursor="pointer"
+          onPress={() => appState$.tab.set('how-to-play')}
         >
-          How to Play
-        </TSizableText>
-      </XStack>
-      <XStack
-        h="$3"
-        px="$3"
-        ai="center"
-        pos="relative"
-        cursor="pointer"
-        onPress={() => appState$.tab.set('leaderboard')}
-      >
-        <Show if={appState$.tab.get() === 'leaderboard'}>
-          <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[32]} />
-        </Show>
-        <TSizableText
-          zi={2}
-          color={appState$.tab.get() === 'leaderboard' ? colors.background : colors.text}
+          <Show if={tab === 'how-to-play'}>
+            <XStack fullscreen h="$3" bg={colors.tile[64]} />
+          </Show>
+          {horizontal ? (
+            <TSizableText zi={2} color={tab === 'how-to-play' ? colors.background : colors.text}>
+              How to Play
+            </TSizableText>
+          ) : (
+            <HelpCircle
+              style={{ zIndex: 2 }}
+              size={20}
+              color={tab === 'how-to-play' ? colors.background : colors.text}
+            />
+          )}
+        </XStack>
+        <XStack
+          h="$3"
+          px={horizontal ? 8 : 16}
+          ai="center"
+          pos="relative"
+          cursor="pointer"
+          onPress={() => appState$.tab.set('leaderboard')}
         >
-          Leaderboard
-        </TSizableText>
+          <Show if={tab === 'leaderboard'}>
+            <XStack fullscreen h="$3" bg={colors.tile[32]} zi={0} />
+          </Show>
+          {horizontal ? (
+            <TSizableText zi={2} color={tab === 'leaderboard' ? colors.background : colors.text}>
+              Leaderboard
+            </TSizableText>
+          ) : (
+            <Table
+              style={{ zIndex: 2 }}
+              size={20}
+              color={tab === 'leaderboard' ? colors.background : colors.text}
+            />
+          )}
+        </XStack>
       </XStack>
+
       <XStack
-        ml="auto"
         h="$3"
         w="$3"
         ai="center"
@@ -241,12 +255,12 @@ const Tabs = observer(() => {
         cur="pointer"
         onPress={() => appState$.tab.set('user')}
       >
-        <Show if={appState$.tab.get() === 'user'}>
-          <XStack fullscreen h="$3" px="$3" ai="center" bg={colors.tile[16]} />
+        <Show if={tab === 'user'}>
+          <XStack fullscreen h="$3" bg={colors.tile[16]} />
         </Show>
         <UserCircle2
           style={{ zIndex: 2 }}
-          color={appState$.tab.get() === 'user' ? colors.background : colors.text}
+          color={tab === 'user' ? colors.background : colors.text}
         />
       </XStack>
     </XStack>
