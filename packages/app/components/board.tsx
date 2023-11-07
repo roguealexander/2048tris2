@@ -35,10 +35,11 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated'
 import { appActions$, appState$ } from 'app/appState'
-import { GameEngine } from 'app/react-native-game-engine'
 import { GameTile } from './GameTile'
 import Matter from 'matter-js'
 import React from 'react'
+import { GameEngine } from 'app/react-native-game-engine/GameEngine'
+import { GameEngineSystem } from 'app/react-native-game-engine/rnge-types'
 
 Matter.Common.isElement = () => false //-- Overriding this function because the original references HTMLElement
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -212,17 +213,17 @@ const createTile = (data: CreateTileData) => {
   return [ballTile, ballSensor, ballConstraint]
 }
 
-const Physics = (state, { time }) => {
-  if (state$.gamePhysicsPaused.peek()) return state
+const Physics: GameEngineSystem = (entities, { time }) => {
+  if (state$.gamePhysicsPaused.peek()) return entities
 
-  const engine = state['physics'].engine
+  const engine = entities['physics']?.engine
 
   Matter.Engine.update(engine, time.delta)
 
-  return state
+  return entities
 }
 
-const CreateTileSystem = (state) => {
+const CreateTileSystem: GameEngineSystem = (entities) => {
   Object.entries(tilesToCreate).forEach(([collisionId, createTileData]) => {
     const tileBodies = createTile(createTileData)
 
@@ -236,10 +237,10 @@ const CreateTileSystem = (state) => {
       actions$.triggerHighEfficiencyCheck(createTileData.size)
     }
 
-    World.add(state['physics'].world, tileBodies)
+    World.add(entities['physics']?.world, tileBodies)
 
     // Index in state by sensor
-    state[tileBodies[0]!.id] = {
+    entities[tileBodies[0]!.id] = {
       body: tileBodies[0]!, // ballTile itself
       size: createTileData.size,
       renderer: GameTile,
@@ -248,21 +249,21 @@ const CreateTileSystem = (state) => {
 
   tilesToCreate = {}
 
-  return state
+  return entities
 }
 
-const RemoveTileSystem = (state) => {
+const RemoveTileSystem: GameEngineSystem = (entities) => {
   Object.keys(bodiesToRemove).forEach((bodyId) => {
-    if (bodyId in state) {
-      delete state[bodyId]
+    if (bodyId in entities) {
+      delete entities[bodyId]
     }
   })
 
   // Remove from world
-  World.remove(state['physics'].world, Object.values(bodiesToRemove))
+  World.remove(entities['physics']?.world, Object.values(bodiesToRemove))
 
   bodiesToRemove = {}
-  return state
+  return entities
 }
 
 const TileDropPositioner = observer(
@@ -337,8 +338,8 @@ export const Game = observer(
     // MATTER-JS
     const engine = useRef(
       Engine.create({
-        positionIterations: 12,
-        velocityIterations: 12,
+        positionIterations: 24,
+        // velocityIterations: 12,
       })
     )
     const boundBodies = useRef(
@@ -376,8 +377,8 @@ export const Game = observer(
     )
 
     useEffect(() => {
-      engine.current.positionIterations = 12
-      engine.current.velocityIterations = 12
+      // engine.current.positionIterations = 12
+      // engine.current.velocityIterations = 12
 
       World.add(engine.current.world, boundBodies.current)
 
