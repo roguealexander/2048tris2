@@ -41,10 +41,7 @@ export const GameEngine = ({
       },
     }
 
-    if (args.time.delta < 16.6) return
-
-    // Fix physics time step to 60fps
-    args.time.delta = 16.66667
+    if (args.time.delta < 8.3) return
 
     const newEntities = (systems ?? []).reduce(
       (entities, sys) => sys(entities, args),

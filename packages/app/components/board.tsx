@@ -213,12 +213,17 @@ const createTile = (data: CreateTileData) => {
   return [ballTile, ballSensor, ballConstraint]
 }
 
-const Physics: GameEngineSystem = (entities, { time }) => {
+const tick = 1000 / 120
+
+const PhysicsSystem: GameEngineSystem = (entities, { time }) => {
   if (state$.gamePhysicsPaused.peek()) return entities
 
   const engine = entities['physics']?.engine
 
-  Matter.Engine.update(engine, time.delta)
+  const iterations = Math.round(time.delta / tick)
+  for (let i = 0; i < iterations; i++) {
+    Matter.Engine.update(engine, tick)
+  }
 
   return entities
 }
@@ -338,8 +343,9 @@ export const Game = observer(
     // MATTER-JS
     const engine = useRef(
       Engine.create({
-        positionIterations: 24,
+        positionIterations: 12,
         // velocityIterations: 12,
+        gravity: { x: 0, y: 1, scale: 0.0018 },
       })
     )
     const boundBodies = useRef(
@@ -377,7 +383,7 @@ export const Game = observer(
     )
 
     useEffect(() => {
-      // engine.current.positionIterations = 12
+      engine.current.positionIterations = 12
       // engine.current.velocityIterations = 12
 
       World.add(engine.current.world, boundBodies.current)
@@ -492,7 +498,7 @@ export const Game = observer(
           left: 0,
           top: 0,
         }}
-        systems={[Physics, CreateTileSystem, RemoveTileSystem]}
+        systems={[PhysicsSystem, CreateTileSystem, RemoveTileSystem]}
         entities={{
           physics: { engine: engine.current, world: engine.current.world },
         }}
