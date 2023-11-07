@@ -36,7 +36,7 @@ export default class DefaultTimer {
     if (this.subscribers.indexOf(callback) === -1) this.subscribers.push(callback)
   }
 
-  unsubscribe(callback) {
+  unsubscribe(callback: (currentTime: number) => void) {
     this.subscribers = this.subscribers.filter((s) => s !== callback)
   }
 }
