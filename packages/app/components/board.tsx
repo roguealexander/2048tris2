@@ -36,7 +36,6 @@ import Animated, {
 } from 'react-native-reanimated'
 import { appActions$, appState$ } from 'app/appState'
 import { GameEngine } from 'app/react-native-game-engine'
-import { Physics } from './rnge/systems'
 import { GameTile } from './GameTile'
 import Matter from 'matter-js'
 import React from 'react'
@@ -211,6 +210,16 @@ const createTile = (data: CreateTileData) => {
   state$.activeTileCount[size].set((count) => count + 1)
 
   return [ballTile, ballSensor, ballConstraint]
+}
+
+const Physics = (state, { time }) => {
+  if (state$.gamePhysicsPaused.peek()) return state
+
+  const engine = state['physics'].engine
+
+  Matter.Engine.update(engine, time.delta)
+
+  return state
 }
 
 const CreateTileSystem = (state) => {
@@ -495,156 +504,12 @@ export const BoardComp = observer(() => {
   const scale = appState$.scale.get()
   const isTouchDevice = useIsTouchDevice()
 
-  // MATTER-JS
-  // const engine = useRef(
-  //   Engine.create({
-  //     positionIterations: 12,
-  //     velocityIterations: 12,
-  //   })
-  // )
-  // const boundBodies = useRef(createBounds(width - 8, height - 4 + 128))
-
   const mouseX = useSharedValue(0)
   const activeTile = state$.activeTile.get()
   const dropX = useDerivedValue(() => {
     const radius = getTileRadius(activeTile)
     return Math.min(Math.max(radius / 2, mouseX.value), (width - 8) * GameScale - radius / 2)
   }, [mouseX, activeTile])
-
-  // useObserveEffect(
-  //   () => state$.resetCount.get(),
-  //   async ({ value }) => {
-  //     if (value === 0 || engine.current == null) return
-
-  //     const bodies = Composite.allBodies(engine.current!.world)
-
-  //     for (let i = bodies.length - 1; i >= 0; i--) {
-  //       if (bodies[i]!.label === 'Tile') {
-  //         bodiesToRemove[bodies[i]!.id] = bodies[i]!
-  //         const power = (bodies[i]?.collisionFilter.group ?? 3) as TilePower
-  //         if (power >= 4) {
-  //           appActions$.triggerPopSound(getTileSizeFromPower(power), bodies[i]?.id ?? power)
-  //         }
-  //         await sleep(25)
-  //       }
-  //     }
-
-  //     Composite.clear(engine.current!.world, false)
-
-  //     handledCollisions = {}
-  //     collidedTiles = {}
-  //     tilesToCreate = {}
-
-  //     World.add(engine.current.world, boundBodies.current)
-
-  //     state$.resetting.set(false)
-  //   }
-  // )
-
-  // useEffect(() => {
-  //   engine.current.positionIterations = 12
-  //   engine.current.velocityIterations = 12
-  //   engine.current.gravity = { x: 0, y: 1, scale: 0.0015 }
-
-  //   World.add(engine.current.world, boundBodies.current)
-
-  //   const collisionActiveCallback = (event: Matter.IEventCollision<Engine>) => {
-  //     // Prevent top-out after game ends and before reset complete
-  //     if (state$.toppedOut.peek() || state$.resetting.peek()) return
-
-  //     const { pairs } = event
-
-  //     pairs.forEach((pair) => {
-  //       const { timeUpdated, timeCreated, bodyA, bodyB } = pair
-
-  //       if (
-  //         bodyA.collisionFilter.category === categoryTopOut ||
-  //         bodyB.collisionFilter.category === categoryTopOut
-  //       ) {
-  //         if (timeUpdated - timeCreated > 2000) {
-  //           actions$.topOut()
-  //         }
-  //       }
-  //     })
-  //   }
-  //   Events.on(engine.current, 'collisionActive', collisionActiveCallback)
-
-  //   const collisionStartCallback = (event: Matter.IEventCollision<Engine>) => {
-  //     // Prevent collisions after game ends
-  //     if (state$.toppedOut.peek() || state$.resetting.peek()) return
-
-  //     const { pairs } = event
-
-  //     pairs.forEach((pair) => {
-  //       const { id, bodyA, bodyB } = pair
-
-  //       // Escape if not sensor
-  //       if (
-  //         bodyA.collisionFilter.category == null ||
-  //         bodyA.collisionFilter.category === categoryPhysics ||
-  //         bodyB.collisionFilter.category == null ||
-  //         bodyB.collisionFilter.category === categoryPhysics
-  //       )
-  //         return
-
-  //       // Escape if collision already handled
-  //       if (handledCollisions[id]) return
-  //       handledCollisions[id] = true
-
-  //       if (bodyA.collisionFilter.category === bodyB.collisionFilter.category) {
-  //         const power = bodyA.collisionFilter.group
-
-  //         const sensorA = bodyA as BodyWithCascadeDelete
-  //         const sensorB = bodyB as BodyWithCascadeDelete
-  //         const lowestVelocitySensor =
-  //           Vector.magnitude(sensorA.velocity) < Vector.magnitude(sensorB.velocity)
-  //             ? sensorA
-  //             : sensorB
-  //         const positionCenter = Vector.div(Vector.add(sensorA.position, sensorB.position), 2)
-  //         const position = Vector.div(Vector.add(positionCenter, lowestVelocitySensor.position), 2)
-  //         const velocity = Vector.div(Vector.add(sensorA.velocity, sensorB.velocity), 3)
-
-  //         // Escape if tiles already collided
-  //         if (collidedTiles[sensorA.id] || collidedTiles[sensorB.id]) return
-
-  //         collidedTiles[sensorB.id] = true
-
-  //         // Created merged tile
-  //         const size = getTileSizeFromPower(power as TilePower)
-  //         const mergedSize = getMergedTileSize(size)
-
-  //         tilesToCreate[id] = {
-  //           size: mergedSize,
-  //           position,
-  //           velocity,
-  //           viaMerge: true,
-  //         }
-
-  //         // Remove tiles
-  //         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  //         const _bodies = [
-  //           sensorA,
-  //           ...(sensorA.cascadeDelete ?? []),
-  //           sensorB,
-  //           ...(sensorB.cascadeDelete ?? []),
-  //         ].forEach((body) => {
-  //           bodiesToRemove[body.id] = body
-  //         })
-
-  //         state$.activeTileCount[size].set((count) => count - 2)
-  //       }
-  //     })
-  //   }
-  //   Events.on(engine.current, 'collisionStart', collisionStartCallback)
-
-  //   return () => {
-  //     World.clear(engine.current.world, false)
-  //     Engine.clear(engine.current)
-
-  //     Events.off(engine.current, 'collisionActive', collisionActiveCallback)
-  //     Events.off(engine.current, 'collisionStart', collisionStartCallback)
-  //   }
-  // }, [])
 
   const releaseBall = () => {
     if (state$.gameInteractionPaused.get()) return
@@ -669,24 +534,13 @@ export const BoardComp = observer(() => {
       h={height * scale}
     >
       <Game />
+
       <TileDropPositioner dropX={dropX}>
         <Tile size={state$.activeTile} />
       </TileDropPositioner>
+
       <TilePositionDetector mouseX={mouseX} release={releaseBall} />
-      {/* <GameEngine
-          style={{
-            position: 'absolute',
-            width: width - 8,
-            height: height + 128,
-            left: 0,
-            top: 0,
-          }}
-          systems={[Physics, CreateTileSystem, RemoveTileSystem]}
-          entities={{
-            physics: { engine: engine.current, world: engine.current.world },
-          }}
-        /> */}
-      {/* </TilePositionDetector> */}
+
       {appState$.layoutDimension.get() === 'horizontal' && !isTouchDevice && (
         <>
           <YStack pos="absolute" l={-64 * scale} w={64 * scale} t={0} b={0} onPress={releaseBall} />
@@ -701,7 +555,6 @@ export const Board = observer(() => {
   return (
     <YStack gap="$2" pos="relative" ai="flex-start" mt={23}>
       <BoardComp />
-      {/* <RigidBodies /> */}
     </YStack>
   )
 })
