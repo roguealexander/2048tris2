@@ -3,8 +3,10 @@ import { getTileData, getTileRadius } from 'app/tiles'
 import { TileSize } from 'app/types'
 import { Body } from 'matter-js'
 import Animated from 'react-native-reanimated'
+import { useScale } from './useScale'
 
 export const GameTile = ({ body, size }: { body: Body; size: TileSize }) => {
+  const scale = useScale()
   const tileData = getTileData(size)!
   const tileRadius = getTileRadius(size)
 
@@ -12,11 +14,11 @@ export const GameTile = ({ body, size }: { body: Body; size: TileSize }) => {
     <Animated.View
       style={{
         position: 'absolute',
-        left: body.position.x - tileRadius / 2,
-        top: body.position.y - tileRadius / 2,
-        width: tileRadius,
-        height: tileRadius,
-        borderRadius: tileRadius,
+        left: (body.position.x - tileRadius / 2) * scale,
+        top: (body.position.y - tileRadius / 2 - 128) * scale,
+        width: tileRadius * scale,
+        height: tileRadius * scale,
+        borderRadius: tileRadius * scale,
         transform: [{ rotate: body.angle + 'rad' }],
         backgroundColor: tileData.color,
         display: 'flex',
@@ -25,7 +27,7 @@ export const GameTile = ({ body, size }: { body: Body; size: TileSize }) => {
         pointerEvents: 'none',
       }}
     >
-      <TSizableText pt={2} size="$7" color={tileData.textColor} selectable={false}>
+      <TSizableText pt={3} size="$7" color={tileData.textColor} selectable={false}>
         {size}
       </TSizableText>
     </Animated.View>

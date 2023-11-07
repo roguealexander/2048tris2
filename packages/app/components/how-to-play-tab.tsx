@@ -19,6 +19,7 @@ import { ArrowDownLeft, ArrowLeftRight, Merge } from '@tamagui/lucide-icons'
 import { TabContainer } from './tab-container'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import { appState$ } from 'app/appState'
+import { useScale } from './useScale'
 
 // Rule drop state
 const activeTile$ = observable<TileSize>('4')
@@ -64,7 +65,7 @@ const TilePositionDetector = ({
   children: ReactNode
 }) => {
   const isTouchDevice = useIsTouchDevice()
-  const scale = appState$.scale.get()
+  const scale = useScale()
 
   const hoverGesture = Gesture.Hover()
     .onBegin((event) => {

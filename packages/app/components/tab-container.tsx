@@ -1,30 +1,34 @@
 import { observer } from '@legendapp/state/react'
-import { ScrollView, YStack } from '@my/ui'
+import { ScrollView } from '@my/ui'
 import { Tab, appState$ } from 'app/appState'
 import { ReactNode } from 'react'
+import { useScale } from './useScale'
+import { useSafeAreaFrame } from 'app/utils/useSafeAreaFrame'
 
 export const TabContainer = observer(({ tab, children }: { tab: Tab; children: ReactNode }) => {
+  const scale = useScale()
+  const frame = useSafeAreaFrame()
   if (appState$.tab.get() !== tab) return null
 
   return (
     <ScrollView
       pos="absolute"
       t={0}
-      mah="100%"
-      mih="100%"
       bg="$background"
       pt={86}
       pb={64}
       zi={5}
-      w={appState$.layoutDimension.get() === 'horizontal' ? 906 : 468}
+      height={frame.height}
+      w={appState$.layoutDimension.get() === 'horizontal' ? 906 : 468 * scale}
       contentContainerStyle={{
-        alignItems: 'center',
+        alignItems: 'flex-start',
         justifyContent: 'flex-start',
+        maxWidth: '100%',
+        paddingHorizontal: 8,
+        width: 450,
       }}
     >
-      <YStack ai="flex-start" miw={450}>
-        {children}
-      </YStack>
+      {children}
     </ScrollView>
   )
 })

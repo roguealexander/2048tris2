@@ -1,18 +1,7 @@
 import { observer, useObserveEffect } from '@legendapp/state/react'
 import { actions$, state$ } from '../state'
 import { Tile } from './tile'
-import {
-  Engine,
-  Render,
-  World,
-  Events,
-  Bodies,
-  Runner,
-  Composite,
-  Body,
-  Constraint,
-  Vector,
-} from 'matter-js'
+import { Engine, World, Events, Bodies, Composite, Body, Constraint, Vector } from 'matter-js'
 import { useRef, useEffect, ReactNode } from 'react'
 import {
   getMergedTileSize,
@@ -51,6 +40,7 @@ import { GameEngine } from 'app/react-native-game-engine'
 import { Physics } from './rnge/systems'
 import { GameTile } from './GameTile'
 import Matter from 'matter-js'
+import { useScale } from './useScale'
 
 Matter.Common.isElement = () => false //-- Overriding this function because the original references HTMLElement
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -134,7 +124,7 @@ const createBounds = (cw: number, ch: number) => {
       label: 'LeftBound',
     }),
     // Bottom Boundary
-    Bodies.rectangle(cw / 2, ch + 200 * WorldScale, cw, 400, {
+    Bodies.rectangle(cw / 2, ch + 200, cw, 400, {
       isStatic: true,
       render: { opacity: 0 },
       friction: 0.1,
@@ -168,7 +158,7 @@ const createTile = (data: CreateTileData) => {
   const ballTile = Bodies.circle(
     position.x,
     position.y,
-    radius * WorldScale,
+    radius,
     {
       id: ballId,
       mass: 1.5 * power * density,
@@ -179,8 +169,8 @@ const createTile = (data: CreateTileData) => {
       render: {
         sprite: {
           texture: tileAsset[size],
-          xScale: 0.5 * WorldScale,
-          yScale: 0.5 * WorldScale,
+          xScale: 0.5,
+          yScale: 0.5,
         },
       },
       label: 'Tile',
@@ -189,7 +179,7 @@ const createTile = (data: CreateTileData) => {
     28
   )
 
-  const ballSensor = Bodies.circle(position.x, position.y, (radius + 2) * WorldScale, {
+  const ballSensor = Bodies.circle(position.x, position.y, radius + 2, {
     id: sensorId,
     mass: 0.00001,
     isSensor: true,
@@ -269,20 +259,21 @@ const RemoveTileSystem = (state) => {
 
 const TileDropPositioner = observer(
   ({ dropX, children }: { dropX: SharedValue<number>; children: ReactNode }) => {
+    const scale = useScale()
     const animatedStyle = useAnimatedStyle(() => {
       return {
-        left: dropX.value - 64,
+        left: (dropX.value - 64) * scale,
       }
-    }, [dropX])
+    }, [dropX, scale])
     return (
       <Animated.View
         style={[
           {
             position: 'absolute',
             pointerEvents: 'none',
-            top: -64,
-            width: 128,
-            height: 128,
+            top: -64 * scale,
+            width: 128 * scale,
+            height: 128 * scale,
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
@@ -306,7 +297,7 @@ const TilePositionDetector = ({
   children: ReactNode
 }) => {
   const isTouchDevice = useIsTouchDevice()
-  const scale = appState$.scale.get()
+  const scale = useScale()
 
   const hoverGesture = Gesture.Hover()
     .onBegin((event) => {
@@ -335,6 +326,7 @@ const TilePositionDetector = ({
 }
 
 export const BoardComp = observer(() => {
+  const scale = useScale()
   const isTouchDevice = useIsTouchDevice()
 
   // MATTER-JS
@@ -342,7 +334,6 @@ export const BoardComp = observer(() => {
     Engine.create({
       positionIterations: 12,
       velocityIterations: 12,
-      gravity: { x: 0, y: 1, scale: 0.0015 },
     })
   )
   // const runner = useRef(
@@ -351,9 +342,7 @@ export const BoardComp = observer(() => {
   //     delta: 1000 / 60,
   //   })
   // )
-  const boundBodies = useRef(
-    createBounds((width - 8) * WorldScale, (height - 4 + 128) * WorldScale)
-  )
+  const boundBodies = useRef(createBounds(width - 8, height - 4 + 128))
 
   // const releaseDelay = useSharedValue(0)
   const mouseX = useSharedValue(0)
@@ -389,8 +378,8 @@ export const BoardComp = observer(() => {
       collidedTiles = {}
       tilesToCreate = {}
 
-      const cw = (width - 8) * WorldScale
-      const ch = (height - 4 + 64 * 2) * WorldScale
+      const cw = width - 8
+      const ch = height - 4 + 64 * 2
 
       World.add(engine.current.world, createBounds(cw, ch))
 
@@ -403,49 +392,7 @@ export const BoardComp = observer(() => {
     engine.current.velocityIterations = 12
     engine.current.gravity = { x: 0, y: 1, scale: 0.0015 }
 
-    const cw = (width - 8) * WorldScale
-    const ch = (height - 4 + 128) * WorldScale
-
-    // const render = Render.create({
-    //   element: scene.current!,
-    //   engine: engine.current,
-    //   options: {
-    //     width: cw,
-    //     height: ch,
-    //     wireframes: false,
-    //     background: 'transparent',
-    //     pixelRatio: 2,
-    //   },
-    // })
-
     World.add(engine.current.world, boundBodies.current)
-
-    // const tickCallback = () => {
-    //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //   // @ts-ignore
-    //   runner.current.deltaMin = runner.current.fps > 60 ? 1000 / runner.current.fps : 1000 / 120
-
-    //   // // Create tiles
-    //   // Object.entries(tilesToCreate).forEach(([collisionId, createTileData]) => {
-    //   //   const tileBodies = createTile(createTileData)
-
-    //   //   // Pop sound effect
-    //   //   appActions$.triggerPopSound(createTileData.size, collisionId)
-
-    //   //   // Update efficiency score
-    //   //   if (createTileData.size === state$.targetEfficiency.peek()) {
-    //   //     actions$.triggerHighEfficiencyCheck(createTileData.size)
-    //   //   }
-
-    //   //   World.add(engine.current.world, tileBodies)
-    //   // })
-
-    //   // tilesToCreate = {}
-    // }
-    // Events.on(runner.current, 'tick', tickCallback)
-
-    // Runner.start(runner.current, engine.current)
-    // Render.run(render)
 
     const collisionActiveCallback = (event: Matter.IEventCollision<Engine>) => {
       // Prevent top-out after game ends and before reset complete
@@ -537,22 +484,11 @@ export const BoardComp = observer(() => {
     Events.on(engine.current, 'collisionStart', collisionStartCallback)
 
     return () => {
-      // Render.stop(render)
       World.clear(engine.current.world, false)
       Engine.clear(engine.current)
 
-      // Events.off(runner.current, 'tick', tickCallback)
       Events.off(engine.current, 'collisionActive', collisionActiveCallback)
       Events.off(engine.current, 'collisionStart', collisionStartCallback)
-
-      // render.canvas.remove()
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      // render.canvas = null
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      // render.context = null
-      // render.textures = {}
     }
   }, [])
 
@@ -561,8 +497,8 @@ export const BoardComp = observer(() => {
 
     tilesToCreate['fresh'] = {
       size: state$.activeTile.peek(),
-      position: { x: dropX.value * WorldScale, y: 128 * WorldScale },
-      velocity: { x: 0.01, y: 0 * WorldScale },
+      position: { x: dropX.value, y: 128 },
+      velocity: { x: 0.01, y: 0 },
       viaMerge: false,
     }
 
@@ -570,7 +506,14 @@ export const BoardComp = observer(() => {
   }
 
   return (
-    <YStack bg="$playarea" bw={4} btw={0} boc="$border" w={width} h={height}>
+    <YStack
+      bg="$playarea"
+      bw={4 * scale}
+      btw={0}
+      boc="$border"
+      w={width * scale}
+      h={height * scale}
+    >
       <TileDropPositioner dropX={dropX}>
         <Tile size={state$.activeTile} />
       </TileDropPositioner>
@@ -581,7 +524,7 @@ export const BoardComp = observer(() => {
             width: width - 8,
             height: height + 128,
             left: 0,
-            top: -128,
+            top: 0,
           }}
           systems={[Physics, CreateTileSystem, RemoveTileSystem]}
           entities={{
@@ -591,8 +534,8 @@ export const BoardComp = observer(() => {
       </TilePositionDetector>
       {appState$.layoutDimension.get() === 'horizontal' && !isTouchDevice && (
         <>
-          <YStack pos="absolute" l={-64} w={64} t={0} b={0} onPress={releaseBall} />
-          <YStack pos="absolute" r={-64} w={64} t={0} b={0} onPress={releaseBall} />
+          <YStack pos="absolute" l={-64 * scale} w={64 * scale} t={0} b={0} onPress={releaseBall} />
+          <YStack pos="absolute" r={-64 * scale} w={64 * scale} t={0} b={0} onPress={releaseBall} />
         </>
       )}
     </YStack>
@@ -601,7 +544,7 @@ export const BoardComp = observer(() => {
 
 export const Board = observer(() => {
   return (
-    <YStack gap="$2" h={700} pos="relative" ai="flex-start" mt={23}>
+    <YStack gap="$2" pos="relative" ai="flex-start" mt={23}>
       <BoardComp />
       {/* <RigidBodies /> */}
     </YStack>

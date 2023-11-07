@@ -3,35 +3,40 @@ import { state$ } from '../state'
 import { Tile } from './tile'
 import { TSizableText, YStack } from '@my/ui'
 import { appState$ } from 'app/appState'
+import { useScale } from './useScale'
+
+const horizontalScale = 144
+const verticalScale = 104
 
 export const Queue = observer(() => {
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
   const vertical = !horizontal
+  const scale = useScale()
 
   return (
     <YStack>
-      <TSizableText>Next:</TSizableText>
+      <TSizableText>Queue:</TSizableText>
       <YStack
         pos="relative"
-        gap="$2"
+        gap={8 * scale}
         jc="center"
         ai="center"
         bg="$playarea"
         {...(horizontal
           ? {
-              w: '$12',
-              pb: '$2',
+              w: horizontalScale * scale,
+              pb: 8 * scale,
             }
           : {
               fd: 'row',
-              h: '$10',
-              pr: '$2',
+              h: verticalScale * scale,
+              pr: 8 * scale,
             })}
       >
         <YStack
-          w={horizontal ? '$12' : '$10'}
-          h={horizontal ? '$12' : '$10'}
-          bw={4}
+          w={(horizontal ? horizontalScale : verticalScale) * scale}
+          h={(horizontal ? horizontalScale : verticalScale) * scale}
+          bw={4 * scale}
           boc="$border"
           ai="center"
           jc="center"
@@ -40,7 +45,13 @@ export const Queue = observer(() => {
         </YStack>
         {[1, 2, 3].map((index) => {
           return (
-            <YStack key={index} w={vertical ? 68 : 105} h={105} ai="center" jc="center">
+            <YStack
+              key={index}
+              w={(vertical ? 65 : 105) * scale}
+              h={105 * scale}
+              ai="center"
+              jc="center"
+            >
               <Tile size={state$.queue[index]} fixedSize={vertical ? '4' : undefined} />
             </YStack>
           )

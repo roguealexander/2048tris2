@@ -3,10 +3,20 @@ import { getTileData, getTileRadius } from '../tiles'
 import { TileSize } from '../types'
 import { Observable, ObservableComputed } from '@legendapp/state'
 import { observer } from '@legendapp/state/react'
+import { useScale } from './useScale'
 
 export const PlaceholderTile = ({ fixedSize }: { fixedSize?: TileSize }) => {
+  const scale = useScale()
   const fixedRadius = fixedSize ? getTileRadius(fixedSize) : undefined
-  return <XStack w={fixedRadius ?? 60} h={fixedRadius ?? 60} bg="$border" o={0.5} br={60} />
+  return (
+    <XStack
+      w={(fixedRadius ?? 60) * scale}
+      h={(fixedRadius ?? 60) * scale}
+      bg="$border"
+      o={0.5}
+      br={60}
+    />
+  )
 }
 
 export const Tile = observer(
@@ -19,11 +29,12 @@ export const Tile = observer(
     fixedSize?: TileSize
     stackProps?: StackProps
   }) => {
+    const scale = useScale()
     const tileSize = size?.get()
     if (tileSize == null) return <PlaceholderTile fixedSize={fixedSize} />
 
     const tileData = getTileData(tileSize)!
-    const tileRadius = getTileRadius(fixedSize || tileSize)
+    const tileRadius = getTileRadius(fixedSize || tileSize) * scale
 
     return (
       <XStack
@@ -36,7 +47,7 @@ export const Tile = observer(
         pe="none"
         {...stackProps}
       >
-        <TSizableText pt={2} size="$7" color={tileData.textColor} selectable={false}>
+        <TSizableText pt={3} size="$7" color={tileData.textColor} selectable={false}>
           {tileData.size}
         </TSizableText>
       </XStack>

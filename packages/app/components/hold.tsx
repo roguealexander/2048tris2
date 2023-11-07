@@ -1,22 +1,27 @@
 import { observer } from '@legendapp/state/react'
 import { actions$, state$ } from '../state'
 import { Tile } from './tile'
-import { Shake, TSizableText, XStack, YStack, useMedia } from '@my/ui'
+import { Shake, TSizableText, XStack, YStack } from '@my/ui'
 import { appState$ } from 'app/appState'
+import { useScale } from './useScale'
+
+const horizontalSize = 144
+const verticalSize = 104
 
 export const Hold = observer(() => {
+  const scale = useScale()
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
 
   return (
     <YStack>
       <TSizableText>Hold:</TSizableText>
       <XStack
-        w={horizontal ? '$12' : '$10'}
-        h={horizontal ? '$12' : '$10'}
+        w={(horizontal ? horizontalSize : verticalSize) * scale}
+        h={(horizontal ? horizontalSize : verticalSize) * scale}
         jc="center"
         ai="center"
         bg="$playarea"
-        bw={4}
+        bw={4 * scale}
         boc="$border"
         cur="pointer"
         onPress={() => actions$.hold()}

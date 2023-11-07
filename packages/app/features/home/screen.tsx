@@ -21,6 +21,8 @@ import { UserCircle2 } from '@tamagui/lucide-icons'
 import { colors } from 'app/colors'
 import { ShowStatsButton } from 'app/components/show-stats-button'
 import { StatsPanel } from 'app/components/stats-panel'
+import { useSafeAreaFrame } from 'app/utils/useSafeAreaFrame'
+import { useScale } from 'app/components/useScale'
 
 const ActiveLeftPanel = observer(() => {
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
@@ -56,9 +58,10 @@ const ActiveRightPanel = observer(() => {
 
 const ActiveBottomPanel = observer(() => {
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
+  const scale = useScale()
   if (horizontal) return null
   return (
-    <XStack gap="$2" w={450} jc="space-between">
+    <XStack gap={8 * scale} w={450 * scale} jc="space-between">
       <Hold />
       <Queue />
     </XStack>
@@ -66,12 +69,14 @@ const ActiveBottomPanel = observer(() => {
 })
 
 const ActiveTopPanel = observer(() => {
+  const scale = useScale()
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
   if (horizontal || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null)
     return null
+
   return (
-    <XStack mt={-22} mb={2} zi={3} gap="$2" w={450} jc="space-between">
-      <YStack w="$50%">
+    <XStack mt={-22} mb={2} zi={3} gap="$2" w={450 * scale} jc="space-between">
+      <YStack>
         <TSizableText>
           Score:{' '}
           <TSizableText size="$5" fontWeight="bold">
@@ -79,15 +84,15 @@ const ActiveTopPanel = observer(() => {
           </TSizableText>
         </TSizableText>
         <TSizableText>
-          Efficiency:{' '}
+          Eff:{' '}
           <TSizableText size="$5" fontWeight="bold">
             <Memo>{state$.efficiency}</Memo>%
           </TSizableText>
         </TSizableText>
       </YStack>
-      <XStack w="50%" gap="$2">
-        <ShowStatsButton w={undefined} f={1} />
-        <NewGameButton w={undefined} f={1} />
+      <XStack gap="$2">
+        <ShowStatsButton w={undefined} px={6} p={scale < 0.7 ? 0 : undefined} />
+        <NewGameButton w={undefined} px={6} p={scale < 0.7 ? 0 : undefined} />
       </XStack>
     </XStack>
   )
@@ -99,23 +104,19 @@ const HorizontalAspectRatio = (866 + XPadding) / 820
 const VerticalAspectRatio = (450 + XPadding) / 1000
 
 const Container = observer(({ children }: { children: ReactNode }) => {
-  const dimensions = useWindowDimensions()
-
-  console.log({
-    dimensions,
-  })
+  const frame = useSafeAreaFrame()
 
   // Layout Dimension
-  const aspectRatio = dimensions.width / dimensions.height
+  const aspectRatio = frame.width / frame.height
   const layoutDimension = aspectRatio >= HorizontalAspectRatio ? 'horizontal' : 'vertical'
   appState$.layoutDimension.set(layoutDimension)
 
   // HorizontalScale
-  const horizontalScale = dimensions.height / 820
+  const horizontalScale = Math.min(1, frame.height / 820)
 
   // Vertical Scale
-  const widthScale = Math.min(1, dimensions.width / (450 + XPadding))
-  const heightScale = Math.min(1, dimensions.height / 1000)
+  const widthScale = Math.min(1, frame.width / (450 + XPadding))
+  const heightScale = Math.min(1, frame.height / 1000)
   const verticalScale = Math.min(widthScale, heightScale)
 
   const scale = layoutDimension === 'horizontal' ? horizontalScale : verticalScale
@@ -140,10 +141,11 @@ const Container = observer(({ children }: { children: ReactNode }) => {
       // w={dimensions.width}
       // maw={dimensions.width}
       f={1}
-      width={200}
+      width="100%"
+      miw={462}
       pt={84}
       px="$2"
-      transform={[{ scale }]}
+      // transform={[{ scale }]}
       overflow="visible"
       style={{
         transformOrigin: 'top',
