@@ -25,8 +25,8 @@ import { appActions$, appState$ } from 'app/appState'
 import { GameTile } from './GameTile'
 import Matter from 'matter-js'
 import React from 'react'
-import { GameEngine } from 'app/react-native-game-engine/GameEngine'
-import { GameEngineSystem } from 'app/react-native-game-engine/rnge-types'
+import { GameEngine, entities$ } from 'app/react-native-game-engine/GameEngine'
+import { GameEngineEntity, GameEngineSystem } from 'app/react-native-game-engine/rnge-types'
 
 Matter.Common.isElement = () => false //-- Overriding this function because the original references HTMLElement
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -179,20 +179,20 @@ const createTile = (data: CreateTileData) => {
 
 const tick = 1000 / 120
 
-const PhysicsSystem: GameEngineSystem = (entities, { time }) => {
-  if (state$.gamePhysicsPaused.peek()) return entities
+const PhysicsSystem: GameEngineSystem = ({ time }) => {
+  if (state$.gamePhysicsPaused.peek()) return
 
-  const engine = entities['physics']?.engine
+  const engine = entities$[0]!.engine.peek()
 
   const iterations = Math.round(time.delta / tick)
   for (let i = 0; i < iterations; i++) {
     Matter.Engine.update(engine, tick)
   }
-
-  return entities
 }
 
-const CreateTileSystem: GameEngineSystem = (entities) => {
+const CreateTileSystem: GameEngineSystem = () => {
+  const bodiesToAdd: GameEngineEntity[] = []
+
   Object.entries(tilesToCreate).forEach(([collisionId, createTileData]) => {
     const tileBodies = createTile(createTileData)
 
@@ -206,33 +206,31 @@ const CreateTileSystem: GameEngineSystem = (entities) => {
       actions$.triggerHighEfficiencyCheck(createTileData.size)
     }
 
-    World.add(entities['physics']?.world, tileBodies)
+    World.add(entities$[0]!.world.peek(), tileBodies)
 
     // Index in state by sensor
-    entities[tileBodies[0]!.id] = {
+    bodiesToAdd.push({
+      id: tileBodies[0]!.id,
       body: tileBodies[0]!, // ballTile itself
       size: createTileData.size,
       renderer: GameTile,
-    }
+    })
   })
 
   tilesToCreate = {}
 
-  return entities
+  entities$.set((entities) => [...entities, ...bodiesToAdd])
 }
 
-const RemoveTileSystem: GameEngineSystem = (entities) => {
-  Object.keys(bodiesToRemove).forEach((bodyId) => {
-    if (bodyId in entities) {
-      delete entities[bodyId]
-    }
-  })
+const RemoveTileSystem: GameEngineSystem = () => {
+  if (Object.keys(bodiesToRemove).length === 0) return
+
+  entities$.set((entities) => entities.filter((entity) => !(entity.id in bodiesToRemove)))
 
   // Remove from world
-  World.remove(entities['physics']?.world, Object.values(bodiesToRemove))
+  World.remove(entities$[0]?.world.peek(), Object.values(bodiesToRemove))
 
   bodiesToRemove = {}
-  return entities
 }
 
 const TileDropPositioner = observer(
@@ -463,9 +461,7 @@ export const Game = observer(
           top: 0,
         }}
         systems={[PhysicsSystem, CreateTileSystem, RemoveTileSystem]}
-        entities={{
-          physics: { engine: engine.current, world: engine.current.world },
-        }}
+        entities={[{ id: 'physics', engine: engine.current, world: engine.current.world }]}
       />
     )
   })

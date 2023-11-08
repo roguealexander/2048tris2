@@ -1,5 +1,6 @@
 import { ScaledSize, StyleProp, ViewStyle } from 'react-native'
 import React from 'react'
+import { TileSize } from 'app/types'
 
 export interface TimeUpdate {
   current: number
@@ -13,17 +14,16 @@ export interface GameEngineUpdateEventOptionType {
   time: TimeUpdate
 }
 
-interface GameEngineEntity {
+export type GameEngineEntity = {
   [key: string]: any
+  id: string | number
+  size?: TileSize
   renderer?: React.FunctionComponent<any>
 }
 
-export type GameEngineEntities = Record<string | number, GameEngineEntity>
+export type GameEngineEntities = GameEngineEntity[]
 
-export type GameEngineSystem = (
-  entities: GameEngineEntities,
-  update: GameEngineUpdateEventOptionType
-) => GameEngineEntities
+export type GameEngineSystem = (update: GameEngineUpdateEventOptionType) => void
 
 export type GameEngineProperties = {
   systems?: GameEngineSystem[]

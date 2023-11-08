@@ -1,13 +1,17 @@
 import { TSizableText } from '@my/ui'
 import { getTileData, getTileRadius } from 'app/tiles'
 import { TileSize } from 'app/types'
-import { Body } from 'matter-js'
 import Animated from 'react-native-reanimated'
 import { appState$ } from 'app/appState'
-import { useSelector } from '@legendapp/state/react'
+import { observer } from '@legendapp/state/react'
+import { ObservableObject } from '@legendapp/state'
+import { GameEngineEntity } from 'app/react-native-game-engine/rnge-types'
+import { frame$ } from 'app/react-native-game-engine/GameEngine'
 
-export const GameTile = ({ body, size }: { body: Body; size: TileSize }) => {
-  const scale = useSelector(appState$.scale)
+export const GameTile = observer(({ entity$ }: { entity$: ObservableObject<GameEngineEntity> }) => {
+  frame$.get()
+  const size = entity$.size.peek() as TileSize
+  const scale = appState$.scale.peek()
   const tileData = getTileData(size)!
   const tileRadius = getTileRadius(size)
 
@@ -15,12 +19,12 @@ export const GameTile = ({ body, size }: { body: Body; size: TileSize }) => {
     <Animated.View
       style={{
         position: 'absolute',
-        left: (body.position.x - tileRadius / 2) * scale,
-        top: (body.position.y - tileRadius / 2 - 128) * scale,
+        left: (entity$.body.position.x.peek() - tileRadius / 2) * scale,
+        top: (entity$.body.position.y.peek() - tileRadius / 2 - 128) * scale,
         width: tileRadius * scale,
         height: tileRadius * scale,
         borderRadius: tileRadius * scale,
-        transform: [{ rotate: body.angle + 'rad' }],
+        transform: [{ rotate: entity$.body.angle.peek() + 'rad' }],
         backgroundColor: tileData.color,
         display: 'flex',
         alignItems: 'center',
@@ -33,4 +37,4 @@ export const GameTile = ({ body, size }: { body: Body; size: TileSize }) => {
       </TSizableText>
     </Animated.View>
   )
-}
+})

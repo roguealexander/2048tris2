@@ -1,84 +1,83 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef } from 'react'
 import { Dimensions } from 'react-native'
 import DefaultTimer from './DefaultTimer'
 import { Stack, XStack } from '@my/ui'
-import { GameEngineEntities, GameEngineProperties } from './rnge-types'
-import { useMount, useUnmount } from '@legendapp/state/react'
+import { GameEngineEntities, GameEngineEntity, GameEngineProperties } from './rnge-types'
+import { For, observer, useMount, useUnmount } from '@legendapp/state/react'
+import { ObservableObject, observable } from '@legendapp/state'
 
-export const GameEngine = ({
-  systems = [],
-  entities: propsEntities = {},
-  style,
-  children,
-}: GameEngineProperties) => {
-  const [entities, setEntities] = useState<{ entities: GameEngineEntities }>({
-    entities: propsEntities,
-  })
-  const timer = useRef(new DefaultTimer())
-  const screen = useRef(Dimensions.get('window'))
-  const previousTime = useRef<number>()
-  const previousDelta = useRef<number>()
+export const entities$ = observable<GameEngineEntities>()
+export const frame$ = observable<number>(0)
 
-  useMount(() => {
-    start()
-  })
+export const GameEngine = observer(
+  ({ systems = [], entities: propsEntities = [], style, children }: GameEngineProperties) => {
+    const timer = useRef(new DefaultTimer())
+    const screen = useRef(Dimensions.get('window'))
+    const previousTime = useRef<number>()
+    const previousDelta = useRef<number>()
 
-  useUnmount(() => {
-    stop()
-    timer.current.unsubscribe(updateHandler)
-  })
+    useMount(() => {
+      entities$.set(propsEntities)
+      start()
+    })
 
-  const updateHandler = (currentTime: number) => {
-    if (previousTime.current == null) previousTime.current = currentTime
+    useUnmount(() => {
+      stop()
+      timer.current.unsubscribe(updateHandler)
+    })
 
-    const args = {
-      screen: screen.current,
-      time: {
-        current: currentTime,
-        previous: previousTime.current ?? currentTime,
-        delta: currentTime - (previousTime.current ?? currentTime),
-        previousDelta: previousDelta.current ?? 0,
-      },
+    const updateHandler = (currentTime: number) => {
+      if (previousTime.current == null) previousTime.current = currentTime
+
+      const args = {
+        screen: screen.current,
+        time: {
+          current: currentTime,
+          previous: previousTime.current ?? currentTime,
+          delta: currentTime - (previousTime.current ?? currentTime),
+          previousDelta: previousDelta.current ?? 0,
+        },
+      }
+
+      if (args.time.delta < 8.3) return null
+      ;(systems ?? []).forEach((sys) => sys(args))
+
+      previousTime.current = currentTime
+      previousDelta.current = args.time.delta
+
+      frame$.set((frame) => frame + 1)
     }
 
-    if (args.time.delta < 8.3) return
+    timer.current.subscribe(updateHandler)
 
-    const newEntities = (systems ?? []).reduce(
-      (entities, sys) => sys(entities, args),
-      entities.entities
+    const clear = () => {
+      previousTime.current = undefined
+      previousDelta.current = undefined
+    }
+
+    const start = () => {
+      clear()
+      timer.current.start()
+    }
+
+    const stop = () => {
+      timer.current.stop()
+    }
+
+    return (
+      <Stack f={1} style={style}>
+        <For each={entities$} optimized>
+          {(entity$: ObservableObject<GameEngineEntity>) => {
+            const entity = entity$.peek()
+            if (entity.renderer == null) return <></>
+            return <entity.renderer entity$={entity$} />
+          }}
+        </For>
+
+        <XStack pointerEvents={'box-none'} fullscreen>
+          {children}
+        </XStack>
+      </Stack>
     )
-
-    previousTime.current = currentTime
-    previousDelta.current = args.time.delta
-    setEntities({ entities: newEntities })
   }
-
-  timer.current.subscribe(updateHandler)
-
-  const clear = () => {
-    previousTime.current = undefined
-    previousDelta.current = undefined
-  }
-
-  const start = () => {
-    clear()
-    timer.current.start()
-  }
-
-  const stop = () => {
-    timer.current.stop()
-  }
-
-  return (
-    <Stack f={1} style={style}>
-      {Object.values(entities.entities).map((entity) => {
-        if (entity.renderer == null) return null
-        return <entity.renderer key={entity.id} {...entity} />
-      })}
-
-      <XStack pointerEvents={'box-none'} fullscreen>
-        {children}
-      </XStack>
-    </Stack>
-  )
-}
+)
