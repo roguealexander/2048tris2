@@ -7,7 +7,6 @@ import { useSafeAreaFrame } from 'app/utils/useSafeAreaFrame'
 export const TabContainer = observer(({ tab, children }: { tab: Tab; children: ReactNode }) => {
   const scale = appState$.scale.get()
   const frame = useSafeAreaFrame()
-  console.log('container size', frame.width, 'content width', 450 * scale)
   if (appState$.tab.get() !== tab) return null
 
   return (
