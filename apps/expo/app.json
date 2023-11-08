@@ -50,12 +50,13 @@
       // ],
       "expo-router",
       // "expo-apple-authentication",
-      "@vonovak/react-native-theme-control"
+      "@vonovak/react-native-theme-control",
+      "expo-community-flipper"
     ],
     "extra": {
-      "router": {
-        "origin": false
-      }
+      // "router": {
+      //   "origin": false
+      // }
       // "eas": {
       //   TODO: Add your project ID here
       //   "projectId": "your-project-id"

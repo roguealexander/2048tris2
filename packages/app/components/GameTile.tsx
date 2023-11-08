@@ -2,6 +2,7 @@ import { TSizableText } from '@my/ui'
 import { getTileData, getTileRadius } from 'app/tiles'
 import { TileSize } from 'app/types'
 import Animated from 'react-native-reanimated'
+import { Text } from 'react-native'
 import { appState$ } from 'app/appState'
 import { observer } from '@legendapp/state/react'
 import { ObservableObject } from '@legendapp/state'
@@ -32,9 +33,9 @@ export const GameTile = observer(({ entity$ }: { entity$: ObservableObject<GameE
         pointerEvents: 'none',
       }}
     >
-      <TSizableText pt={3} size="$7" color={tileData.textColor} selectable={false}>
+      <Text style={{ color: tileData.textColor }} selectable={false}>
         {size}
-      </TSizableText>
+      </Text>
     </Animated.View>
   )
 })

@@ -12,13 +12,13 @@ Please remember that Takeout is closed source and you should not make this code 
 
 If you want to clone this starter, you can run
 
- ```bash 
- yarn create tamagui --template takeout-starter
- ``` 
- 
- Otherwise, ignore this section. If you're getting authentication issues with `yarn create tamagui`, clone the template (using `gh` or just `git`), cd into the project and run `yarn install`, and then `yarn setup`.
+```bash
+yarn create tamagui --template takeout-starter
+```
 
-To rename the project you can search the workspace for the word `myapp` and replace with your name.
+Otherwise, ignore this section. If you're getting authentication issues with `yarn create tamagui`, clone the template (using `gh` or just `git`), cd into the project and run `yarn install`, and then `yarn setup`.
+
+To rename the project you can search the workspace for the word `2048tris` and replace with your name.
 If you prefer, you may also run [react-native-rename](https://github.com/junedomingo/react-native-rename) from `/apps/expo` to rename the react-native references.
 
 If you're getting issues with the /android or /ios directories when setting up the starter, you can safely remove them and re-generate them using `yarn ios` and `yarn android`.
@@ -41,6 +41,7 @@ To configure the project, `cd` into the root of the project and run `yarn setup`
 [Docker](https://www.docker.com) based workflow is recommended if your takeout project is using Supabase as a dependency.
 
 Please reference [Supabase's documentation](https://supabase.com/docs/guides/self-hosting/docker) for docker configuration instructions.
+
 ## Development
 
 Development scripts:

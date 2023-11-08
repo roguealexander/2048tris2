@@ -20,7 +20,7 @@ export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode
 }
 
-function MyApp({
+function 2048tris({
   Component,
   pageProps,
 }: SolitoAppProps<{ initialSession: AuthProviderProps['initialSession'] }>) {
@@ -53,4 +53,4 @@ function MyApp({
   )
 }
 
-export default api.withTRPC(MyApp)
+export default api.withTRPC(2048tris)

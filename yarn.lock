@@ -15536,6 +15536,7 @@ __metadata:
     eslint-plugin-import: "npm:^2.28.0"
     expo: "npm:^49.0.0"
     expo-apple-authentication: "npm:~6.1.0"
+    expo-community-flipper: "npm:^48.0.1"
     expo-constants: "npm:~14.4.2"
     expo-crypto: "npm:^12.6.0"
     expo-dev-client: "npm:~2.4.11"
@@ -15555,11 +15556,13 @@ __metadata:
     expo-web-browser: "npm:^12.5.0"
     metro-minify-terser: "npm:^0.74.1"
     react: "npm:^18.2.0"
+    react-devtools-core: "npm:^4.28.5"
     react-dom: "npm:^18.2.0"
     react-native: "npm:0.72.5"
     react-native-clean-project: "npm:^4.0.1"
     react-native-debugger-open: "npm:^0.4.3"
     react-native-dotenv: "npm:^3.4.8"
+    react-native-flipper: "npm:~0.203.0"
     react-native-gesture-handler: "npm:^2.13.4"
     react-native-mmkv: "npm:^2.10.2"
     react-native-reanimated: "npm:~3.3.0"
@@ -15602,6 +15605,18 @@ __metadata:
     path-browserify: "npm:^1.0.0"
     url-parse: "npm:^1.5.9"
   checksum: 2b6ac86e16b3a05c9afb3435e86cc27edb4ede81b1eb1e9e09b2575c90c2def87184617ef410f1cf5602d08dd1fa5ccc39bff837f8fe2278a004cdaa44575850
+  languageName: node
+  linkType: hard
+
+"expo-community-flipper@npm:^48.0.1":
+  version: 48.0.1
+  resolution: "expo-community-flipper@npm:48.0.1"
+  dependencies:
+    semver: "npm:^7.3.8"
+    ts-dedent: "npm:^2.2.0"
+  peerDependencies:
+    expo: ">=47.0.0-beta.0 <48"
+  checksum: 8792674bc50a72b2d65e2c9b705a4bb0a93de3c255b5ae6a7fb62f04c61ceb0ba42ab687fd899ca2f7e8cab5613dbb2a735b3d93c1d1384405b74b431570e73e
   languageName: node
   linkType: hard
 
@@ -23304,6 +23319,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-devtools-core@npm:^4.28.5":
+  version: 4.28.5
+  resolution: "react-devtools-core@npm:4.28.5"
+  dependencies:
+    shell-quote: "npm:^1.6.1"
+    ws: "npm:^7"
+  checksum: 7c951a6a9b773e4fd56b2f1894c83aaec417373cf01aa261bd2dd286e6c6f1d8c67a3749ecb1d106dbf9e8cda0e6ed1bfd6ce1b61c81e035f2527be3dd9eebc2
+  languageName: node
+  linkType: hard
+
 "react-docgen-typescript@npm:^2.2.2":
   version: 2.2.2
   resolution: "react-docgen-typescript@npm:2.2.2"
@@ -23481,6 +23506,16 @@ __metadata:
   peerDependencies:
     "@babel/runtime": ^7.20.6
   checksum: 87675dda6b3142944413cd0570ce2208f9f25a3996d3b1b6ac43fca4ef0bb1543f19f931d8df492c28ce013f3354f28df365e29030fdd5ac8120f9e3b25f99e6
+  languageName: node
+  linkType: hard
+
+"react-native-flipper@npm:~0.203.0":
+  version: 0.203.0
+  resolution: "react-native-flipper@npm:0.203.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    react-native: ">0.62.0"
+  checksum: ec7988bf6250e1db9672736aee0b80054baf0bc67a073ec1e5d847706574f4b3ddc6466f8c1b67f979fd92632064acf0f898b830e0648938aa85613e43343974
   languageName: node
   linkType: hard
 

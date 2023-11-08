@@ -86,6 +86,7 @@ export function useProtectedRoute(user: User | null) {
  * see https://github.com/expo/router/issues/745
  *  */
 const replaceRoute = (href: string) => {
+  console.log('replace route', href)
   if (Platform.OS === 'ios') {
     setTimeout(() => {
       router.replace(href)

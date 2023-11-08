@@ -520,7 +520,7 @@ export const BoardComp = observer(() => {
 
 export const Board = observer(() => {
   return (
-    <YStack gap="$2" pos="relative" ai="flex-start" mt={24}>
+    <YStack h={height * appState$.scale.get()} ai="flex-start" mt={24}>
       <BoardComp />
     </YStack>
   )

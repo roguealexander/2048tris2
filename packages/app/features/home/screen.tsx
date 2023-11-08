@@ -22,6 +22,7 @@ import { colors } from 'app/colors'
 import { ShowStatsButton } from 'app/components/show-stats-button'
 import { StatsPanel } from 'app/components/stats-panel'
 import { useSafeAreaFrame } from 'app/utils/useSafeAreaFrame'
+import { batch } from '@legendapp/state'
 
 const ActiveLeftPanel = observer(() => {
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
@@ -65,7 +66,7 @@ const ActiveBottomPanel = observer(() => {
   const scale = appState$.scale.get()
   if (horizontal) return null
   return (
-    <XStack gap={8 * scale} w={450 * scale} jc="space-between">
+    <XStack gap={8 * scale} w={450 * scale} h={24 + 104 * scale} jc="space-between">
       <Hold />
       <Queue />
     </XStack>
@@ -79,7 +80,7 @@ const ActiveTopPanel = observer(() => {
     return null
 
   return (
-    <XStack mt={-32} mb={-8} zi={3} gap="$2" w={450 * scale} jc="space-between" ai="center">
+    <XStack zi={3} height={44} gap="$2" w={450 * scale} jc="space-between" ai="center">
       <YStack>
         <TSizableText size="$2">
           Score:{' '}
@@ -143,13 +144,12 @@ const VerticalScalingHeightsTotal = Object.values(VerticalScalingHeights).reduce
 )
 const VerticalHeightsTotal = VerticalFixedHeightsTotal + VerticalScalingHeightsTotal
 
-const Container = observer(({ children }: { children: ReactNode }) => {
+const ScaleAndOrientationCalculator = () => {
   const frame = useSafeAreaFrame()
 
   // Layout Dimension
   const aspectRatio = frame.width / frame.height
   const layoutDimension = aspectRatio >= HorizontalAspectRatio ? 'horizontal' : 'vertical'
-  appState$.layoutDimension.set(layoutDimension)
 
   // HorizontalScale
   const horizontalScale = Math.min(
@@ -167,32 +167,43 @@ const Container = observer(({ children }: { children: ReactNode }) => {
   const verticalScale = Math.min(widthScale, heightScale)
 
   const scale = layoutDimension === 'horizontal' ? horizontalScale : verticalScale
-  appState$.scale.set(scale)
+
+  batch(() => {
+    appState$.layoutDimension.set(layoutDimension)
+    appState$.scale.set(scale)
+  })
+
+  return null
+}
+
+const Container = observer(({ children }: { children: ReactNode }) => {
+  const frame = useSafeAreaFrame()
+  const scale = appState$.scale.get()
+  const horizontal = appState$.layoutDimension.get() === 'horizontal'
 
   return (
     <Stack
-      {...(layoutDimension === 'horizontal'
+      {...(horizontal
         ? {
             fd: 'row',
             gap: 64 * scale,
             ai: 'flex-start',
             jc: 'center',
+            pt: 84,
           }
         : {
             fd: 'column',
             gap: 8 * scale,
             ai: 'center',
             fc: 'flex-start',
+            pt: 44,
           })}
-      // miw={462}
-      // w={dimensions.width}
-      // maw={dimensions.width}
       f={1}
+      h={frame.height}
+      mih={frame.height}
       width="100%"
       miw={462 * scale}
-      pt={84}
       px="$2"
-      // transform={[{ scale }]}
       overflow="visible"
       style={{
         transformOrigin: 'top',
@@ -334,36 +345,39 @@ export const HappyBirthday = () => {
 
 export function HomeScreen() {
   return (
-    <Container>
-      <Tabs />
-      <StatsPersistor />
-      <GameplayHoldListener />
-      <PopSoundEffect />
+    <>
+      <ScaleAndOrientationCalculator />
+      <Container>
+        <Tabs />
+        <StatsPersistor />
+        <GameplayHoldListener />
+        <PopSoundEffect />
 
-      {/* LEFT */}
-      <TopOutPanel />
-      <StatsPanel />
-      <HighEfficiencyPanel />
-      <ActiveLeftPanel />
+        {/* LEFT */}
+        <TopOutPanel />
+        <StatsPanel />
+        <HighEfficiencyPanel />
+        <ActiveLeftPanel />
 
-      {/* TOP */}
-      <ActiveTopPanel />
+        {/* TOP */}
+        <ActiveTopPanel />
 
-      {/* BOARD */}
-      <Board />
+        {/* BOARD */}
+        <Board />
 
-      {/* BOTTOM */}
-      <ActiveBottomPanel />
+        {/* BOTTOM */}
+        <ActiveBottomPanel />
 
-      {/* RIGHT */}
-      <ActiveRightPanel />
+        {/* RIGHT */}
+        <ActiveRightPanel />
 
-      {/* TABS */}
-      <HowToPlayTab />
-      <LeaderboardTab />
-      <UserTab />
-      {/* <HappyBirthday /> */}
-    </Container>
+        {/* TABS */}
+        <HowToPlayTab />
+        <LeaderboardTab />
+        <UserTab />
+        {/* <HappyBirthday /> */}
+      </Container>
+    </>
   )
 }
 

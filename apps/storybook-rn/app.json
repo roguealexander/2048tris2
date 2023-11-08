@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "myapp-sb",
-    "slug": "myapp-sb",
-    "scheme": "myapp-sb",
+    "name": "2048tris-sb",
+    "slug": "2048tris-sb",
+    "scheme": "2048tris-sb",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.acme.myapp-sb"
+      "bundleIdentifier": "com.acme.2048tris-sb"
     },
     "android": {
-      "package": "com.acme.myapp-sb"
+      "package": "com.acme.2048tris-sb"
     }
   }
 }
