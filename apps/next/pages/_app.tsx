@@ -20,7 +20,7 @@ export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode
 }
 
-function 2048tris({
+function App2048tris({
   Component,
   pageProps,
 }: SolitoAppProps<{ initialSession: AuthProviderProps['initialSession'] }>) {
@@ -35,9 +35,12 @@ function 2048tris({
         <title>Tamagui Universal App</title>
         <meta name="description" content="Tamagui Universal Starter" />
         <link rel="icon" href="/favicon.svg" />
-        <link rel="preconnect" href="https://fonts.googleapis.com"/>
-        <link rel="preconnect" href="https://fonts.gstatic.com"/>
-        <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet"/>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap"
+          rel="stylesheet"
+        />
       </Head>
       <NextThemeProvider
         forcedTheme="light"
@@ -53,4 +56,4 @@ function 2048tris({
   )
 }
 
-export default api.withTRPC(2048tris)
+export default api.withTRPC(App2048tris)

@@ -67,8 +67,8 @@ export const GameEngine = observer(
     return (
       <Stack f={1} style={style}>
         <For each={entities$} optimized>
-          {(entity$: ObservableObject<GameEngineEntity>) => {
-            const entity = entity$.peek()
+          {(entity$) => {
+            const entity = entity$.peek() as GameEngineEntity
             if (entity.renderer == null) return <></>
             return <entity.renderer entity$={entity$} />
           }}

@@ -2,7 +2,7 @@ import { observable } from '@legendapp/state'
 import { configureObservablePersistence, persistObservable } from '@legendapp/state/persist'
 import { z } from 'zod'
 import { StatsSchema } from '../api/src/routers/tris'
-import { pluginLocal } from './persistence'
+import { localPersistenceConfig } from './persistence'
 
 type Stats = z.infer<typeof StatsSchema>
 type StatsActions = {
@@ -31,9 +31,7 @@ export const statsActions$ = observable<StatsActions>({
 
 // Global configuration
 configureObservablePersistence({
-  // Use localStorage in React
-  // Use react-native-mmkv in React Native
-  pluginLocal,
+  ...localPersistenceConfig,
 })
 
 persistObservable(stats$, {
