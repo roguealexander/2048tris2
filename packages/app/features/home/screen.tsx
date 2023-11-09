@@ -117,7 +117,7 @@ const HorizontalFixedHeightsTotal = Object.values(HorizontalFixedHeights).reduce
   0
 )
 const HorizontalScalingHeights = {
-  board: 700,
+  board: 675,
 }
 const HorizontalScalingHeightsTotal = Object.values(HorizontalScalingHeights).reduce(
   (acc, h) => acc + h,
@@ -134,7 +134,7 @@ const VerticalFixedHeights = {
 }
 const VerticalFixedHeightsTotal = Object.values(VerticalFixedHeights).reduce((acc, h) => acc + h, 0)
 const VerticalScalingHeights = {
-  board: 700,
+  board: 675,
   bottomGap: 8,
   bottomPanel: 104,
 }

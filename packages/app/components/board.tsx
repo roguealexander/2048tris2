@@ -34,7 +34,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 const GameScale = 1
 
 const width = 450
-const height = 700
+const height = 675
 
 type BodyWithCascadeDelete = Body & { cascadeDelete?: (Constraint | Body)[] }
 

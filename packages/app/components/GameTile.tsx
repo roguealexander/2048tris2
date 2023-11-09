@@ -33,9 +33,9 @@ export const GameTile = observer(({ entity$ }: { entity$: ObservableObject<GameE
         pointerEvents: 'none',
       }}
     >
-      <Text style={{ color: tileData.textColor }} selectable={false}>
+      <TSizableText color={tileData.textColor} selectable={false}>
         {size}
-      </Text>
+      </TSizableText>
     </Animated.View>
   )
 })

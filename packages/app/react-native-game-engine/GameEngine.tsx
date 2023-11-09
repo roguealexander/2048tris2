@@ -4,7 +4,7 @@ import DefaultTimer from './DefaultTimer'
 import { Stack, XStack } from '@my/ui'
 import { GameEngineEntities, GameEngineEntity, GameEngineProperties } from './rnge-types'
 import { For, observer, useMount, useUnmount } from '@legendapp/state/react'
-import { ObservableObject, observable } from '@legendapp/state'
+import { observable } from '@legendapp/state'
 
 export const entities$ = observable<GameEngineEntities>()
 export const frame$ = observable<number>(0)
