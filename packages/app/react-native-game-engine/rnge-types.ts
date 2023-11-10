@@ -17,6 +17,7 @@ export interface GameEngineUpdateEventOptionType {
 export type GameEngineEntity = {
   [key: string]: any
   id: string | number
+  type: 'tile' | 'physics' | 'body'
   size?: TileSize
   renderer?: React.FunctionComponent<any>
 }

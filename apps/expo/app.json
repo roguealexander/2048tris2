@@ -12,6 +12,7 @@
       "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
+    "platforms": ["ios", "android"],
     "updates": {
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/your-project-id"
@@ -30,10 +31,10 @@
       "package": "com.roguerotkosky.2048tris",
       "permissions": ["android.permission.RECORD_AUDIO"]
     },
-    "web": {
-      "favicon": "./assets/favicon.png",
-      "bundler": "metro"
-    },
+    // "web": {
+    //   "favicon": "./assets/favicon.png",
+    //   "bundler": "metro"
+    // },
     "plugins": [
       // [
       //   "expo-notifications",

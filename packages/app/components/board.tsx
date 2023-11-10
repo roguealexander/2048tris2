@@ -2,7 +2,7 @@ import { observer, useObserveEffect } from '@legendapp/state/react'
 import { actions$, state$ } from '../state'
 import { Tile } from './tile'
 import { Engine, World, Events, Bodies, Composite, Body, Constraint, Vector } from 'matter-js'
-import { useRef, useEffect, ReactNode } from 'react'
+import { useRef, useEffect, ReactNode, RefObject } from 'react'
 import {
   getMergedTileSize,
   getTileDensity,
@@ -10,6 +10,7 @@ import {
   getTileRadius,
   getTileSizeFromPower,
 } from '../tiles'
+import { View, Platform } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 
 import { TilePower, TileRecord, TileSize } from '../types'
@@ -22,10 +23,16 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated'
 import { appActions$, appState$ } from 'app/appState'
-import { GameTile } from './GameTile'
 import Matter from 'matter-js'
 import React from 'react'
-import { GameEngine, entities$ } from 'app/react-native-game-engine/GameEngine'
+import {
+  GameEngine,
+  entities$,
+  frame$,
+  tileBodies,
+  tileRefs,
+  tiles$,
+} from 'app/react-native-game-engine/GameEngine'
 import { GameEngineEntity, GameEngineSystem } from 'app/react-native-game-engine/rnge-types'
 
 Matter.Common.isElement = () => false //-- Overriding this function because the original references HTMLElement
@@ -184,17 +191,45 @@ const PhysicsSystem: GameEngineSystem = ({ time }) => {
 
   const engine = entities$[0]!.engine.peek()
 
-  const iterations = Math.round(time.delta / tick)
+  const iterations = Math.min(4, Math.round(time.delta / tick))
   for (let i = 0; i < iterations; i++) {
     Matter.Engine.update(engine, tick)
   }
+
+  // Increment frame on web, don't directly update native props of tiles
+  if (Platform.OS === 'web') {
+    frame$.set((frame) => frame + 1)
+    return
+  }
+
+  const scale = appState$.scale.peek()
+
+  entities$.peek().forEach((entity) => {
+    if (entity.type !== 'tile') return
+
+    const ref = tileRefs[entity.id] as RefObject<View>
+    if (ref == null) return
+
+    const body = tileBodies[entity.id]
+    if (body == null) return
+
+    const tileRadius = getTileRadius(entity.size!)
+
+    ref.current?.setNativeProps({
+      transform: [
+        { translateX: (body.position.x - tileRadius / 2) * scale },
+        { translateY: (body.position.y - tileRadius / 2 - 128) * scale },
+        { rotate: body.angle + 'rad' },
+      ],
+    })
+  })
 }
 
 const CreateTileSystem: GameEngineSystem = () => {
   const bodiesToAdd: GameEngineEntity[] = []
 
   Object.entries(tilesToCreate).forEach(([collisionId, createTileData]) => {
-    const tileBodies = createTile(createTileData)
+    const tileElements = createTile(createTileData)
 
     // Pop sound effect
     if (createTileData.viaMerge) {
@@ -206,15 +241,16 @@ const CreateTileSystem: GameEngineSystem = () => {
       actions$.triggerHighEfficiencyCheck(createTileData.size)
     }
 
-    World.add(entities$[0]!.world.peek(), tileBodies)
+    World.add(entities$[0]!.world.peek(), tileElements)
 
     // Index in state by sensor
     bodiesToAdd.push({
-      id: tileBodies[0]!.id,
-      body: tileBodies[0]!, // ballTile itself
+      id: tileElements[0]!.id,
+      type: 'tile',
       size: createTileData.size,
-      renderer: GameTile,
     })
+
+    tileBodies[tileElements[0]!.id] = tileElements[0]! as Body
   })
 
   tilesToCreate = {}
@@ -305,9 +341,9 @@ export const Game = observer(
     // MATTER-JS
     const engine = useRef(
       Engine.create({
-        positionIterations: 12,
-        // velocityIterations: 12,
         gravity: { x: 0, y: 1, scale: 0.0018 },
+        // positionIterations: 2,
+        // velocityIterations: 2,
       })
     )
     const boundBodies = useRef(
@@ -338,6 +374,8 @@ export const Game = observer(
         collidedTiles = {}
         tilesToCreate = {}
 
+        tiles$.refs.set({})
+
         World.add(engine.current.world, boundBodies.current)
 
         state$.resetting.set(false)
@@ -345,7 +383,7 @@ export const Game = observer(
     )
 
     useEffect(() => {
-      engine.current.positionIterations = 12
+      // engine.current.positionIterations = 12
       // engine.current.velocityIterations = 12
 
       World.add(engine.current.world, boundBodies.current)
@@ -461,7 +499,9 @@ export const Game = observer(
           top: 0,
         }}
         systems={[PhysicsSystem, CreateTileSystem, RemoveTileSystem]}
-        entities={[{ id: 'physics', engine: engine.current, world: engine.current.world }]}
+        entities={[
+          { id: 'physics', type: 'physics', engine: engine.current, world: engine.current.world },
+        ]}
       />
     )
   })

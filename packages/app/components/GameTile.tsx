@@ -1,31 +1,48 @@
-import { TSizableText } from '@my/ui'
 import { getTileData, getTileRadius } from 'app/tiles'
 import { TileSize } from 'app/types'
-import Animated from 'react-native-reanimated'
-import { Text } from 'react-native'
+import { Text, View, Platform } from 'react-native'
 import { appState$ } from 'app/appState'
-import { observer } from '@legendapp/state/react'
+import { observer, useMount, useUnmount } from '@legendapp/state/react'
 import { ObservableObject } from '@legendapp/state'
 import { GameEngineEntity } from 'app/react-native-game-engine/rnge-types'
-import { frame$ } from 'app/react-native-game-engine/GameEngine'
+import { frame$, tileBodies, tileRefs } from 'app/react-native-game-engine/GameEngine'
+import { useRef } from 'react'
 
 export const GameTile = observer(({ entity$ }: { entity$: ObservableObject<GameEngineEntity> }) => {
-  frame$.get()
-  const size = entity$.size.peek() as TileSize
+  if (Platform.OS === 'web') {
+    frame$.get()
+  }
+  const ref = useRef<View>(null)
+  const size = entity$.size.get() as TileSize
   const scale = appState$.scale.peek()
   const tileData = getTileData(size)!
   const tileRadius = getTileRadius(size)
+  const id = entity$.id.peek()
+  const body = tileBodies[id]!
+
+  useMount(() => {
+    tileRefs[id] = ref
+  })
+  useUnmount(() => {
+    delete tileRefs[id]
+    delete tileBodies[id]
+  })
 
   return (
-    <Animated.View
+    <View
+      ref={ref}
       style={{
         position: 'absolute',
-        left: (entity$.body.position.x.peek() - tileRadius / 2) * scale,
-        top: (entity$.body.position.y.peek() - tileRadius / 2 - 128) * scale,
+        left: 0,
+        top: 0,
         width: tileRadius * scale,
         height: tileRadius * scale,
         borderRadius: tileRadius * scale,
-        transform: [{ rotate: entity$.body.angle.peek() + 'rad' }],
+        transform: [
+          { translateX: (body.position.x - tileRadius / 2) * scale },
+          { translateY: (body.position.y - tileRadius / 2 - 128) * scale },
+          { rotate: body.angle + 'rad' },
+        ],
         backgroundColor: tileData.color,
         display: 'flex',
         alignItems: 'center',
@@ -33,9 +50,9 @@ export const GameTile = observer(({ entity$ }: { entity$: ObservableObject<GameE
         pointerEvents: 'none',
       }}
     >
-      <TSizableText color={tileData.textColor} selectable={false}>
+      <Text style={{ color: tileData.textColor }} selectable={false}>
         {size}
-      </TSizableText>
-    </Animated.View>
+      </Text>
+    </View>
   )
 })

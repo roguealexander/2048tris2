@@ -10,9 +10,10 @@ import { connectToDevTools } from 'react-devtools-core'
 import { colors } from 'app/colors'
 
 if (__DEV__) {
+  console.log('connecting to devtools')
   connectToDevTools({
     host: 'localhost',
-    port: 8097,
+    port: 8081,
   })
 }
 

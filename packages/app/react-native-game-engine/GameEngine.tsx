@@ -1,13 +1,30 @@
-import React, { useRef } from 'react'
-import { Dimensions } from 'react-native'
+import React, { useRef, RefObject } from 'react'
+import { Dimensions, View } from 'react-native'
 import DefaultTimer from './DefaultTimer'
 import { Stack, XStack } from '@my/ui'
 import { GameEngineEntities, GameEngineEntity, GameEngineProperties } from './rnge-types'
 import { For, observer, useMount, useUnmount } from '@legendapp/state/react'
-import { observable } from '@legendapp/state'
+import { ObservableObject, observable } from '@legendapp/state'
+import { SharedValue } from 'react-native-reanimated'
+import { Body } from 'matter-js'
+import { GameTile } from 'app/components/GameTile'
 
 export const entities$ = observable<GameEngineEntities>()
 export const frame$ = observable<number>(0)
+export const tileBodies: Record<number, Body> = {}
+export const tileRefs: Record<number, RefObject<View>> = {}
+
+type SharedBodyVals = SharedValue<{ x: number; y: number; angle: string }>
+type TilesState = {
+  refs: Record<number, SharedBodyVals>
+  register: (id: number, ref: SharedBodyVals) => void
+}
+export const tiles$ = observable<TilesState>({
+  refs: {},
+  register: (id, ref) => {
+    tiles$.refs.set((refs) => ({ ...refs, [id]: ref }))
+  },
+})
 
 export const GameEngine = observer(
   ({ systems = [], entities: propsEntities = [], style, children }: GameEngineProperties) => {
@@ -44,8 +61,6 @@ export const GameEngine = observer(
 
       previousTime.current = currentTime
       previousDelta.current = args.time.delta
-
-      frame$.set((frame) => frame + 1)
     }
 
     timer.current.subscribe(updateHandler)
@@ -69,8 +84,8 @@ export const GameEngine = observer(
         <For each={entities$} optimized>
           {(entity$) => {
             const entity = entity$.peek() as GameEngineEntity
-            if (entity.renderer == null) return <></>
-            return <entity.renderer entity$={entity$} />
+            if (entity.type !== 'tile') return <></>
+            return <GameTile entity$={entity$ as ObservableObject<GameEngineEntity>} />
           }}
         </For>
 
