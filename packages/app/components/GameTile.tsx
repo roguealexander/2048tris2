@@ -11,7 +11,7 @@ import { TSizableText } from '@my/ui'
 export const GameTile = observer(
   ({ tile: { id, size } }: { tile: { id: number; size: TileSize } }) => {
     const ref = useRef<View>(null)
-    const scale = appState$.scale.peek()
+    const scale = appState$.scale.get()
     const tileData = getTileData(size)!
     const tileRadius = getTileRadius(size)
     const b2dBody = b2dTileBodies[id]!

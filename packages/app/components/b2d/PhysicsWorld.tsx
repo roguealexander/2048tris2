@@ -49,12 +49,12 @@ export const b2dTiles$ = observable<Array<{ id: number; size: TileSize }>>([])
 const PhysicsSystem = (world: b2World, deltaTime: number) => {
   if (state$.gamePhysicsPaused.peek()) return
 
-  const iterations = Math.min(4, Math.round(deltaTime / (1000 / 60)))
+  const iterations = Math.min(4, Math.round(deltaTime / (1000 / 120)))
   for (let i = 0; i < iterations; i++) {
     world.Step(
-      1 / 60, //frame-rate (just hoping typical 60hz. in future, planning to use webworkers for uninterrupted physics simulation)
-      4, //velocity iterations
-      4 //position iterations
+      1 / 90, //frame-rate
+      2, //velocity iterations
+      2 //position iterations
     )
   }
 
@@ -233,7 +233,7 @@ const RemoveTileSystem = (world: b2World) => {
 }
 
 export function UsePhysicsWorld() {
-  const world = useRef(new b2World(new b2Vec2(0, 15)))
+  const world = useRef(new b2World(new b2Vec2(0, 20)))
 
   // @ts-ignore
   world.current.scaleFactor = SCALE

@@ -85,10 +85,8 @@ export function useAnimationFrame(callback: (deltaTime: number) => void) {
   const animate = (time: number) => {
     if (previousTimeRef.current != undefined) {
       const deltaTime = time - previousTimeRef.current
-      if (deltaTime > 16) {
-        callback(deltaTime)
-        previousTimeRef.current = time
-      }
+      callback(deltaTime)
+      previousTimeRef.current = time
     } else {
       previousTimeRef.current = time
     }

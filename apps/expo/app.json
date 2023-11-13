@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "cover",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FDFAE7"
     },
     "platforms": ["ios", "android"],
     "updates": {
@@ -26,10 +26,10 @@
       "softwareKeyboardLayoutMode": "pan",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#FDFAE7"
       },
       "package": "com.roguerotkosky.2048tris",
-      "permissions": ["android.permission.RECORD_AUDIO"]
+      "permissions": []
     },
     // "web": {
     //   "favicon": "./assets/favicon.png",
