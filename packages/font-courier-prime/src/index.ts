@@ -27,7 +27,7 @@ export const createCourierPrimeFont = <A extends GenericFont>(
   return createFont({
     family: isWeb
       ? '"Courier Prime", -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
-      : 'Courier Prime',
+      : 'CourierPrime',
     lineHeight: Object.fromEntries(
       Object.entries(size).map(([k, v]) => [k, sizeLineHeight(getVariableValue(v) * LINE_HEIGHT)])
     ),

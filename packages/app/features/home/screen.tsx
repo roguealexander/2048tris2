@@ -17,12 +17,13 @@ import { state$ } from 'app/state'
 import React, { ReactNode } from 'react'
 import { PopSoundEffect } from 'app/components/pop-sound-effect'
 import { appState$ } from 'app/appState'
-import { HelpCircle, Table, UserCircle2 } from '@tamagui/lucide-icons'
+import { Code, HelpCircle, Table, UserCircle2 } from '@tamagui/lucide-icons'
 import { colors } from 'app/colors'
 import { ShowStatsButton } from 'app/components/show-stats-button'
 import { StatsPanel } from 'app/components/stats-panel'
 import { useSafeAreaFrame } from 'app/utils/useSafeAreaFrame'
 import { batch } from '@legendapp/state'
+import { DebugTab } from 'app/components/debug-tab'
 
 const ActiveLeftPanel = observer(() => {
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
@@ -214,6 +215,8 @@ const Container = observer(({ children }: { children: ReactNode }) => {
   )
 })
 
+const __DEBUG__ = true
+
 const Tabs = observer(() => {
   const scale = appState$.scale.get()
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
@@ -298,6 +301,29 @@ const Tabs = observer(() => {
             />
           )}
         </XStack>
+        <XStack
+          h="$3"
+          px={horizontal ? 8 : 16}
+          ai="center"
+          pos="relative"
+          cursor="pointer"
+          onPress={() => appState$.tab.set('debug')}
+        >
+          <Show if={tab === 'debug'}>
+            <XStack fullscreen h="$3" bg={colors.tile[32]} zi={0} />
+          </Show>
+          {horizontal ? (
+            <TSizableText zi={2} color={tab === 'debug' ? colors.background : colors.text}>
+              Debug
+            </TSizableText>
+          ) : (
+            <Code
+              style={{ zIndex: 2 }}
+              size={20}
+              color={tab === 'debug' ? colors.background : colors.text}
+            />
+          )}
+        </XStack>
       </XStack>
 
       <XStack
@@ -375,6 +401,7 @@ export function HomeScreen() {
         <HowToPlayTab />
         <LeaderboardTab />
         <UserTab />
+        <DebugTab />
         {/* <HappyBirthday /> */}
       </Container>
     </>

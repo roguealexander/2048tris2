@@ -1,7 +1,7 @@
 import { observable } from '@legendapp/state'
 import { TileSize } from './types'
 
-export type Tab = '2048tris' | 'how-to-play' | 'leaderboard' | 'user'
+export type Tab = '2048tris' | 'how-to-play' | 'leaderboard' | 'user' | 'debug'
 export type LayoutDimension = 'vertical' | 'horizontal'
 
 type AppState = {

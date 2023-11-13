@@ -95,7 +95,7 @@ const courierPrimeSize = {
   16: 134,
 }
 export const courierPrimeFont = createFont({
-  family: 'Courier Prime',
+  family: 'CourierPrime',
   weight: {
     1: '300',
     // 2 will be 300
