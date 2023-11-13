@@ -8864,13 +8864,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/matter-js@npm:^0.19.2":
-  version: 0.19.2
-  resolution: "@types/matter-js@npm:0.19.2"
-  checksum: 60907d362ba505d7ead865fcaf7e1113e5171f77a4daacf276835e7d567396b6c21e1a76c603e043fb438f6424e4c4f57096fe4e8d672be45303b77f923f700a
-  languageName: node
-  linkType: hard
-
 "@types/mdx@npm:^2.0.0":
   version: 2.0.7
   resolution: "@types/mdx@npm:2.0.7"
@@ -10532,7 +10525,6 @@ __metadata:
     "@tanstack/react-query": "npm:4.18.0"
     "@trpc/client": "npm:^10.38.2"
     "@types/lodash": "npm:^4"
-    "@types/matter-js": "npm:^0.19.2"
     "@types/react": "npm:^18.0.27"
     "@vonovak/react-native-theme-control": "npm:^5.0.1"
     base64-arraybuffer: "npm:^1.0.2"
@@ -10544,7 +10536,6 @@ __metadata:
     expo-linking: "npm:~5.0.2"
     expo-secure-store: "npm:~12.3.1"
     lodash: "npm:^4.17.21"
-    matter-js: "npm:^0.19.0"
     react-hook-form: "npm:^7.46.1"
     react-native-gesture-handler: "npm:^2.13.4"
     react-native-safe-area-context: "npm:4.6.3"
@@ -20249,13 +20240,6 @@ __metadata:
   bin:
     marked: bin/marked.js
   checksum: e51d15f79c9b2a93e8bd801cfc0f1924027f0bf9ae12c237300d34363edf9dacdfa27de0659074ade78f2ba747cdb1c8246aef144f9ccf91600ee71c87e4d169
-  languageName: node
-  linkType: hard
-
-"matter-js@npm:^0.19.0":
-  version: 0.19.0
-  resolution: "matter-js@npm:0.19.0"
-  checksum: 7945824d9ec059437562d626479562d615b65bc2b519f08efdd5183fade213458388a35d54552c81c7edeea33cfe6e9ba9354983c1e7019b40dbb933e4c5a0ef
   languageName: node
   linkType: hard
 
