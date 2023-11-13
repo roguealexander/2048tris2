@@ -1,19 +1,9 @@
-import { observer, useObserveEffect } from '@legendapp/state/react'
+import { For, observer, useObserveEffect } from '@legendapp/state/react'
 import { actions$, state$ } from '../state'
 import { Tile } from './tile'
-import { Engine, World, Events, Bodies, Composite, Body, Constraint, Vector } from 'matter-js'
-import { useRef, useEffect, ReactNode, RefObject } from 'react'
-import {
-  getMergedTileSize,
-  getTileDensity,
-  getTilePower,
-  getTileRadius,
-  getTileSizeFromPower,
-} from '../tiles'
-import { View, Platform } from 'react-native'
+import { ReactNode, useContext } from 'react'
+import { getTilePower, getTileRadius } from '../tiles'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
-
-import { TilePower, TileRecord, TileSize } from '../types'
 import { XStack, YStack, useIsTouchDevice } from '@my/ui'
 import Animated, {
   useAnimatedStyle,
@@ -23,251 +13,15 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated'
 import { appActions$, appState$ } from 'app/appState'
-import Matter from 'matter-js'
 import React from 'react'
-import {
-  GameEngine,
-  entities$,
-  frame$,
-  tileBodies,
-  tileRefs,
-  tiles$,
-} from 'app/react-native-game-engine/GameEngine'
-import { GameEngineEntity, GameEngineSystem } from 'app/react-native-game-engine/rnge-types'
+import PhysicsWorld, { b2dTiles$, b2dTilesToCreate, worldContext } from './b2d/PhysicsWorld'
+import { GameTile } from './GameTile'
 
-Matter.Common.isElement = () => false //-- Overriding this function because the original references HTMLElement
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 const GameScale = 1
-
 const width = 450
 const height = 675
-
-type BodyWithCascadeDelete = Body & { cascadeDelete?: (Constraint | Body)[] }
-
-const categoryPhysics = 0x0001
-const categoryTopOut = 0x0002
-const categoryTile: TileRecord<number> = {
-  '2': 0x0003,
-  '4': 0x0004,
-  '8': 0x0005,
-  '16': 0x0006,
-  '32': 0x0007,
-  '64': 0x0008,
-  '128': 0x0009,
-  '256': 0x0010,
-  '512': 0x0011,
-  '1024': 0x0012,
-  '2048': 0x0013,
-  '4096': 0x0014,
-  '8192': 0x0015,
-}
-
-let handledCollisions: Record<string, boolean> = {}
-let tileId = 450
-const topOutSensorLabel = 'top-out-sensor'
-
-type CreateTileData = {
-  size: TileSize
-  position: { x: number; y: number }
-  velocity?: { x: number; y: number }
-  viaMerge: boolean
-}
-let tilesToCreate: Record<string, CreateTileData> = {}
-let bodiesToRemove: Record<string, Body | Constraint> = {}
-let collidedTiles: Record<string, true> = {}
-
-const createBounds = (cw: number, ch: number) => {
-  return [
-    // Top Sensor
-    Bodies.rectangle(cw / 2, -200 + 128, cw, 400, {
-      id: 100,
-      isSensor: true,
-      isStatic: true,
-      render: { opacity: 0 },
-      label: topOutSensorLabel,
-      collisionFilter: {
-        category: categoryTopOut,
-      },
-    }),
-
-    // Left Boundary
-    Bodies.rectangle(-200, ch / 2, 400, ch, {
-      isStatic: true,
-      render: { opacity: 0 },
-      friction: 0.1,
-      frictionStatic: 0,
-      collisionFilter: { category: categoryPhysics, mask: categoryPhysics },
-      label: 'LeftBound',
-    }),
-    // Bottom Boundary
-    Bodies.rectangle(cw / 2, ch + 200, cw, 400, {
-      isStatic: true,
-      render: { opacity: 0 },
-      friction: 0.1,
-      frictionStatic: 0,
-      collisionFilter: { category: categoryPhysics, mask: categoryPhysics },
-      label: 'RightBound',
-    }),
-    // Right Boundary
-    Bodies.rectangle(cw + 200, ch / 2, 400, ch, {
-      isStatic: true,
-      render: { opacity: 0 },
-      friction: 0.1,
-      frictionStatic: 0,
-      collisionFilter: { category: categoryPhysics, mask: categoryPhysics },
-      label: 'BottomBound',
-    }),
-  ]
-}
-
-const createTile = (data: CreateTileData) => {
-  const { size, position, velocity } = data
-
-  const radius = getTileRadius(size) / 2
-  const power = getTilePower(size)
-  const density = getTileDensity(size)
-
-  const ballId = ++tileId
-  const sensorId = ++tileId
-  const constraintId = ++tileId
-
-  const ballTile = Bodies.circle(
-    position.x,
-    position.y,
-    radius,
-    {
-      id: ballId,
-      mass: 1.5 * power * density,
-      restitution: 0.3,
-      friction: 0.05,
-      frictionStatic: 0,
-      frictionAir: 0,
-      label: 'Tile',
-      collisionFilter: { category: categoryPhysics, mask: categoryPhysics, group: power },
-    },
-    28
-  )
-
-  const ballSensor = Bodies.circle(position.x, position.y, radius + 2, {
-    id: sensorId,
-    mass: 0.00001,
-    isSensor: true,
-    friction: 0,
-    frictionStatic: 0,
-    frictionAir: 0,
-    collisionFilter: {
-      category: categoryTile[size],
-      mask: categoryTopOut | categoryTile[size],
-      group: power,
-    },
-    render: { visible: false },
-    label: 'Sensor',
-  }) as BodyWithCascadeDelete
-
-  const ballConstraint = Constraint.create({
-    id: constraintId,
-    bodyA: ballTile,
-    bodyB: ballSensor,
-    render: { visible: false },
-  })
-
-  ballSensor.cascadeDelete = [ballTile, ballConstraint]
-
-  // Set velocity
-  if (velocity != null) {
-    Body.setVelocity(ballTile, velocity)
-  }
-
-  state$.activeTileCount[size].set((count) => count + 1)
-
-  return [ballTile, ballSensor, ballConstraint]
-}
-
-const tick = 1000 / 120
-
-const PhysicsSystem: GameEngineSystem = ({ time }) => {
-  if (state$.gamePhysicsPaused.peek()) return
-
-  const engine = entities$[0]!.engine.peek()
-
-  const iterations = Math.min(4, Math.round(time.delta / tick))
-  for (let i = 0; i < iterations; i++) {
-    Matter.Engine.update(engine, tick)
-  }
-
-  // Increment frame on web, don't directly update native props of tiles
-  if (Platform.OS === 'web') {
-    frame$.set((frame) => frame + 1)
-    return
-  }
-
-  const scale = appState$.scale.peek()
-
-  entities$.peek().forEach((entity) => {
-    if (entity.type !== 'tile') return
-
-    const ref = tileRefs[entity.id] as RefObject<View>
-    if (ref == null) return
-
-    const body = tileBodies[entity.id]
-    if (body == null) return
-
-    const tileRadius = getTileRadius(entity.size!)
-
-    ref.current?.setNativeProps({
-      transform: [
-        { translateX: (body.position.x - tileRadius / 2) * scale },
-        { translateY: (body.position.y - tileRadius / 2 - 128) * scale },
-        { rotate: body.angle + 'rad' },
-      ],
-    })
-  })
-}
-
-const CreateTileSystem: GameEngineSystem = () => {
-  const bodiesToAdd: GameEngineEntity[] = []
-
-  Object.entries(tilesToCreate).forEach(([collisionId, createTileData]) => {
-    const tileElements = createTile(createTileData)
-
-    // Pop sound effect
-    if (createTileData.viaMerge) {
-      appActions$.triggerPopSound(createTileData.size, collisionId)
-    }
-
-    // Update efficiency score
-    if (createTileData.viaMerge && createTileData.size === state$.targetEfficiency.peek()) {
-      actions$.triggerHighEfficiencyCheck(createTileData.size)
-    }
-
-    World.add(entities$[0]!.world.peek(), tileElements)
-
-    // Index in state by sensor
-    bodiesToAdd.push({
-      id: tileElements[0]!.id,
-      type: 'tile',
-      size: createTileData.size,
-    })
-
-    tileBodies[tileElements[0]!.id] = tileElements[0]! as Body
-  })
-
-  tilesToCreate = {}
-
-  entities$.set((entities) => [...entities, ...bodiesToAdd])
-}
-
-const RemoveTileSystem: GameEngineSystem = () => {
-  if (Object.keys(bodiesToRemove).length === 0) return
-
-  entities$.set((entities) => entities.filter((entity) => !(entity.id in bodiesToRemove)))
-
-  // Remove from world
-  World.remove(entities$[0]?.world.peek(), Object.values(bodiesToRemove))
-
-  bodiesToRemove = {}
-}
 
 const TileDropPositioner = observer(
   ({ dropX, children }: { dropX: SharedValue<number>; children: ReactNode }) => {
@@ -335,177 +89,47 @@ const TilePositionDetector = observer(
   }
 )
 
-export const Game = observer(
-  // eslint-disable-next-line react/display-name
-  React.memo(() => {
-    // MATTER-JS
-    const engine = useRef(
-      Engine.create({
-        gravity: { x: 0, y: 1, scale: 0.0018 },
-        // positionIterations: 2,
-        // velocityIterations: 2,
-      })
-    )
-    const boundBodies = useRef(
-      createBounds((width - 8) * GameScale, (height - 4 + 128) * GameScale)
-    )
+const WorldResetter = observer(() => {
+  const world = useContext(worldContext)
 
-    useObserveEffect(
-      () => state$.resetCount.get(),
-      async ({ value }) => {
-        if (value === 0 || engine.current == null) return
+  useObserveEffect(
+    () => state$.resetCount.get(),
+    async ({ value }) => {
+      if (value === 0 || world == null) return
 
-        const bodies = Composite.allBodies(engine.current!.world)
-
-        for (let i = bodies.length - 1; i >= 0; i--) {
-          if (bodies[i]!.label === 'Tile') {
-            bodiesToRemove[bodies[i]!.id] = bodies[i]!
-            const power = (bodies[i]?.collisionFilter.group ?? 3) as TilePower
-            if (power >= 4) {
-              appActions$.triggerPopSound(getTileSizeFromPower(power), bodies[i]?.id ?? power)
-            }
-            await sleep(25)
+      for (let b = world.m_bodyList; b; b = b.m_next) {
+        const userData = b.GetUserData()
+        if (userData && userData.category === '_TILE_') {
+          const power = getTilePower(userData['size'])
+          if (power >= 4) {
+            appActions$.triggerPopSound(userData['size'], userData['id'])
           }
+          b.m_userData.removed = true
+          await sleep(25)
         }
-
-        Composite.clear(engine.current!.world, false)
-
-        handledCollisions = {}
-        collidedTiles = {}
-        tilesToCreate = {}
-
-        tiles$.refs.set({})
-
-        World.add(engine.current.world, boundBodies.current)
-
-        state$.resetting.set(false)
       }
-    )
 
-    useEffect(() => {
-      // engine.current.positionIterations = 12
-      // engine.current.velocityIterations = 12
+      state$.resetting.set(false)
+    }
+  )
 
-      World.add(engine.current.world, boundBodies.current)
+  return null
+})
 
-      const collisionActiveCallback = (event: Matter.IEventCollision<Engine>) => {
-        // Prevent top-out after game ends and before reset complete
-        if (state$.toppedOut.peek() || state$.resetting.peek()) return
-
-        const { pairs } = event
-
-        pairs.forEach((pair) => {
-          const { timeUpdated, timeCreated, bodyA, bodyB } = pair
-
-          if (
-            bodyA.collisionFilter.category === categoryTopOut ||
-            bodyB.collisionFilter.category === categoryTopOut
-          ) {
-            if (timeUpdated - timeCreated > 2000) {
-              actions$.topOut()
-            }
-          }
-        })
-      }
-      Events.on(engine.current, 'collisionActive', collisionActiveCallback)
-
-      const collisionStartCallback = (event: Matter.IEventCollision<Engine>) => {
-        // Prevent collisions after game ends
-        if (state$.toppedOut.peek() || state$.resetting.peek()) return
-
-        const { pairs } = event
-
-        pairs.forEach((pair) => {
-          const { id, bodyA, bodyB } = pair
-
-          // Escape if not sensor
-          if (
-            bodyA.collisionFilter.category == null ||
-            bodyA.collisionFilter.category === categoryPhysics ||
-            bodyB.collisionFilter.category == null ||
-            bodyB.collisionFilter.category === categoryPhysics
-          )
-            return
-
-          // Escape if collision already handled
-          if (handledCollisions[id]) return
-          handledCollisions[id] = true
-
-          if (bodyA.collisionFilter.category === bodyB.collisionFilter.category) {
-            const power = bodyA.collisionFilter.group
-
-            const sensorA = bodyA as BodyWithCascadeDelete
-            const sensorB = bodyB as BodyWithCascadeDelete
-            const lowestVelocitySensor =
-              Vector.magnitude(sensorA.velocity) < Vector.magnitude(sensorB.velocity)
-                ? sensorA
-                : sensorB
-            const positionCenter = Vector.div(Vector.add(sensorA.position, sensorB.position), 2)
-            const position = Vector.div(
-              Vector.add(positionCenter, lowestVelocitySensor.position),
-              2
-            )
-            const velocity = Vector.div(Vector.add(sensorA.velocity, sensorB.velocity), 3)
-
-            // Escape if tiles already collided
-            if (collidedTiles[sensorA.id] || collidedTiles[sensorB.id]) return
-
-            collidedTiles[sensorB.id] = true
-
-            // Created merged tile
-            const size = getTileSizeFromPower(power as TilePower)
-            const mergedSize = getMergedTileSize(size)
-
-            tilesToCreate[id] = {
-              size: mergedSize,
-              position,
-              velocity,
-              viaMerge: true,
-            }
-
-            // Remove tiles
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const _bodies = [
-              sensorA,
-              ...(sensorA.cascadeDelete ?? []),
-              sensorB,
-              ...(sensorB.cascadeDelete ?? []),
-            ].forEach((body) => {
-              bodiesToRemove[body.id] = body
-            })
-
-            state$.activeTileCount[size].set((count) => count - 2)
-          }
-        })
-      }
-      Events.on(engine.current, 'collisionStart', collisionStartCallback)
-
-      return () => {
-        World.clear(engine.current.world, false)
-        Engine.clear(engine.current)
-
-        Events.off(engine.current, 'collisionActive', collisionActiveCallback)
-        Events.off(engine.current, 'collisionStart', collisionStartCallback)
-      }
-    }, [])
-
-    return (
-      <GameEngine
-        style={{
-          position: 'absolute',
-          width: (width - 8) * GameScale,
-          height: (height - 4 + 128) * GameScale,
-          left: 0,
-          top: 0,
+const GameBox2D = () => {
+  return (
+    <PhysicsWorld>
+      <WorldResetter />
+      <For each={b2dTiles$} optimized>
+        {(tile$) => {
+          const tile = tile$.peek()
+          if (tile == null) return <></>
+          return <GameTile tile={tile} />
         }}
-        systems={[PhysicsSystem, CreateTileSystem, RemoveTileSystem]}
-        entities={[
-          { id: 'physics', type: 'physics', engine: engine.current, world: engine.current.world },
-        ]}
-      />
-    )
-  })
-)
+      </For>
+    </PhysicsWorld>
+  )
+}
 
 export const BoardComp = observer(() => {
   const scale = appState$.scale.get()
@@ -521,9 +145,9 @@ export const BoardComp = observer(() => {
   const releaseBall = () => {
     if (state$.gameInteractionPaused.get()) return
 
-    tilesToCreate['fresh'] = {
+    b2dTilesToCreate['fresh'] = {
       size: state$.activeTile.peek(),
-      position: { x: dropX.value, y: 128 },
+      position: { x: dropX.value, y: 0 },
       velocity: { x: 0.01, y: 0 },
       viaMerge: false,
     }
@@ -540,7 +164,7 @@ export const BoardComp = observer(() => {
       w={width * scale}
       h={height * scale}
     >
-      <Game />
+      <GameBox2D />
 
       <TileDropPositioner dropX={dropX}>
         <Tile size={state$.activeTile} />

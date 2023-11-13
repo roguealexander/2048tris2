@@ -1,11 +1,18 @@
 import { colors } from './colors'
-import { TileSize, TileData, TileRecord, TilePower } from './types'
+import { TileSize, TileData, TileRecord, TilePower, TileList } from './types'
+;[
+  0.6366197723675814, 0.238732414637843, 0.1326291192432461, 0.08952465548919113,
+  0.06366197723675814, 0.05305164769729845, 0.045472840883398674, 0.039788735772973836,
+  0.0353677651315323, 0.03183098861837907, 0.028937262380344605, 0.026525823848649224,
+  0.02448537586029159,
+]
 
 const tile2: TileData = {
   size: '2',
   power: 1,
   radius: 1,
-  density: 3,
+  mass: 2,
+  density: 0.4366197723675814,
   color: colors.tile['2'],
   textColor: colors.tileText,
 }
@@ -13,7 +20,8 @@ const tile4: TileData = {
   size: '4',
   power: 2,
   radius: 2,
-  density: 2,
+  mass: 3,
+  density: 0.208732414637843,
   color: colors.tile['4'],
   textColor: colors.tileText,
 }
@@ -21,7 +29,8 @@ const tile8: TileData = {
   size: '8',
   power: 3,
   radius: 3,
-  density: 1.5,
+  mass: 3.75,
+  density: 0.1326291192432461,
   color: colors.tile['8'],
   textColor: colors.background,
 }
@@ -29,7 +38,8 @@ const tile16: TileData = {
   size: '16',
   power: 4,
   radius: 4,
-  density: 1.5,
+  mass: 4.5,
+  density: 0.08952465548919113,
   color: colors.tile['16'],
   textColor: colors.background,
 }
@@ -37,7 +47,8 @@ const tile32: TileData = {
   size: '32',
   power: 5,
   radius: 5,
-  density: 1,
+  mass: 5,
+  density: 0.06366197723675814,
   color: colors.tile['32'],
   textColor: colors.background,
 }
@@ -45,7 +56,8 @@ const tile64: TileData = {
   size: '64',
   power: 6,
   radius: 6,
-  density: 1,
+  mass: 6,
+  density: 0.05305164769729845,
   color: colors.tile['64'],
   textColor: colors.background,
 }
@@ -53,7 +65,8 @@ const tile128: TileData = {
   size: '128',
   power: 7,
   radius: 7,
-  density: 1,
+  mass: 7,
+  density: 0.045472840883398674,
   color: colors.tile['128'],
   textColor: colors.background,
 }
@@ -61,7 +74,8 @@ const tile256: TileData = {
   size: '256',
   power: 8,
   radius: 8,
-  density: 1,
+  mass: 8,
+  density: 0.039788735772973836,
   color: colors.tile['256'],
   textColor: colors.background,
 }
@@ -69,7 +83,8 @@ const tile512: TileData = {
   size: '512',
   power: 9,
   radius: 9,
-  density: 1,
+  mass: 9,
+  density: 0.0353677651315323,
   color: colors.tile['512'],
   textColor: colors.background,
 }
@@ -77,7 +92,8 @@ const tile1024: TileData = {
   size: '1024',
   power: 10,
   radius: 10,
-  density: 1,
+  mass: 10,
+  density: 0.03183098861837907,
   color: colors.tile['1024'],
   textColor: colors.background,
 }
@@ -85,7 +101,8 @@ const tile2048: TileData = {
   size: '2048',
   power: 11,
   radius: 11,
-  density: 1,
+  mass: 11,
+  density: 0.028937262380344605,
   color: colors.tile['2048'],
   textColor: colors.background,
 }
@@ -93,7 +110,8 @@ const tile4096: TileData = {
   size: '4096',
   power: 12,
   radius: 12,
-  density: 1,
+  mass: 12,
+  density: 0.026525823848649224,
   color: colors.tile['4096'],
   textColor: colors.background,
 }
@@ -101,7 +119,8 @@ const tile8192: TileData = {
   size: '8192',
   power: 13,
   radius: 13,
-  density: 1,
+  mass: 13,
+  density: 0.02448537586029159,
   color: colors.tile['8192'],
   textColor: colors.background,
 }
@@ -135,6 +154,19 @@ export const mergedSize: TileRecord<TileSize> = {
   2048: '4096',
   4096: '8192',
   8192: '8192',
+}
+
+export const getTileDensityLog = () => {
+  const areas = TileList.map((tile) => tiles[tile].radius * tiles[tile].radius * Math.PI)
+  const masses = TileList.map((tile) => tiles[tile].mass)
+  const densities = TileList.map(
+    (tile) => tiles[tile].mass / (tiles[tile].radius * tiles[tile].radius * Math.PI)
+  )
+  console.log({
+    areas,
+    masses,
+    densities,
+  })
 }
 
 export const getTileData = (size: TileSize | null): TileData | null => {

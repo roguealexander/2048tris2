@@ -9,7 +9,10 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "cSpell.words": [
     "Authed",
+    "constiations",
     "falso",
+    "fixt",
+    "GSCALE",
     "leaderboard",
     "leaderboards",
     "legendapp",

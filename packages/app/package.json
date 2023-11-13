@@ -11,6 +11,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "@flyover/box2d": "^1.0.1",
     "@legendapp/state": "^2.1.1",
     "@my/supabase": "*",
     "@my/ui": "*",

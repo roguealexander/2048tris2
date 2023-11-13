@@ -26,6 +26,7 @@ export type TileData = {
   size: TileSize
   power: TilePower
   radius: number
+  mass: number
   density: number
   color: string
   textColor: string
