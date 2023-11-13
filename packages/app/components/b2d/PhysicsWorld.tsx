@@ -257,7 +257,9 @@ export function UsePhysicsWorld() {
   world.current.SetContactListener(listener.current)
 
   useLayoutEffect(() => {
-    makeEnclosedBox(width, height, enclosureThickness, world.current, SCALE)
+    if (world.current.m_bodyCount === 0) {
+      makeEnclosedBox(width, height, enclosureThickness, world.current, SCALE)
+    }
   }, [])
 
   useAnimationFrame(function (deltaTime: number) {

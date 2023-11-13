@@ -1,11 +1,12 @@
 import { getTileData, getTileRadius } from 'app/tiles'
 import { TileSize } from 'app/types'
-import { Text, View } from 'react-native'
+import { View } from 'react-native'
 import { appState$ } from 'app/appState'
 import { observer, useMount, useUnmount } from '@legendapp/state/react'
 import { useRef } from 'react'
 import { b2dTileBodies, b2dTileRefs } from './b2d/PhysicsWorld'
 import { fromPhysicsToCanvas } from './b2d/Utils'
+import { TSizableText } from '@my/ui'
 
 export const GameTile = observer(
   ({ tile: { id, size } }: { tile: { id: number; size: TileSize } }) => {
@@ -13,7 +14,6 @@ export const GameTile = observer(
     const scale = appState$.scale.peek()
     const tileData = getTileData(size)!
     const tileRadius = getTileRadius(size)
-    // const body = tileBodies[id]!
     const b2dBody = b2dTileBodies[id]!
     const position = b2dBody.GetPosition()
     const angle = b2dBody.GetAngle()
@@ -50,9 +50,9 @@ export const GameTile = observer(
           pointerEvents: 'none',
         }}
       >
-        <Text style={{ color: tileData.textColor }} selectable={false}>
+        <TSizableText color={tileData.textColor} selectable={false}>
           {size}
-        </Text>
+        </TSizableText>
       </View>
     )
   }

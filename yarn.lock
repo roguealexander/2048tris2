@@ -2795,12 +2795,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@flyover/box2d@npm:^1.0.1":
+"@flyover/box2d@npm:1.0.1":
   version: 1.0.1
   resolution: "@flyover/box2d@npm:1.0.1"
   dependencies:
     "@types/systemjs": "npm:^0.20.6"
   checksum: 73129aa8794ffa3ec919c08d9cf6dc9ad131a5e0a851760249859a2988482077eebefec2e3d9d946950c6b124186824012984d20b114e0af069e73b75eb618c8
+  languageName: node
+  linkType: hard
+
+"@flyover/box2d@patch:@flyover/box2d@npm%3A1.0.1#~/.yarn/patches/@flyover-box2d-npm-1.0.1-4a0d63b6ed.patch":
+  version: 1.0.1
+  resolution: "@flyover/box2d@patch:@flyover/box2d@npm%3A1.0.1#~/.yarn/patches/@flyover-box2d-npm-1.0.1-4a0d63b6ed.patch::version=1.0.1&hash=452764"
+  dependencies:
+    "@types/systemjs": "npm:^0.20.6"
+  checksum: 654f131a13ff815ffab9260b577fbc2e00f8d16c3566691fc386e3f91599bf82771d5c7d712bb374de18af0032ef121330990ecb5a3ad08cbd1a1696f8d44eb3
   languageName: node
   linkType: hard
 
@@ -10505,7 +10514,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "app@workspace:packages/app"
   dependencies:
-    "@flyover/box2d": "npm:^1.0.1"
+    "@flyover/box2d": "patch:@flyover/box2d@npm%3A1.0.1#~/.yarn/patches/@flyover-box2d-npm-1.0.1-4a0d63b6ed.patch"
     "@legendapp/state": "npm:^2.1.1"
     "@my/supabase": "npm:*"
     "@my/ui": "npm:*"

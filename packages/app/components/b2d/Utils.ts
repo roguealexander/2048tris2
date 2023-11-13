@@ -80,9 +80,9 @@ export function delay(millis: number): Promise<void> {
 //https://css-tricks.com/using-requestanimationframe-with-react-hooks
 export function useAnimationFrame(callback: (deltaTime: number) => void) {
   const requestRef = React.useRef<any>()
-  const previousTimeRef = React.useRef()
+  const previousTimeRef = React.useRef<number | undefined>()
 
-  const animate = (time) => {
+  const animate = (time: number) => {
     if (previousTimeRef.current != undefined) {
       const deltaTime = time - previousTimeRef.current
       if (deltaTime > 16) {

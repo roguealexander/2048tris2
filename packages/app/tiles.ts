@@ -1,11 +1,5 @@
 import { colors } from './colors'
 import { TileSize, TileData, TileRecord, TilePower, TileList } from './types'
-;[
-  0.6366197723675814, 0.238732414637843, 0.1326291192432461, 0.08952465548919113,
-  0.06366197723675814, 0.05305164769729845, 0.045472840883398674, 0.039788735772973836,
-  0.0353677651315323, 0.03183098861837907, 0.028937262380344605, 0.026525823848649224,
-  0.02448537586029159,
-]
 
 const tile2: TileData = {
   size: '2',
@@ -21,7 +15,7 @@ const tile4: TileData = {
   power: 2,
   radius: 2,
   mass: 3,
-  density: 0.208732414637843,
+  density: 0.178732414637843,
   color: colors.tile['4'],
   textColor: colors.tileText,
 }
