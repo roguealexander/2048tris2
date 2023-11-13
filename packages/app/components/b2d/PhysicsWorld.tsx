@@ -87,6 +87,9 @@ const createTile = (world: b2World, data: CreateTileData): b2Body => {
 }
 
 const CollisionSystem = (world: b2World) => {
+  // Exit if physics not running
+  if (state$.gamePhysicsPaused.peek()) return
+
   for (let c = world.GetContactList(); c; c = c.m_next) {
     const {
       m_fixtureA: { m_body: m_bodyA },
