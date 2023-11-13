@@ -49,12 +49,14 @@ export const b2dTiles$ = observable<Array<{ id: number; size: TileSize }>>([])
 const PhysicsSystem = (world: b2World, deltaTime: number) => {
   if (state$.gamePhysicsPaused.peek()) return
 
-  // const iterations = Math.min(4, Math.round(deltaTime / (1000 / 120)))
-  world.Step(
-    1 / 60, //frame-rate (just hoping typical 60hz. in future, planning to use webworkers for uninterrupted physics simulation)
-    4, //velocity iterations
-    4 //position iterations
-  )
+  const iterations = Math.min(4, Math.round(deltaTime / (1000 / 60)))
+  for (let i = 0; i < iterations; i++) {
+    world.Step(
+      1 / 60, //frame-rate (just hoping typical 60hz. in future, planning to use webworkers for uninterrupted physics simulation)
+      4, //velocity iterations
+      4 //position iterations
+    )
+  }
 
   world.ClearForces()
 }
