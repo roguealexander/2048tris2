@@ -16,6 +16,7 @@ export const NewGameButton = observer(({ ...props }: ButtonProps) => {
         event.stopPropagation()
         appActions$.triggerPopSound('8', state$.resetCount.peek())
         actions$.reset()
+        appState$.adAvailable.set(true)
       }}
     >
       {horizontal ? 'NEW GAME' : <RotateCcw size={20} color="$background" />}

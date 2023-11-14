@@ -24,6 +24,7 @@ import { StatsPanel } from 'app/components/stats-panel'
 import { useSafeAreaFrame } from 'app/utils/useSafeAreaFrame'
 import { batch } from '@legendapp/state'
 import { DebugTab } from 'app/components/debug-tab'
+import { Interstitial } from 'app/components/interstitial'
 
 const ActiveLeftPanel = observer(() => {
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
@@ -438,6 +439,8 @@ export function HomeScreen() {
         <DebugTab />
         {/* <HappyBirthday /> */}
       </Container>
+      {/* ADS */}
+      <Interstitial />
     </>
   )
 }

@@ -16,15 +16,20 @@ type AppState = {
 
   scale: number
   statsPanelOpen: boolean
+
+  adTimestamp: number | null
+  adAvailable: boolean
 }
 
 export const appState$ = observable<AppState>({
   tab: '2048tris',
-  backTab: 'leaderboard',
+  backTab: null,
   layoutDimension: 'horizontal',
   popSound: null,
   scale: 1,
   statsPanelOpen: false,
+  adTimestamp: null,
+  adAvailable: false,
 })
 
 type AppActions = {

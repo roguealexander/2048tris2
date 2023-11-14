@@ -7,6 +7,7 @@ import { TamaguiProvider } from './tamagui'
 import { UniversalThemeProvider } from './theme'
 import { ToastProvider } from './toast'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { AdsProvider } from './ads'
 
 export function Provider({
   initialSession,
@@ -41,4 +42,5 @@ const Providers = compose([
   ToastProvider,
   QueryClientProvider,
   GestureHandlerRootView,
+  AdsProvider,
 ])
