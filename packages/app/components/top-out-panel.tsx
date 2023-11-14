@@ -7,6 +7,7 @@ import { stats$ } from 'app/statsState'
 import { appState$ } from 'app/appState'
 import { useUser } from 'app/utils/useUser'
 import { PanelOrOverlayContainer } from './panel-or-overlay-container'
+import { batch } from '@legendapp/state'
 
 const TopOutTitle = observer(
   ({ isHighScore, isLowScore }: { isHighScore: boolean; isLowScore: boolean }) => {
@@ -48,7 +49,18 @@ const TopOutLowScoreSubtitle = observer(() => {
 const JoinLeaderboardButton = observer(() => {
   const { user } = useUser()
   if (user != null) return
-  return <TButton onPress={() => appState$.tab.set('user')}>SIGN UP TO JOIN LEADERBOARD</TButton>
+  return (
+    <TButton
+      onPress={() => {
+        batch(() => {
+          appState$.backTab.set('2048tris')
+          appState$.tab.set('user')
+        })
+      }}
+    >
+      SIGN UP TO JOIN LEADERBOARD
+    </TButton>
+  )
 })
 
 export const TopOutPanel = observer(() => {

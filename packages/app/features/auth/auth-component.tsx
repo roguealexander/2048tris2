@@ -100,10 +100,10 @@ export const AuthComponent = observer(() => {
           renderAfter={({ submit }) => {
             return (
               <>
-                <SubmitButton onPress={() => submit()} w={250}>
+                <SubmitButton onPress={() => submit()} w={150}>
                   Sign {signingIn ? 'In' : 'Up'}
                 </SubmitButton>
-                <TSizableText>
+                <TSizableText size="$1">
                   {signingIn ? 'Dont have an account? ' : 'Already have an account? '}
                   <TSizableText
                     cur="pointer"

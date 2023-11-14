@@ -6,6 +6,7 @@ export type LayoutDimension = 'vertical' | 'horizontal'
 
 type AppState = {
   tab: Tab
+  backTab: Tab | null
   layoutDimension: LayoutDimension
 
   popSound: {
@@ -19,6 +20,7 @@ type AppState = {
 
 export const appState$ = observable<AppState>({
   tab: '2048tris',
+  backTab: 'leaderboard',
   layoutDimension: 'horizontal',
   popSound: null,
   scale: 1,

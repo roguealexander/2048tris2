@@ -221,6 +221,7 @@ const Tabs = observer(() => {
   const scale = appState$.scale.get()
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
   const tab = appState$.tab.get()
+  const backTab = appState$.backTab.get()
 
   return (
     <XStack
@@ -242,10 +243,15 @@ const Tabs = observer(() => {
           ai="center"
           pos="relative"
           cursor="pointer"
-          onPress={() => appState$.tab.set('2048tris')}
+          onPress={() => {
+            batch(() => {
+              appState$.backTab.set(null)
+              appState$.tab.set('2048tris')
+            })
+          }}
         >
-          <Show if={tab === '2048tris'}>
-            <XStack fullscreen h="$3" bg={colors.tile[2048]} />
+          <Show if={tab === '2048tris' || backTab === '2048tris'}>
+            <XStack fullscreen h="$3" bg={colors.tile[2048]} o={tab === '2048tris' ? 1 : 0.3} />
           </Show>
           <TSizableText
             size="$5"
@@ -261,10 +267,15 @@ const Tabs = observer(() => {
           ai="center"
           pos="relative"
           cursor="pointer"
-          onPress={() => appState$.tab.set('how-to-play')}
+          onPress={() => {
+            batch(() => {
+              appState$.backTab.set(null)
+              appState$.tab.set('how-to-play')
+            })
+          }}
         >
-          <Show if={tab === 'how-to-play'}>
-            <XStack fullscreen h="$3" bg={colors.tile[64]} />
+          <Show if={tab === 'how-to-play' || backTab === 'how-to-play'}>
+            <XStack fullscreen h="$3" bg={colors.tile[64]} o={tab === 'how-to-play' ? 1 : 0.3} />
           </Show>
           {horizontal ? (
             <TSizableText zi={2} color={tab === 'how-to-play' ? colors.background : colors.text}>
@@ -284,10 +295,21 @@ const Tabs = observer(() => {
           ai="center"
           pos="relative"
           cursor="pointer"
-          onPress={() => appState$.tab.set('leaderboard')}
+          onPress={() => {
+            batch(() => {
+              appState$.backTab.set(null)
+              appState$.tab.set('leaderboard')
+            })
+          }}
         >
-          <Show if={tab === 'leaderboard'}>
-            <XStack fullscreen h="$3" bg={colors.tile[32]} zi={0} />
+          <Show if={tab === 'leaderboard' || backTab === 'leaderboard'}>
+            <XStack
+              fullscreen
+              h="$3"
+              bg={colors.tile[32]}
+              zi={0}
+              o={tab === 'leaderboard' ? 1 : 0.3}
+            />
           </Show>
           {horizontal ? (
             <TSizableText zi={2} color={tab === 'leaderboard' ? colors.background : colors.text}>
@@ -301,29 +323,36 @@ const Tabs = observer(() => {
             />
           )}
         </XStack>
-        <XStack
-          h="$3"
-          px={horizontal ? 8 : 16}
-          ai="center"
-          pos="relative"
-          cursor="pointer"
-          onPress={() => appState$.tab.set('debug')}
-        >
-          <Show if={tab === 'debug'}>
-            <XStack fullscreen h="$3" bg={colors.tile[32]} zi={0} />
-          </Show>
-          {horizontal ? (
-            <TSizableText zi={2} color={tab === 'debug' ? colors.background : colors.text}>
-              Debug
-            </TSizableText>
-          ) : (
-            <Code
-              style={{ zIndex: 2 }}
-              size={20}
-              color={tab === 'debug' ? colors.background : colors.text}
-            />
-          )}
-        </XStack>
+        {__DEBUG__ && (
+          <XStack
+            h="$3"
+            px={horizontal ? 8 : 16}
+            ai="center"
+            pos="relative"
+            cursor="pointer"
+            onPress={() => {
+              batch(() => {
+                appState$.backTab.set(null)
+                appState$.tab.set('debug')
+              })
+            }}
+          >
+            <Show if={tab === 'debug' || backTab === 'debug'}>
+              <XStack fullscreen h="$3" bg={colors.tile[32]} zi={0} o={tab === 'debug' ? 1 : 0.3} />
+            </Show>
+            {horizontal ? (
+              <TSizableText zi={2} color={tab === 'debug' ? colors.background : colors.text}>
+                Debug
+              </TSizableText>
+            ) : (
+              <Code
+                style={{ zIndex: 2 }}
+                size={20}
+                color={tab === 'debug' ? colors.background : colors.text}
+              />
+            )}
+          </XStack>
+        )}
       </XStack>
 
       <XStack
@@ -333,9 +362,14 @@ const Tabs = observer(() => {
         jc="center"
         pos="relative"
         cur="pointer"
-        onPress={() => appState$.tab.set('user')}
+        onPress={() => {
+          batch(() => {
+            appState$.backTab.set(null)
+            appState$.tab.set('user')
+          })
+        }}
       >
-        <Show if={tab === 'user'}>
+        <Show if={tab === 'user' || backTab === 'user'}>
           <XStack fullscreen h="$3" bg={colors.tile[16]} />
         </Show>
         <UserCircle2

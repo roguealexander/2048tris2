@@ -1,7 +1,7 @@
 import { Memo, Show, observer } from '@legendapp/state/react'
 import { Spacer, Spinner, TButton, TSizableText, XStack, YStack } from '@my/ui'
 import { LeaderboardType } from 'app/types'
-import { computed, observable } from '@legendapp/state'
+import { batch, computed, observable } from '@legendapp/state'
 import { colors } from 'app/colors'
 import { TabContainer } from './tab-container'
 import { api } from 'app/utils/api'
@@ -146,7 +146,7 @@ const Header = observer(() => {
       <XStack h="$4" w="100%" ai="center" jc="space-between" px="$4" pos="relative">
         <XStack fullscreen bg={colors.tile['2']} zi={-1} />
         <XStack ai="center" jc="center" gap="$4">
-          <TSizableText w={40}>RANK</TSizableText>
+          <TSizableText w={50}>RANK</TSizableText>
           <TSizableText fontWeight="bold">PLAYER</TSizableText>
         </XStack>
         <TSizableText fontWeight="bold" textAlign="right">
@@ -211,24 +211,24 @@ const Leaderboard = observer(() => {
 })
 
 const ScoreHighLeaderboard = observer(() => {
-  const { data, isLoading } = api.tris.getHighScoreLeaderboard.useQuery()
-  return <Table data={data} isLoading={isLoading} />
+  const { data, error, isLoading } = api.tris.getHighScoreLeaderboard.useQuery()
+  return <Table data={data} error={error?.message} isLoading={isLoading} />
 })
 const ScoreLowLeaderboard = observer(() => {
-  const { data, isLoading } = api.tris.getLowScoreLeaderboard.useQuery()
-  return <Table data={data} isLoading={isLoading} />
+  const { data, error, isLoading } = api.tris.getLowScoreLeaderboard.useQuery()
+  return <Table data={data} error={error?.message} isLoading={isLoading} />
 })
 const Efficiency2048Leaderboard = observer(() => {
-  const { data, isLoading } = api.tris.getEfficiency2048Leaderboard.useQuery()
-  return <Table data={data} isLoading={isLoading} />
+  const { data, error, isLoading } = api.tris.getEfficiency2048Leaderboard.useQuery()
+  return <Table data={data} error={error?.message} isLoading={isLoading} />
 })
 const Efficiency4096Leaderboard = observer(() => {
-  const { data, isLoading } = api.tris.getEfficiency4096Leaderboard.useQuery()
-  return <Table data={data} isLoading={isLoading} />
+  const { data, error, isLoading } = api.tris.getEfficiency4096Leaderboard.useQuery()
+  return <Table data={data} error={error?.message} isLoading={isLoading} />
 })
 const Efficiency8192Leaderboard = observer(() => {
-  const { data, isLoading } = api.tris.getEfficiency8192Leaderboard.useQuery()
-  return <Table data={data} isLoading={isLoading} />
+  const { data, error, isLoading } = api.tris.getEfficiency8192Leaderboard.useQuery()
+  return <Table data={data} error={error?.message} isLoading={isLoading} />
 })
 
 type RowData = { id: string; rank: number; name: string; value: string }
@@ -273,7 +273,15 @@ const rowValueString = (type: LeaderboardType, value: number): string => {
 }
 
 const Table = observer(
-  ({ data, isLoading }: { data: LeaderboardQueryData | undefined; isLoading: boolean }) => {
+  ({
+    data,
+    error,
+    isLoading,
+  }: {
+    data: LeaderboardQueryData | undefined
+    error: string | undefined
+    isLoading: boolean
+  }) => {
     const rows = extractRows(leaderboard$.get(), data)
     return (
       <YStack w="100%" pos="relative" ai="center" jc="center">
@@ -281,11 +289,12 @@ const Table = observer(
         {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((index) => {
           return <Row key={index} index={index} data={rows[index]} />
         })}
-        {isLoading && (
-          <>
-            <XStack fullscreen bg="$background" o={0.5} />
-            <Spinner color="$text" pos="absolute" />
-          </>
+        {(isLoading || error != null) && <XStack fullscreen bg="$background" o={0.5} />}
+        {isLoading && <Spinner color="$text" pos="absolute" />}
+        {error != null && (
+          <TSizableText pos="absolute" color={colors.tile[64]}>
+            {error}
+          </TSizableText>
         )}
       </YStack>
     )
@@ -317,7 +326,15 @@ const JoinLeaderboardButton = observer(() => {
   return (
     <>
       <Spacer />
-      <TButton w="100%" onPress={() => appState$.tab.set('user')}>
+      <TButton
+        w="100%"
+        onPress={() => {
+          batch(() => {
+            appState$.backTab.set('leaderboard')
+            appState$.tab.set('user')
+          })
+        }}
+      >
         JOIN LEADERBOARD
       </TButton>
     </>

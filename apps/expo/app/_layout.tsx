@@ -8,7 +8,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
 import { connectToDevTools } from 'react-devtools-core'
 import { colors } from 'app/colors'
-import { NativePopSoundEffect } from './native-pop-sound-effect'
 
 if (__DEV__) {
   console.log('connecting to devtools')
@@ -74,7 +73,6 @@ export default function Layout() {
           }}
         /> */}
           <HomeScreen />
-          <NativePopSoundEffect />
         </SafeAreaView>
       </Provider>
     </View>

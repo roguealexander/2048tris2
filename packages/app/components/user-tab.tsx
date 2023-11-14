@@ -8,7 +8,9 @@ import { AuthComponent } from 'app/features/auth/auth-component'
 import { stats$, statsActions$ } from 'app/statsState'
 import { User } from '@supabase/supabase-js'
 import { api } from 'app/utils/api'
+import { ChevronLeft } from '@tamagui/lucide-icons'
 import { appState$ } from 'app/appState'
+import { batch } from '@legendapp/state'
 
 const Header = observer(() => {
   const scale = appState$.scale.get()
@@ -157,7 +159,27 @@ export const UserTab = observer(() => {
   const { user } = useUser()
   return (
     <TabContainer tab="user">
-      <Spacer />
+      {appState$.backTab.get() != null && (
+        <XStack
+          cur="pointer"
+          ml={-12}
+          w={40}
+          h={40}
+          p={0}
+          mt={-22}
+          mb={22}
+          ai="center"
+          jc="center"
+          onPress={() => {
+            batch(() => {
+              appState$.tab.set(appState$.backTab.peek())
+              appState$.backTab.set(null)
+            })
+          }}
+        >
+          <ChevronLeft color="$text" />
+        </XStack>
+      )}
       {user == null && (
         <>
           <AuthComponent />
