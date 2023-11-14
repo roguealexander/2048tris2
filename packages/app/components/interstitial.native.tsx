@@ -3,13 +3,22 @@ import { observer } from '@legendapp/state/react'
 import { appState$ } from 'app/appState'
 import { memo, useEffect, useRef } from 'react'
 import { useInterstitialAd, TestIds } from 'react-native-google-mobile-ads'
-import { AppState } from 'react-native'
+import { AppState, Platform } from 'react-native'
 
 const currentTimestamp$ = observable<number | null>(null)
 
+const adUnitId = __DEV__
+  ? TestIds.INTERSTITIAL
+  : Platform.OS === 'ios'
+  ? 'ca-app-pub-9877675476183127/3120499694'
+  : Platform.OS === 'android'
+  ? 'ca-app-pub-9877675476183127/1073792991'
+  : null
+
 // eslint-disable-next-line react/display-name
 const InterstitialInner = memo(() => {
-  const { isLoaded, load, show } = useInterstitialAd(TestIds.INTERSTITIAL, {
+  console.log({ adUnitId })
+  const { isLoaded, load, show } = useInterstitialAd(adUnitId, {
     requestNonPersonalizedAdsOnly: true,
     keywords: ['gaming', 'games'],
   })
