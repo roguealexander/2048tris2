@@ -2,6 +2,7 @@ import { observer, useObserveEffect } from '@legendapp/state/react'
 import { appState$ } from 'app/appState'
 import { TileRecord } from 'app/types'
 import Sound from 'react-native-sound'
+import * as Haptics from 'expo-haptics'
 
 Sound.setCategory('Playback')
 const sound2 = new Sound('pop_2.mp3', Sound.MAIN_BUNDLE, (error) => {
@@ -71,11 +72,32 @@ const sounds: TileRecord<Sound> = {
   '8192': sound1024,
 }
 
+const haptics: TileRecord<Haptics.ImpactFeedbackStyle> = {
+  '2': Haptics.ImpactFeedbackStyle.Light,
+  '4': Haptics.ImpactFeedbackStyle.Light,
+  '8': Haptics.ImpactFeedbackStyle.Light,
+  '16': Haptics.ImpactFeedbackStyle.Light,
+  '32': Haptics.ImpactFeedbackStyle.Medium,
+  '64': Haptics.ImpactFeedbackStyle.Medium,
+  '128': Haptics.ImpactFeedbackStyle.Medium,
+  '256': Haptics.ImpactFeedbackStyle.Medium,
+  '512': Haptics.ImpactFeedbackStyle.Heavy,
+  '1024': Haptics.ImpactFeedbackStyle.Heavy,
+  '2048': Haptics.ImpactFeedbackStyle.Heavy,
+  '4096': Haptics.ImpactFeedbackStyle.Heavy,
+  '8192': Haptics.ImpactFeedbackStyle.Heavy,
+}
+
 export const PopSoundEffect = observer(() => {
   useObserveEffect(appState$.popSound, ({ value }) => {
     if (value == null) return
     const { size } = value
+
+    // SOUND
     sounds[size].play()
+
+    // HAPTICS
+    Haptics.impactAsync(haptics[size])
   })
 
   return null
