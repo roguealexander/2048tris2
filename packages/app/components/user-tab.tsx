@@ -198,7 +198,7 @@ export const UserTab = observer(() => {
         </>
       )}
       <TSizableText>
-        Games Played:{' '}
+        Games Finished:{' '}
         <TSizableText size="$5" fontWeight="bold">
           <Memo>{stats$.gamesPlayed}</Memo>
         </TSizableText>
