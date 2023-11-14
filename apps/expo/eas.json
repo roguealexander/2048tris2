@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 3.14.0"
+    "version": ">= 3.14.0",
+    "promptToConfigurePushNotifications": false
   },
   "build": {
     "development": {
@@ -21,6 +22,7 @@
       "channel": "preview"
     },
     "production": {
+      "node": "18.14.0",
       "env": {
         "TAMAGUI_TARGET": "native"
       },

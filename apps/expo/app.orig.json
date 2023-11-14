@@ -13,17 +13,12 @@
       "resizeMode": "cover",
       "backgroundColor": "#FDFAE7"
     },
-    "platforms": [
-      "ios",
-      "android"
-    ],
+    "platforms": ["ios", "android"],
     "updates": {
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/your-project-id"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.roguerotkosky.2048tris"
@@ -37,18 +32,37 @@
       "package": "com.roguerotkosky.2048tris",
       "permissions": []
     },
+    // "web": {
+    //   "favicon": "./assets/favicon.png",
+    //   "bundler": "metro"
+    // },
     "plugins": [
+      // [
+      //   "expo-notifications",
+      //   {
+      //     "icon": "./assets/icon.png",
+      //     "color": "#ffffff"
+      //   }
+      // ],
+      // [
+      //   "expo-image-picker",
+      //   {
+      //     "photosPermission": "The app accesses your photos to let you share them with your friends."
+      //   }
+      // ],
       "expo-router",
+      // "expo-apple-authentication",
       "@vonovak/react-native-theme-control",
       "expo-community-flipper"
     ],
     "extra": {
-      "router": {
-        "origin": false
-      },
-      "eas": {
-        "projectId": "0da242a3-2ec7-4a40-acbc-811c6cb9a929"
-      }
+      // "router": {
+      //   "origin": false
+      // }
+      // "eas": {
+      //   TODO: Add your project ID here
+      //   "projectId": "your-project-id"
+      // }
     },
     "runtimeVersion": {
       "policy": "appVersion"
