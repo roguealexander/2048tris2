@@ -13,17 +13,12 @@
       "resizeMode": "cover",
       "backgroundColor": "#FDFAE7"
     },
-    "platforms": [
-      "ios",
-      "android"
-    ],
+    "platforms": ["ios", "android"],
     "updates": {
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/your-project-id"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.roguerotkosky.2048tris"
@@ -40,7 +35,20 @@
     "plugins": [
       "expo-router",
       "@vonovak/react-native-theme-control",
-      "expo-community-flipper"
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 31,
+            "targetSdkVersion": 31,
+            "buildToolsVersion": "31.0.0"
+          },
+          "ios": {
+            "deploymentTarget": "13.0",
+            "flipper": "0.203.0"
+          }
+        }
+      ]
     ],
     "extra": {
       "router": {
