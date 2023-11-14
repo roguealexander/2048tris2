@@ -25,6 +25,7 @@ import { appActions$, appState$ } from 'app/appState'
 import { actions$, state$ } from 'app/state'
 import { batch, observable } from '@legendapp/state'
 import { View } from 'react-native'
+import { api } from 'app/utils/api'
 const { Provider } = worldContext
 
 const width = 450
@@ -94,7 +95,7 @@ const createTile = (world: b2World, data: CreateTileData): b2Body => {
   return fixt.m_body
 }
 
-const CollisionSystem = (world: b2World) => {
+const CollisionSystem = (world: b2World, invalidateTRPC: () => void) => {
   // Exit if physics not running
   if (state$.gamePhysicsPaused.peek()) return
 
@@ -113,7 +114,7 @@ const CollisionSystem = (world: b2World) => {
       const overlapBody = m_bodyA.m_userData['category'] === '_TOP_OUT_SENSOR_' ? m_bodyB : m_bodyA
       const overlapDuration = time - (overlapBody.m_userData['top_out_overlap_start_time'] ?? time)
       if (overlapDuration > 2000) {
-        actions$.topOut()
+        actions$.topOut(invalidateTRPC)
       }
     }
 
@@ -196,7 +197,7 @@ const UpdateTilePositionsSystem = (world: b2World) => {
   }
 }
 
-const CreateTileSystem = (world: b2World) => {
+const CreateTileSystem = (world: b2World, invalidateTRPC: () => void) => {
   const createdTileIds: Array<{ id: number; size: TileSize }> = []
 
   Object.entries(b2dTilesToCreate).forEach(([collisionId, createTileData]) => {
@@ -210,7 +211,7 @@ const CreateTileSystem = (world: b2World) => {
 
     // Update efficiency score
     if (createTileData.viaMerge && createTileData.size === state$.targetEfficiency.peek()) {
-      actions$.triggerHighEfficiencyCheck(createTileData.size)
+      actions$.triggerHighEfficiencyCheck(createTileData.size, invalidateTRPC)
     }
 
     // Index in state by sensor
@@ -240,6 +241,7 @@ const RemoveTileSystem = (world: b2World) => {
 
 export function UsePhysicsWorld() {
   const world = useRef(new b2World(new b2Vec2(0, 20)))
+  const utils = api.useContext()
 
   // @ts-ignore
   world.current.scaleFactor = SCALE
@@ -280,10 +282,10 @@ export function UsePhysicsWorld() {
     RemoveTileSystem(world.current)
 
     // CREATE TILE SYSTEM
-    CreateTileSystem(world.current)
+    CreateTileSystem(world.current, utils.invalidate)
 
     // COLLISION SYSTEM
-    CollisionSystem(world.current)
+    CollisionSystem(world.current, utils.invalidate)
 
     // UPDATE POSITION SYSTEM
     UpdateTilePositionsSystem(world.current)

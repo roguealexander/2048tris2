@@ -38,8 +38,8 @@ type GameActions = {
   drop: () => void
   hold: () => void
   reset: () => void
-  topOut: () => void
-  triggerHighEfficiencyCheck: (size: EfficiencyTile) => void
+  topOut: (invalidateTRPC: () => void) => void
+  triggerHighEfficiencyCheck: (size: EfficiencyTile, invalidateTRPC: () => void) => void
   closeActiveHighEfficiencyPanel: () => void
 }
 
@@ -247,14 +247,16 @@ export const actions$ = observable<GameActions>({
       resetCount: currState.resetCount + 1,
     }))
   },
-  topOut: () => {
+  topOut: (invalidateTRPC: () => void) => {
     batch(() => {
       // Update high scores
       if (state$.score.peek() < (stats$.scoreLow.peek() ?? Infinity)) {
         stats$.scoreLow.set(state$.score.peek())
+        invalidateTRPC()
       }
       if (state$.score.peek() > (stats$.scoreHigh.peek() ?? 0)) {
         stats$.scoreHigh.set(state$.score.peek())
+        invalidateTRPC()
       }
       state$.toppedOut.set(true)
 
@@ -265,7 +267,7 @@ export const actions$ = observable<GameActions>({
       stats$.ballsDropped.set((ballsDropped) => ballsDropped + state$.ballsDropped.peek())
     })
   },
-  triggerHighEfficiencyCheck: (size: EfficiencyTile) => {
+  triggerHighEfficiencyCheck: (size: EfficiencyTile, invalidateTRPC: () => void) => {
     const efficiency = state$.efficiency.peek()
     batch(() => {
       switch (size) {
@@ -273,6 +275,7 @@ export const actions$ = observable<GameActions>({
           if (efficiency > stats$.efficiency2048.peek()) {
             stats$.efficiency2048.set(efficiency)
             state$.activeHighEfficiencyPanel.set('2048')
+            invalidateTRPC()
           } else {
             state$.targetEfficiency.set('4096')
           }
@@ -282,6 +285,7 @@ export const actions$ = observable<GameActions>({
           if (efficiency > stats$.efficiency4096.peek()) {
             stats$.efficiency4096.set(efficiency)
             state$.activeHighEfficiencyPanel.set('4096')
+            invalidateTRPC()
           } else {
             state$.targetEfficiency.set('8192')
           }
@@ -291,6 +295,7 @@ export const actions$ = observable<GameActions>({
           if (efficiency > stats$.efficiency8192.peek()) {
             stats$.efficiency8192.set(efficiency)
             state$.activeHighEfficiencyPanel.set('8192')
+            invalidateTRPC()
           } else {
             state$.targetEfficiency.set('8192')
           }
