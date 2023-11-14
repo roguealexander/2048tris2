@@ -28,12 +28,3 @@ export const statsActions$ = observable<StatsActions>({
     stats$.set({ ...statsInit })
   },
 })
-
-// Global configuration
-configureObservablePersistence({
-  ...localPersistenceConfig,
-})
-
-persistObservable(stats$, {
-  local: 'highScores_v2',
-})

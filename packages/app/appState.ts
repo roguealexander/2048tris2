@@ -26,7 +26,7 @@ export const appState$ = observable<AppState>({
   backTab: null,
   layoutDimension: 'horizontal',
   popSound: null,
-  scale: 1,
+  scale: 0,
   statsPanelOpen: false,
   adTimestamp: null,
   adAvailable: false,
@@ -34,7 +34,10 @@ export const appState$ = observable<AppState>({
 
 type AppActions = {
   triggerPopSound: (size: TileSize, key: string | number) => void
+  triggerAd: () => void
 }
+
+const minInMS = 60 * 1000
 
 export const appActions$ = observable<AppActions>({
   triggerPopSound: (size: TileSize, key: string | number) => {
@@ -42,5 +45,14 @@ export const appActions$ = observable<AppActions>({
       size,
       key,
     })
+  },
+  triggerAd: () => {
+    const currentTimestamp = Date.now()
+    const adTimestamp = appState$.adTimestamp.peek() ?? 0
+    const minutesSinceLastAd = (currentTimestamp - adTimestamp) / minInMS
+    console.log(`AD TRIGGERED, last ad ${minutesSinceLastAd} mins ago`)
+    if (minutesSinceLastAd >= 10) {
+      appState$.adAvailable.set(true)
+    }
   },
 })

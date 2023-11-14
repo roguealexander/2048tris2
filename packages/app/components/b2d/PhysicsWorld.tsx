@@ -23,7 +23,7 @@ import { TileSize } from 'app/types'
 import { getMergedTileSize, getTileDensity, getTileRadius } from 'app/tiles'
 import { appActions$, appState$ } from 'app/appState'
 import { actions$, state$ } from 'app/state'
-import { observable } from '@legendapp/state'
+import { batch, observable } from '@legendapp/state'
 import { View } from 'react-native'
 const { Provider } = worldContext
 
@@ -39,6 +39,7 @@ type CreateTileData = {
   position: { x: number; y: number }
   velocity?: { x: number; y: number }
   viaMerge: boolean
+  unmergedSize?: TileSize
 }
 export let b2dTilesToCreate: Record<string, CreateTileData> = {}
 export const b2dTileBodies: Record<string, b2Body> = {}
@@ -83,7 +84,12 @@ const createTile = (world: b2World, data: CreateTileData): b2Body => {
   fixt.m_body.SetUserData({ category: '_TILE_', id: ++tileId, size: data.size })
 
   // Add to state
-  state$.activeTileCount[data.size].set((count) => count + 1)
+  batch(() => {
+    state$.activeTileCount[data.size].set((count) => count + 1)
+    if (data.viaMerge && data.unmergedSize != null) {
+      state$.activeTileCount[data.unmergedSize].set((count) => count - 2)
+    }
+  })
 
   return fixt.m_body
 }
@@ -125,7 +131,6 @@ const CollisionSystem = (world: b2World) => {
       // Update state
       const size = m_bodyA.m_userData['size'] as TileSize
       const mergedSize = getMergedTileSize(size)
-      state$.activeTileCount[size].set((count) => count - 2)
 
       // Create merged tile
       const aVel = m_bodyA.GetLinearVelocity()
@@ -150,6 +155,7 @@ const CollisionSystem = (world: b2World) => {
         position: mergedPos,
         velocity: mergedVel,
         viaMerge: true,
+        unmergedSize: size,
       }
     }
   }

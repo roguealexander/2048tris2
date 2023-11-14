@@ -1,11 +1,9 @@
-import { batch, observable } from '@legendapp/state'
+import { batch } from '@legendapp/state'
 import { observer } from '@legendapp/state/react'
-import { appState$ } from 'app/appState'
+import { appActions$, appState$ } from 'app/appState'
 import { memo, useEffect, useRef } from 'react'
 import { useInterstitialAd, TestIds } from 'react-native-google-mobile-ads'
 import { AppState, Platform } from 'react-native'
-
-const currentTimestamp$ = observable<number | null>(null)
 
 const adUnitId = __DEV__
   ? TestIds.INTERSTITIAL
@@ -17,7 +15,6 @@ const adUnitId = __DEV__
 
 // eslint-disable-next-line react/display-name
 const InterstitialInner = memo(() => {
-  console.log({ adUnitId })
   const { isLoaded, load, show } = useInterstitialAd(adUnitId, {
     requestNonPersonalizedAdsOnly: true,
     keywords: ['gaming', 'games'],
@@ -39,28 +36,23 @@ const InterstitialInner = memo(() => {
   return null
 })
 
-const minInMS = 1 * 60 * 1000
-
 export const Interstitial = observer(() => {
   const prevAppState = useRef(AppState.currentState)
+  const adAvailable = appState$.adAvailable.get()
+
   useEffect(() => {
     const interval = setInterval(() => {
       if (prevAppState.current !== 'active' && AppState.currentState === 'active') {
-        appState$.adAvailable.set(true)
+        appActions$.triggerAd()
       }
       prevAppState.current = AppState.currentState
-      currentTimestamp$.set(Date.now())
     }, 1000)
     return () => {
       clearInterval(interval)
     }
   }, [])
 
-  const minutesSinceLastAd =
-    ((currentTimestamp$.get() ?? 0) - (appState$.adTimestamp.get() ?? 0)) / minInMS
-
-  if (!appState$.adAvailable.get()) return null
-  if (appState$.adTimestamp.get() != null && minutesSinceLastAd < 10) return null
+  if (!adAvailable) return null
 
   return <InterstitialInner />
 })

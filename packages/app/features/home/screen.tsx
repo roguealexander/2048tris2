@@ -1,5 +1,5 @@
 import { Memo, Show, observer } from '@legendapp/state/react'
-import { Stack, TSizableText, XStack, YStack } from '@my/ui'
+import { AnimatePresence, Stack, TSizableText, XStack, YStack } from '@my/ui'
 import { ActiveTilesHistogram } from 'app/components/active-tile-histogram'
 import { Board } from 'app/components/board'
 import { HighEfficiencyPanel } from 'app/components/high-efficiency-panel'
@@ -25,6 +25,7 @@ import { useSafeAreaFrame } from 'app/utils/useSafeAreaFrame'
 import { batch } from '@legendapp/state'
 import { DebugTab } from 'app/components/debug-tab'
 import { Interstitial } from 'app/components/interstitial'
+import '../../persistedStates'
 
 const ActiveLeftPanel = observer(() => {
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
@@ -185,6 +186,7 @@ const Container = observer(({ children }: { children: ReactNode }) => {
 
   return (
     <Stack
+      key="container"
       {...(horizontal
         ? {
             fd: 'row',
@@ -207,16 +209,19 @@ const Container = observer(({ children }: { children: ReactNode }) => {
       miw={462 * scale}
       px="$2"
       overflow="visible"
-      style={{
-        transformOrigin: 'top',
+      animation="100ms"
+      o={1}
+      enterStyle={{
+        opacity: 0,
+      }}
+      exitStyle={{
+        opacity: 0,
       }}
     >
       {children}
     </Stack>
   )
 })
-
-const __DEBUG__ = true
 
 const Tabs = observer(() => {
   const scale = appState$.scale.get()
@@ -324,7 +329,7 @@ const Tabs = observer(() => {
             />
           )}
         </XStack>
-        {__DEBUG__ && (
+        {__DEV__ && (
           <XStack
             h="$3"
             px={horizontal ? 8 : 16}
@@ -404,45 +409,50 @@ export const HappyBirthday = () => {
   )
 }
 
-export function HomeScreen() {
+export const HomeScreen = observer(() => {
   return (
     <>
       <ScaleAndOrientationCalculator />
-      <Container>
-        <Tabs />
-        <StatsPersistor />
-        <GameplayHoldListener />
-        <PopSoundEffect />
+      <AnimatePresence>
+        {appState$.scale.get() !== 0 && (
+          <Container>
+            <Tabs />
+            <StatsPersistor />
+            <GameplayHoldListener />
+            <PopSoundEffect />
 
-        {/* LEFT */}
-        <TopOutPanel />
-        <StatsPanel />
-        <HighEfficiencyPanel />
-        <ActiveLeftPanel />
+            {/* LEFT */}
+            <TopOutPanel />
+            <StatsPanel />
+            <HighEfficiencyPanel />
+            <ActiveLeftPanel />
 
-        {/* TOP */}
-        <ActiveTopPanel />
+            {/* TOP */}
+            <ActiveTopPanel />
 
-        {/* BOARD */}
-        <Board />
+            {/* BOARD */}
+            <Board />
 
-        {/* BOTTOM */}
-        <ActiveBottomPanel />
+            {/* BOTTOM */}
+            <ActiveBottomPanel />
 
-        {/* RIGHT */}
-        <ActiveRightPanel />
+            {/* RIGHT */}
+            <ActiveRightPanel />
 
-        {/* TABS */}
-        <HowToPlayTab />
-        <LeaderboardTab />
-        <UserTab />
-        <DebugTab />
-        {/* <HappyBirthday /> */}
-      </Container>
+            {/* TABS */}
+            <HowToPlayTab />
+            <LeaderboardTab />
+            <UserTab />
+            <DebugTab />
+            {/* <HappyBirthday /> */}
+          </Container>
+        )}
+      </AnimatePresence>
+
       {/* ADS */}
       <Interstitial />
     </>
   )
-}
+})
 
 export default HomeScreen

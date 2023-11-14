@@ -10,7 +10,6 @@ import { connectToDevTools } from 'react-devtools-core'
 import { colors } from 'app/colors'
 
 if (__DEV__) {
-  console.log('connecting to devtools')
   connectToDevTools({
     host: 'localhost',
     port: 8081,
@@ -18,7 +17,6 @@ if (__DEV__) {
 }
 
 export default function Layout() {
-  const segments = useSegments()
   const [fontLoaded] = useFonts({
     Inter: require('@tamagui/font-inter/otf/Inter-Medium.otf'),
     InterBold: require('@tamagui/font-inter/otf/Inter-Bold.otf'),
@@ -48,11 +46,6 @@ export default function Layout() {
     }
   }, [fontLoaded, sessionLoadAttempted])
 
-  console.log({
-    fontLoaded,
-    sessionLoadAttempted,
-  })
-
   if (!fontLoaded || !sessionLoadAttempted) {
     return null
   }
@@ -61,17 +54,6 @@ export default function Layout() {
     <View style={{ flex: 1, backgroundColor: colors.background }} onLayout={onLayoutRootView}>
       <Provider initialSession={initialSession}>
         <SafeAreaView>
-          {/* <Stack
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: '#f4511e',
-            },
-            headerTintColor: '#fff',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-          }}
-        /> */}
           <HomeScreen />
         </SafeAreaView>
       </Provider>
