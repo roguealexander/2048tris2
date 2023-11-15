@@ -1,5 +1,5 @@
 import { Memo, observer, useObservable } from '@legendapp/state/react'
-import { Spacer, Spinner, TButton, TSizableText, XStack, YStack } from '@my/ui'
+import { Slider, Spacer, Spinner, TButton, TSizableText, XStack, YStack } from '@my/ui'
 import { colors } from 'app/colors'
 import { TabContainer } from './tab-container'
 import { useUser } from 'app/utils/useUser'
@@ -155,6 +155,38 @@ const AuthedUser = observer(({ user }: { user: User }) => {
   )
 })
 
+const SettingsSection = observer(() => {
+  const scale = appState$.scale.get()
+  return (
+    <XStack w="100%" jc="space-between" ai="center">
+      <TSizableText>Volume:</TSizableText>
+      <Slider
+        defaultValue={[appState$.volume.peek()]}
+        max={1}
+        step={0.01}
+        mx={-18}
+        w={300 * scale}
+        onValueChange={(val) => appState$.volume.set(val[0] != null ? val[0] : 0.5)}
+      >
+        <Slider.Track h={8} bg="$border" br={0} mx={18} w={300 * scale - 44} />
+        <Slider.Thumb
+          index={0}
+          width={44}
+          h={44}
+          bw={0}
+          bg="transparent"
+          hoverStyle={{ bg: 'transparent' }}
+          focusStyle={{ bg: 'transparent' }}
+          ai="center"
+          jc="center"
+        >
+          <XStack w={8} h={36} bg="$text" />
+        </Slider.Thumb>
+      </Slider>
+    </XStack>
+  )
+})
+
 export const UserTab = observer(() => {
   const { user } = useUser()
   return (
@@ -245,6 +277,14 @@ export const UserTab = observer(() => {
           <SignOutButton />
         </>
       )}
+
+      {/* SETTINGS */}
+      <Spacer />
+      <Spacer />
+      <XStack w="100%" h={2} bg="$border" />
+      <Spacer />
+      <Spacer />
+      <SettingsSection />
     </TabContainer>
   )
 })

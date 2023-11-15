@@ -13,12 +13,15 @@
         "buildConfiguration": "Debug"
       },
       "env": {
-        "TAMAGUI_TARGET": "native",
-        "NO_FLIPPER": "1"
+        "TAMAGUI_TARGET": "native"
       },
       "channel": "development"
     },
     "preview": {
+      "node": "18.14.0",
+      "env": {
+        "TAMAGUI_TARGET": "native"
+      },
       "distribution": "internal",
       "channel": "preview"
     },
@@ -27,7 +30,8 @@
       "env": {
         "TAMAGUI_TARGET": "native"
       },
-      "channel": "production"
+      "channel": "production",
+      "distribution": "internal"
     }
   },
   "submit": {

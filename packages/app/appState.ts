@@ -9,6 +9,8 @@ type AppState = {
   backTab: Tab | null
   layoutDimension: LayoutDimension
 
+  volume: number
+
   popSound: {
     size: TileSize
     key: string | number
@@ -25,6 +27,7 @@ export const appState$ = observable<AppState>({
   tab: '2048tris',
   backTab: null,
   layoutDimension: 'horizontal',
+  volume: 0.5,
   popSound: null,
   scale: 0,
   statsPanelOpen: false,

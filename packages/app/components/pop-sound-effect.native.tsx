@@ -4,7 +4,10 @@ import { TileRecord } from 'app/types'
 import Sound from 'react-native-sound'
 import * as Haptics from 'expo-haptics'
 
-Sound.setCategory('Playback')
+Sound.setCategory('Playback', true)
+Sound.setActive(true)
+Sound.setMode('Default')
+
 const sound2 = new Sound('pop_2.mp3', Sound.MAIN_BUNDLE, (error) => {
   if (error) {
     console.log('Error loading sound: ', error)
@@ -94,7 +97,7 @@ export const PopSoundEffect = observer(() => {
     const { size } = value
 
     // SOUND
-    sounds[size].play()
+    sounds[size].setVolume(appState$.volume.peek()).play()
 
     // HAPTICS
     Haptics.impactAsync(haptics[size])
