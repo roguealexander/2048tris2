@@ -103,7 +103,7 @@ const CollisionSystem = (world: b2World, invalidateTRPC: () => void) => {
     const {
       m_fixtureA: { m_body: m_bodyA },
       m_fixtureB: { m_body: m_bodyB },
-      m_touchingFlag,
+      // m_touchingFlag,
     } = c
 
     if (
@@ -118,47 +118,47 @@ const CollisionSystem = (world: b2World, invalidateTRPC: () => void) => {
       }
     }
 
-    if (
-      m_touchingFlag &&
-      m_bodyA.m_userData['size'] != null &&
-      m_bodyA.m_userData['size'] === m_bodyB.m_userData['size'] &&
-      m_bodyA.m_userData.removed !== true &&
-      m_bodyB.m_userData.removed !== true
-    ) {
-      // Remove bodies
-      m_bodyA.m_userData.removed = true
-      m_bodyB.m_userData.removed = true
+    // if (
+    //   m_touchingFlag &&
+    //   m_bodyA.m_userData['size'] != null &&
+    //   m_bodyA.m_userData['size'] === m_bodyB.m_userData['size'] &&
+    //   m_bodyA.m_userData.removed !== true &&
+    //   m_bodyB.m_userData.removed !== true
+    // ) {
+    //   // Remove bodies
+    //   m_bodyA.m_userData.removed = true
+    //   m_bodyB.m_userData.removed = true
 
-      // Update state
-      const size = m_bodyA.m_userData['size'] as TileSize
-      const mergedSize = getMergedTileSize(size)
+    //   // Update state
+    //   const size = m_bodyA.m_userData['size'] as TileSize
+    //   const mergedSize = getMergedTileSize(size)
 
-      // Create merged tile
-      const aVel = m_bodyA.GetLinearVelocity()
-      const bVel = m_bodyB.GetLinearVelocity()
-      const mergedVel = {
-        x: fromPhysicsToCanvas((aVel.x + bVel.x) / 2, SCALE),
-        y: fromPhysicsToCanvas((aVel.y + bVel.y) / 2, SCALE),
-      }
-      const aVelComponent = (aVel.Length() / (aVel.Length() + bVel.Length())) * 0.8
+    //   // Create merged tile
+    //   const aVel = m_bodyA.GetLinearVelocity()
+    //   const bVel = m_bodyB.GetLinearVelocity()
+    //   const mergedVel = {
+    //     x: fromPhysicsToCanvas((aVel.x + bVel.x) / 2, SCALE),
+    //     y: fromPhysicsToCanvas((aVel.y + bVel.y) / 2, SCALE),
+    //   }
+    //   const aVelComponent = (aVel.Length() / (aVel.Length() + bVel.Length())) * 0.8
 
-      const aPos = m_bodyA.GetPosition()
-      const bPos = m_bodyB.GetPosition()
-      const lerpedX = aPos.x * (0.8 - aVelComponent) + bPos.x * (0.2 + aVelComponent)
-      const lerpedY = aPos.y * (0.8 - aVelComponent) + bPos.y * (0.2 + aVelComponent)
-      const mergedPos = {
-        x: fromPhysicsToCanvas(lerpedX, SCALE),
-        y: fromPhysicsToCanvas(lerpedY, SCALE),
-      }
+    //   const aPos = m_bodyA.GetPosition()
+    //   const bPos = m_bodyB.GetPosition()
+    //   const lerpedX = aPos.x * (0.8 - aVelComponent) + bPos.x * (0.2 + aVelComponent)
+    //   const lerpedY = aPos.y * (0.8 - aVelComponent) + bPos.y * (0.2 + aVelComponent)
+    //   const mergedPos = {
+    //     x: fromPhysicsToCanvas(lerpedX, SCALE),
+    //     y: fromPhysicsToCanvas(lerpedY, SCALE),
+    //   }
 
-      b2dTilesToCreate[`${m_bodyA.m_userData['id']}-${m_bodyB.m_userData['id']}`] = {
-        size: mergedSize,
-        position: mergedPos,
-        velocity: mergedVel,
-        viaMerge: true,
-        unmergedSize: size,
-      }
-    }
+    //   b2dTilesToCreate[`${m_bodyA.m_userData['id']}-${m_bodyB.m_userData['id']}`] = {
+    //     size: mergedSize,
+    //     position: mergedPos,
+    //     velocity: mergedVel,
+    //     viaMerge: true,
+    //     unmergedSize: size,
+    //   }
+    // }
   }
 }
 
@@ -252,6 +252,7 @@ export function UsePhysicsWorld() {
     const {
       m_fixtureA: { m_body: m_bodyA },
       m_fixtureB: { m_body: m_bodyB },
+      m_touchingFlag,
     } = contact
 
     if (
@@ -261,6 +262,48 @@ export function UsePhysicsWorld() {
     ) {
       const overlapBody = m_bodyA.m_userData['category'] === '_TOP_OUT_SENSOR_' ? m_bodyB : m_bodyA
       overlapBody.m_userData['top_out_overlap_start_time'] = time
+    }
+
+    if (
+      m_touchingFlag &&
+      m_bodyA.m_userData['size'] != null &&
+      m_bodyA.m_userData['size'] === m_bodyB.m_userData['size'] &&
+      m_bodyA.m_userData.removed !== true &&
+      m_bodyB.m_userData.removed !== true
+    ) {
+      // Remove bodies
+      m_bodyA.m_userData.removed = true
+      m_bodyB.m_userData.removed = true
+
+      // Update state
+      const size = m_bodyA.m_userData['size'] as TileSize
+      const mergedSize = getMergedTileSize(size)
+
+      // Create merged tile
+      const aVel = m_bodyA.GetLinearVelocity()
+      const bVel = m_bodyB.GetLinearVelocity()
+      const mergedVel = {
+        x: fromPhysicsToCanvas((aVel.x + bVel.x) / 2, SCALE),
+        y: fromPhysicsToCanvas((aVel.y + bVel.y) / 2, SCALE),
+      }
+      const aVelComponent = (aVel.Length() / (aVel.Length() + bVel.Length())) * 0.8
+
+      const aPos = m_bodyA.GetPosition()
+      const bPos = m_bodyB.GetPosition()
+      const lerpedX = aPos.x * (0.8 - aVelComponent) + bPos.x * (0.2 + aVelComponent)
+      const lerpedY = aPos.y * (0.8 - aVelComponent) + bPos.y * (0.2 + aVelComponent)
+      const mergedPos = {
+        x: fromPhysicsToCanvas(lerpedX, SCALE),
+        y: fromPhysicsToCanvas(lerpedY, SCALE),
+      }
+
+      b2dTilesToCreate[`${m_bodyA.m_userData['id']}-${m_bodyB.m_userData['id']}`] = {
+        size: mergedSize,
+        position: mergedPos,
+        velocity: mergedVel,
+        viaMerge: true,
+        unmergedSize: size,
+      }
     }
   }
 

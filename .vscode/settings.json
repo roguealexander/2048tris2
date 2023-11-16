@@ -18,6 +18,7 @@
     "leaderboards",
     "legendapp",
     "lucide",
+    "netinfo",
     "nextjs",
     "ngneat",
     "NOSSR",
@@ -26,7 +27,8 @@
     "supabase",
     "superjson",
     "tris",
-    "TRPC"
+    "TRPC",
+    "vonovak"
   ],
   "editor.formatOnSave": true
 }

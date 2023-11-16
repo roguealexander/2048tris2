@@ -16,6 +16,7 @@ import { appActions$, appState$ } from 'app/appState'
 import React from 'react'
 import PhysicsWorld, { b2dTiles$, b2dTilesToCreate, worldContext } from './b2d/PhysicsWorld'
 import { GameTile } from './GameTile'
+import { RapierWorld } from './rapier/RapierWorld'
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -131,6 +132,10 @@ const GameBox2D = () => {
   )
 }
 
+const GameRapier = () => {
+  return <RapierWorld />
+}
+
 export const BoardComp = observer(() => {
   const scale = appState$.scale.get()
   const isTouchDevice = useIsTouchDevice()
@@ -164,7 +169,8 @@ export const BoardComp = observer(() => {
       w={width * scale}
       h={height * scale}
     >
-      <GameBox2D />
+      {/* <GameBox2D /> */}
+      <GameRapier />
 
       <TileDropPositioner dropX={dropX}>
         <Tile size={state$.activeTile} />
