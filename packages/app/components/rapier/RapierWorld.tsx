@@ -9,7 +9,7 @@ import {
   makeEnclosedBox,
 } from './Utils'
 import { TileSize } from 'app/types'
-import { getTileDensity, getTileRadius } from 'app/tiles'
+import { getMergedTileSize, getTileDensity, getTileRadius } from 'app/tiles'
 import { batch, observable } from '@legendapp/state'
 import { actions$, state$ } from 'app/state'
 import { appActions$, appState$ } from 'app/appState'
@@ -53,8 +53,69 @@ const importRapier = async () => {
   return r
 }
 
-const PhysicsSystem = (rapier: Rapier, world: World, deltaTime: number) => {
-  world.step()
+const PhysicsSystem = (
+  rapier: Rapier,
+  world: World,
+  eventQueue: RAPIER.EventQueue,
+  deltaTime: number
+) => {
+  world.step(eventQueue)
+}
+
+const CollisionSystem = (
+  rapier: Rapier,
+  world: World,
+  eventQueue: RAPIER.EventQueue,
+  invalidateTRPC: () => void
+) => {
+  eventQueue.drainCollisionEvents((handle1, handle2, started) => {
+    const body1 = world.getCollider(handle1).parent()
+    const body2 = world.getCollider(handle2).parent()
+    if (body1 == null || body2 == null) return
+
+    if (
+      started &&
+      (body1.userData as TileUserData).category === '_TILE_' &&
+      (body2.userData as TileUserData).category === '_TILE_' &&
+      !(body1.userData as TileUserData).removed &&
+      !(body2.userData as TileUserData).removed &&
+      (body1.userData as TileUserData).size === (body2.userData as TileUserData).size
+    ) {
+      // eslint-disable-next-line no-extra-semi
+      ;(body1.userData as TileUserData).removed = true
+      ;(body2.userData as TileUserData).removed = true
+
+      const size = (body1.userData as TileUserData).size
+      const mergedSize = getMergedTileSize(size)
+
+      const vel1 = body1.linvel()
+      const vel1Mag = Math.sqrt(vel1.x * vel1.x + vel1.y * vel1.y)
+      const vel2 = body2.linvel()
+      const vel2Mag = Math.sqrt(vel2.x * vel2.x + vel2.y * vel2.y)
+      const velMerged = {
+        x: fromPhysicsToCanvas(vel1.x + vel2.x / 2),
+        y: fromPhysicsToCanvas(vel1.y + vel2.y / 2),
+      }
+      const vel1Component = (vel1Mag / (vel1Mag + vel2Mag)) * 0.8
+
+      const pos1 = body1.translation()
+      const pos2 = body2.translation()
+      const lerpedX = pos1.x * (0.8 - vel1Component) + pos2.x * (0.2 + vel1Component)
+      const lerpedY = pos1.y * (0.8 - vel1Component) + pos2.y * (0.2 + vel1Component)
+      const posMerged = {
+        x: fromPhysicsToCanvas(lerpedX),
+        y: fromPhysicsToCanvas(lerpedY),
+      }
+
+      rapierTilesToCreate[`${handle1}-${handle2}`] = {
+        size: mergedSize,
+        position: posMerged,
+        velocity: velMerged,
+        viaMerge: true,
+        unmergedSize: size,
+      }
+    }
+  })
 }
 
 const createTile = (rapier: Rapier, world: World, data: CreateTileData): RAPIER.RigidBody => {
@@ -64,6 +125,7 @@ const createTile = (rapier: Rapier, world: World, data: CreateTileData): RAPIER.
     .setDensity(1.5 * getTileDensity(data.size))
     .setFriction(0.1)
     .setRestitution(0.1)
+    .setActiveEvents(rapier.ActiveEvents.COLLISION_EVENTS)
   const tileBodyDesc = rapier.RigidBodyDesc.dynamic()
     .setLinvel(
       data.velocity != null ? fromCanvasToPhysics(data.velocity.x) : 0,
@@ -175,6 +237,7 @@ export const RapierWorld = ({ children }: { children?: ReactNode }) => {
 
   // Use the RAPIER module here.
   const world = useConst(new rapier.World({ x: 0.0, y: 9.81 }))
+  const eventQueue = useConst(new rapier.EventQueue(true))
 
   useLayoutEffect(() => {
     makeEnclosedBox(rapier, width, height, enclosureThickness, 4, world)
@@ -185,16 +248,16 @@ export const RapierWorld = ({ children }: { children?: ReactNode }) => {
     time += deltaTime
 
     // PHYSICS SYSTEM
-    PhysicsSystem(rapier, world, deltaTime)
+    PhysicsSystem(rapier, world, eventQueue, deltaTime)
+
+    // COLLISION SYSTEM
+    CollisionSystem(rapier, world, eventQueue, utils.invalidate)
 
     // REMOVE TILE SYSTEM
     RemoveTileSystem(rapier, world)
 
     // CREATE TILE SYSTEM
     CreateTileSystem(rapier, world, utils.invalidate)
-
-    // COLLISION SYSTEM
-    // CollisionSystem(world.current, utils.invalidate)
 
     // UPDATE POSITION SYSTEM
     UpdateTilePositionsSystem(rapier, world)
