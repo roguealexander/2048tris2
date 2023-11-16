@@ -1,7 +1,7 @@
 import { For, observer, useObserveEffect } from '@legendapp/state/react'
 import { actions$, state$ } from '../state'
 import { Tile } from './tile'
-import { ReactNode, useContext } from 'react'
+import { ReactNode, Suspense, useContext } from 'react'
 import { getTilePower, getTileRadius } from '../tiles'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import { XStack, YStack, useIsTouchDevice } from '@my/ui'
@@ -16,7 +16,7 @@ import { appActions$, appState$ } from 'app/appState'
 import React from 'react'
 import PhysicsWorld, { b2dTiles$, b2dTilesToCreate, worldContext } from './b2d/PhysicsWorld'
 import { GameTile } from './GameTile'
-import { RapierWorld } from './rapier/RapierWorld'
+import { RapierWorld, rapierTiles$, rapierTilesToCreate } from './rapier/RapierWorld'
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -133,7 +133,19 @@ const GameBox2D = () => {
 }
 
 const GameRapier = () => {
-  return <RapierWorld />
+  return (
+    <Suspense>
+      <RapierWorld>
+        <For each={rapierTiles$} optimized>
+          {(tile$) => {
+            const tile = tile$.peek()
+            if (tile == null) return <></>
+            return <GameTile tile={tile} />
+          }}
+        </For>
+      </RapierWorld>
+    </Suspense>
+  )
 }
 
 export const BoardComp = observer(() => {
@@ -150,7 +162,13 @@ export const BoardComp = observer(() => {
   const releaseBall = () => {
     if (state$.gameInteractionPaused.get()) return
 
-    b2dTilesToCreate['fresh'] = {
+    // b2dTilesToCreate['fresh'] = {
+    //   size: state$.activeTile.peek(),
+    //   position: { x: dropX.value, y: 0 },
+    //   velocity: { x: 0.01, y: 0 },
+    //   viaMerge: false,
+    // }
+    rapierTilesToCreate['fresh'] = {
       size: state$.activeTile.peek(),
       position: { x: dropX.value, y: 0 },
       velocity: { x: 0.01, y: 0 },

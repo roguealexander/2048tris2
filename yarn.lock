@@ -1906,6 +1906,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@dimforge/rapier2d-compat@npm:^0.11.2":
+  version: 0.11.2
+  resolution: "@dimforge/rapier2d-compat@npm:0.11.2"
+  checksum: 784d6510f5c8bebd668384f202580e307a91da619b0e924584383407fd16d81c2459b1b4ea0de56e213e214b3d638beaef8cfd270424a64e7d58b5cb6654d42a
+  languageName: node
+  linkType: hard
+
 "@dimforge/rapier3d-compat@npm:0.11.2":
   version: 0.11.2
   resolution: "@dimforge/rapier3d-compat@npm:0.11.2"
@@ -9357,6 +9364,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/stats.js@npm:*":
+  version: 0.17.3
+  resolution: "@types/stats.js@npm:0.17.3"
+  checksum: 4f84a012f630532877f62959b6335d3fa081ccaac15ce3f1f916741db265bda22b9c927d7efc9cc3389ffd60919a370673cb0b4e7221d580c571031e94b689fd
+  languageName: node
+  linkType: hard
+
 "@types/systemjs@npm:^0.20.6":
   version: 0.20.11
   resolution: "@types/systemjs@npm:0.20.11"
@@ -9370,6 +9384,18 @@ __metadata:
   dependencies:
     "@types/jest": "npm:*"
   checksum: e257de95a4a9385cc09ae4ca3396d23ad4b5cfb8e021a1ca3454c424c34636075f6fe151b2f881f79bf9d497aa04fbfae62449b135f293e8d2d614fa899898a8
+  languageName: node
+  linkType: hard
+
+"@types/three@npm:^0":
+  version: 0.158.2
+  resolution: "@types/three@npm:0.158.2"
+  dependencies:
+    "@types/stats.js": "npm:*"
+    "@types/webxr": "npm:*"
+    fflate: "npm:~0.6.10"
+    meshoptimizer: "npm:~0.18.1"
+  checksum: 6ce40499cb87ec88a4b3bfe662005052ada3413692efe62bc3a1958b1608aef8282613da150191af7312d114aec98326e2274d246c12f34db5dd7faf3beea132
   languageName: node
   linkType: hard
 
@@ -10811,6 +10837,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "app@workspace:packages/app"
   dependencies:
+    "@dimforge/rapier2d-compat": "npm:^0.11.2"
     "@flyover/box2d": "patch:@flyover/box2d@npm%3A1.0.1#~/.yarn/patches/@flyover-box2d-npm-1.0.1-4a0d63b6ed.patch"
     "@legendapp/state": "npm:^2.1.1"
     "@my/supabase": "npm:*"
@@ -10835,6 +10862,7 @@ __metadata:
     "@trpc/client": "npm:^10.38.2"
     "@types/lodash": "npm:^4"
     "@types/react": "npm:^18.0.27"
+    "@types/three": "npm:^0"
     "@vonovak/react-native-theme-control": "npm:^5.0.1"
     base64-arraybuffer: "npm:^1.0.2"
     burnt: "npm:^0.12.1"
@@ -10856,6 +10884,8 @@ __metadata:
     react-native-use-sound: "npm:^1.2.2"
     solito: "npm:^4.0.1"
     superjson: "npm:^1.13.1"
+    suspend-react: "npm:^0.1.3"
+    three: "npm:^0.158.0"
     use-sound: "npm:^4.0.1"
     uuid: "npm:^9.0.1"
     zod: "npm:^3.22.2"
@@ -16734,7 +16764,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fflate@npm:^0.6.9":
+"fflate@npm:^0.6.9, fflate@npm:~0.6.10":
   version: 0.6.10
   resolution: "fflate@npm:0.6.10"
   checksum: 9f2fd7224bccdb28102adc7c55c262b584571426eb9e0b91b13088884f45700232b51e034e300b74abf64e5449596d5c37d0a802673e25edb17c6742e4a4a0bd
@@ -20882,6 +20912,13 @@ __metadata:
   peerDependencies:
     three: ">=0.137"
   checksum: 0b160a0930a8a1543990c24bb3d0041b287c239344b49ac97f1b4d4ae91de139c6caa7aa6a046d2fb5bf77c21455e106dba840eb8de33880f98c110b69127ae2
+  languageName: node
+  linkType: hard
+
+"meshoptimizer@npm:~0.18.1":
+  version: 0.18.1
+  resolution: "meshoptimizer@npm:0.18.1"
+  checksum: 5cfef6918562b8363a51e92b6eafe81a684fe7b9e31de1c19a6e2068ca8edab745b3e8ef2f0190ecbcc2065134b5dc1de97e4514eb2157914762356c07f93b9f
   languageName: node
   linkType: hard
 
@@ -27180,6 +27217,13 @@ __metadata:
   peerDependencies:
     three: ">=0.128.0"
   checksum: bddae554e09836f8992e30f61c0f1cc6ae7b5519d82c708881896b02f5212eee65f5bd91f4460a755c7f061c3223f48f9db7c8ccf6b41d101a75b90b1509aa82
+  languageName: node
+  linkType: hard
+
+"three@npm:^0.158.0":
+  version: 0.158.0
+  resolution: "three@npm:0.158.0"
+  checksum: 0dcb30fde67495337d129af55f3e4ed5f16425bb55c8fe2ec871bbde8264bdbdf3141fce4733c4739fe394f7840c4b37f6210754f657cfe98554f8f9a02eeb92
   languageName: node
   linkType: hard
 
