@@ -11,7 +11,6 @@ const SCALE = 60
 //some utilities to deal with co-ordinate systems constiations with some sanity intact
 //seems simple enough. But without these , I get very easily confused
 
-//Box2d typically deals with meters(real world) and not pixels(our canvas on screen)
 export function fromPhysicsToCanvas(n: number, GSCALE = SCALE) {
   return n * GSCALE
 }

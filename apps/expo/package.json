@@ -51,6 +51,7 @@
     "react-devtools-core": "^4.28.5",
     "react-dom": "^18.2.0",
     "react-native": "0.72.5",
+    "react-native-box2d": "^0.2.5",
     "react-native-debugger-open": "^0.4.3",
     "react-native-dotenv": "^3.4.8",
     "react-native-flipper": "~0.203.0",
@@ -63,7 +64,8 @@
     "react-native-svg": "13.9.0",
     "react-native-url-polyfill": "^2.0.0",
     "react-native-use-sound": "^1.2.2",
-    "react-native-web": "~0.19.6"
+    "react-native-web": "~0.19.6",
+    "react-native-webassembly": "^0.3.3"
   },
   "devDependencies": {
     "@babel/core": "^7.20.2",

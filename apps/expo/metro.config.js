@@ -16,6 +16,7 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules'),
 ]
 config.resolver.sourceExts = [...config.resolver.sourceExts, 'mjs', 'cjs']
+config.resolver.assetExts = [...config.resolver.assetExts, 'wasm']
 
 config.transformer = { ...config.transformer, unstable_allowRequireContext: true }
 config.transformer.minifierPath = require.resolve('metro-minify-terser')

@@ -1,7 +1,5 @@
 import { ReactNode, RefObject, useLayoutEffect, useRef } from 'react'
 import { View } from 'react-native'
-import RAPIER, { World } from '@dimforge/rapier2d-compat'
-import { suspend } from 'suspend-react'
 import {
   useAnimationFrame,
   fromCanvasToPhysics,
@@ -9,15 +7,13 @@ import {
   makeEnclosedBox,
 } from './Utils'
 import { TileSize } from 'app/types'
-import { getMergedTileSize, getTileDensity, getTileRadius } from 'app/tiles'
+import { getMergedTileSize, getTileDensity, getTileMass, getTileRadius } from 'app/tiles'
 import { batch, observable } from '@legendapp/state'
 import { actions$, state$ } from 'app/state'
 import { appActions$, appState$ } from 'app/appState'
 import { api } from 'app/utils/api'
-import 'app/utils/globals'
-import { importRapier } from './loadRapier'
-
-type Rapier = typeof RAPIER
+import { System, Circle, Vector, SystemConfig, Entity } from 'kinetics.ts'
+import React from 'react'
 
 let time = 0
 let tileId = 0
@@ -33,11 +29,12 @@ type CreateTileData = {
   viaMerge: boolean
   unmergedSize?: TileSize
 }
-type TileUserData = { category: string; id: number; size: TileSize; removed: boolean }
-export let rapierTilesToCreate: Record<string, CreateTileData> = {}
-export const rapierTileBodies: Record<string, RAPIER.RigidBody> = {}
-export const rapierTileRefs: Record<number, RefObject<View>> = {}
-export const rapierTiles$ = observable<Array<{ id: number; size: TileSize }>>([])
+type TileUserData = { id: number; size: TileSize; removed: boolean }
+export let kineticsTilesToCreate: Record<string, CreateTileData> = {}
+export const kineticsTileBodies: Record<string, Entity> = {}
+export const kineticsTileRefs: Record<number, RefObject<View>> = {}
+export const kineticsTiles$ = observable<Array<{ id: number; size: TileSize }>>([])
+export const kineticsTileDatas: Record<string, TileUserData> = {}
 
 export function useConst<T>(initialValue: T | (() => T)): T {
   const ref = useRef<{ value: T }>()
@@ -104,7 +101,7 @@ const CollisionSystem = (
         y: fromPhysicsToCanvas(lerpedY),
       }
 
-      rapierTilesToCreate[`${handle1}-${handle2}`] = {
+      kineticsTilesToCreate[`${handle1}-${handle2}`] = {
         size: mergedSize,
         position: posMerged,
         velocity: velMerged,
@@ -115,32 +112,35 @@ const CollisionSystem = (
   })
 }
 
-const createTile = (rapier: Rapier, world: World, data: CreateTileData): RAPIER.RigidBody => {
-  const tileColliderDesc = rapier.ColliderDesc.ball(
-    fromCanvasToPhysics(getTileRadius(data.size) / 2)
+const createTile = (system: System, data: CreateTileData): Entity => {
+  const tileEntity = new Circle(
+    {
+      form: {
+        vertices: [
+          new Vector(fromCanvasToPhysics(data.position.x), fromCanvasToPhysics(data.position.y)),
+        ],
+      },
+      radius: fromCanvasToPhysics(getTileRadius(data.size) / 2),
+      mass: 0.15 * getTileMass(data.size),
+      elasticity: 0,
+      speed: 0,
+    },
+    system
   )
-    .setDensity(1.5 * getTileDensity(data.size))
-    .setFriction(0.1)
-    .setRestitution(0.1)
-    .setActiveEvents(rapier.ActiveEvents.COLLISION_EVENTS)
-  const tileBodyDesc = rapier.RigidBodyDesc.dynamic()
-    .setLinvel(
-      data.velocity != null ? fromCanvasToPhysics(data.velocity.x) : 0,
-      data.velocity != null ? fromCanvasToPhysics(data.velocity.y) : 0
-    )
-    .setUserData({
-      category: '_TILE_',
-      id: ++tileId,
-      size: data.size,
-      removed: false,
-    } as TileUserData)
+  system.addEntity(tileEntity)
 
-  const tileBody = world.createRigidBody(tileBodyDesc)
-  world.createCollider(tileColliderDesc, tileBody)
-  tileBody.setTranslation(
-    new RAPIER.Vector2(fromCanvasToPhysics(data.position.x), fromCanvasToPhysics(data.position.y)),
-    true
-  )
+  if (data.velocity != null) {
+    tileEntity.velocity = new Vector(
+      fromCanvasToPhysics(data.velocity.x),
+      fromCanvasToPhysics(data.velocity.y)
+    )
+  }
+
+  kineticsTileDatas[tileEntity.id] = {
+    id: tileEntity.id,
+    size: data.size,
+    removed: false,
+  }
 
   // Add to state
   batch(() => {
@@ -150,15 +150,18 @@ const createTile = (rapier: Rapier, world: World, data: CreateTileData): RAPIER.
     }
   })
 
-  return tileBody
+  return tileEntity
 }
 
-const CreateTileSystem = (rapier: Rapier, world: World, invalidateTRPC: () => void) => {
+const CreateTileSystem = (system: System, invalidateTRPC: () => void) => {
   const createdTileIds: Array<{ id: number; size: TileSize }> = []
 
-  Object.entries(rapierTilesToCreate).forEach(([collisionId, createTileData]) => {
-    const tileBody = createTile(rapier, world, createTileData)
-    const tileBodyId = (tileBody.userData as TileUserData).id
+  Object.entries(kineticsTilesToCreate).forEach(([collisionId, createTileData]) => {
+    const tileEntity = createTile(system, createTileData)
+    const tileEntityId = tileEntity.id // (tileBody.userData as TileUserData).id
+    console.log({
+      tileEntityId,
+    })
 
     // Pop sound effect
     if (createTileData.viaMerge) {
@@ -171,16 +174,16 @@ const CreateTileSystem = (rapier: Rapier, world: World, invalidateTRPC: () => vo
     }
 
     // Index in state by sensor
-    createdTileIds.push({ id: tileBodyId, size: createTileData.size })
+    createdTileIds.push({ id: tileEntityId, size: createTileData.size })
 
-    rapierTileBodies[tileBodyId] = tileBody
+    kineticsTileBodies[tileEntityId] = tileEntity
   })
 
-  rapierTilesToCreate = {}
+  kineticsTilesToCreate = {}
 
   if (createdTileIds.length === 0) return
 
-  rapierTiles$.set((tiles) => [...tiles, ...createdTileIds])
+  kineticsTiles$.set((tiles) => [...tiles, ...createdTileIds])
 }
 
 const RemoveTileSystem = (rapier: Rapier, world: RAPIER.World) => {
@@ -194,20 +197,22 @@ const RemoveTileSystem = (rapier: Rapier, world: RAPIER.World) => {
     }
   })
 
-  rapierTiles$.set((tiles) => tiles.filter((tile) => !(tile.id in removedTileIds)))
+  kineticsTiles$.set((tiles) => tiles.filter((tile) => !(tile.id in removedTileIds)))
 }
 
-const UpdateTilePositionsSystem = (rapier: Rapier, world: RAPIER.World) => {
+const UpdateTilePositionsSystem = (system: System) => {
   const worldScale = appState$.scale.peek()
 
-  world.bodies.forEach((body) => {
-    const userData = body.userData as TileUserData
+  system.entities.forEach((entity) => {
+    if (entity == null) return
 
-    if (userData != null && userData.category === '_TILE_') {
+    const userData = kineticsTileDatas[entity.id]
+
+    if (userData != null) {
       const { id, size } = userData
-      const { x, y } = body.translation()
-      const angle = body.rotation()
-      const tileRef = rapierTileRefs[id]
+      const { x, y } = entity.position
+      const angle = entity.angle
+      const tileRef = kineticsTileRefs[id]
       const tileRadius = getTileRadius(size)
 
       if (tileRef != null && tileRef.current != null) {
@@ -228,37 +233,53 @@ const UpdateTilePositionsSystem = (rapier: Rapier, world: RAPIER.World) => {
   })
 }
 
-export const RapierWorld = ({ children }: { children?: ReactNode }) => {
+class BetterSystem extends System {
+  constructor(config: SystemConfig) {
+    super(config)
+  }
+  override update() {
+    super.update()
+    this.emit('tick')
+  }
+}
+
+// eslint-disable-next-line react/display-name
+export const KineticsWorld = React.memo(({ children }: { children?: ReactNode }) => {
   const utils = api.useContext()
-  const rapier = suspend(importRapier)
+  const system = useConst(
+    new BetterSystem({
+      tickRate: 60,
+      friction: 0.05,
+      collisionInfo: {
+        cellSize: 6,
+      },
+      gravity: -0.001,
+      dimensions: new Vector(fromCanvasToPhysics(width - 8), fromCanvasToPhysics(height + 120)),
+      verbose: true,
+    })
+  ) as unknown as System
 
-  // // Use the RAPIER module here.
-  // const world = useConst(new rapier.World({ x: 0.0, y: 9.81 }))
-  // const eventQueue = useConst(new rapier.EventQueue(true))
-
-  // useLayoutEffect(() => {
-  //   makeEnclosedBox(rapier, width, height, enclosureThickness, 4, world)
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [])
-
-  // useAnimationFrame(function (deltaTime: number) {
-  //   time += deltaTime
-
-  //   // PHYSICS SYSTEM
-  //   PhysicsSystem(rapier, world, eventQueue, deltaTime)
-
-  //   // COLLISION SYSTEM
-  //   CollisionSystem(rapier, world, eventQueue, utils.invalidate)
-
-  //   // REMOVE TILE SYSTEM
-  //   RemoveTileSystem(rapier, world)
-
-  //   // CREATE TILE SYSTEM
-  //   CreateTileSystem(rapier, world, utils.invalidate)
-
-  //   // UPDATE POSITION SYSTEM
-  //   UpdateTilePositionsSystem(rapier, world)
-  // })
+  system.on('tick', () => {
+    // // Use the RAPIER module here.
+    // const world = useConst(new rapier.World({ x: 0.0, y: 9.81 }))
+    // const eventQueue = useConst(new rapier.EventQueue(true))
+    // useLayoutEffect(() => {
+    //   makeEnclosedBox(system, width, height + 128, enclosureThickness, 4)
+    //   // eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [])
+    // useAnimationFrame(function (deltaTime: number) {
+    //   time += deltaTime
+    //   // PHYSICS SYSTEM
+    //   PhysicsSystem(rapier, world, eventQueue, deltaTime)
+    //   // COLLISION SYSTEM
+    //   CollisionSystem(rapier, world, eventQueue, utils.invalidate)
+    //   // REMOVE TILE SYSTEM
+    //   RemoveTileSystem(rapier, world)
+    // CREATE TILE SYSTEM
+    CreateTileSystem(system, utils.invalidate)
+    // UPDATE POSITION SYSTEM
+    UpdateTilePositionsSystem(system)
+  })
 
   return <>{children}</>
-}
+})

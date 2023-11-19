@@ -1,0 +1,23 @@
+diff --git a/src/System.ts b/src/System.ts
+index c0a71047e74da3b8616b15f5df1e7b433d09bc72..edf0aebb3bc9b33d616b53a9a2832d965e42a4f7 100755
+--- a/src/System.ts
++++ b/src/System.ts
+@@ -138,7 +138,8 @@ export default class System extends EventEmitter {
+         this.CollisionManager = engine;
+     };
+ 
+-    private update() {        
++    private update() {    
++        console.log('fire update');
+         const time = performance.now();
+ 
+         this.CollisionManager.clear();
+@@ -160,6 +161,8 @@ export default class System extends EventEmitter {
+ 
+         if (this.environment === Environment.Browser && this.config.useRAF !== false)
+             requestAnimationFrame(this.update.bind(this));
++
++        this.emit('tick', this);
+     };
+ 
+     /** Adds an entity to the system. */

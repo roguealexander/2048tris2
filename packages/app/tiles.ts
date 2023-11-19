@@ -180,6 +180,10 @@ export const getTilePower = (size: TileSize): TilePower => {
   'worklet'
   return tiles[size].power
 }
+export const getTileMass = (size: TileSize): number => {
+  'worklet'
+  return tiles[size].mass
+}
 export const getTileRadius = (size: TileSize): number => {
   'worklet'
   return 30 + 15 * getTileData(size)!.radius

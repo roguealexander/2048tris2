@@ -17,6 +17,7 @@ import React from 'react'
 import PhysicsWorld, { b2dTiles$, b2dTilesToCreate, worldContext } from './b2d/PhysicsWorld'
 import { GameTile } from './GameTile'
 import { RapierWorld, rapierTiles$, rapierTilesToCreate } from './rapier/RapierWorld'
+import { KineticsWorld, kineticsTiles$, kineticsTilesToCreate } from './kinetics/KineticsWorld'
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -148,6 +149,21 @@ const GameRapier = () => {
   )
 }
 
+const GameKinetics = () => {
+  return (
+    <>
+      <KineticsWorld />
+      <For each={kineticsTiles$} optimized>
+        {(tile$) => {
+          const tile = tile$.peek()
+          if (tile == null) return <></>
+          return <GameTile tile={tile} />
+        }}
+      </For>
+    </>
+  )
+}
+
 export const BoardComp = observer(() => {
   const scale = appState$.scale.get()
   const isTouchDevice = useIsTouchDevice()
@@ -168,7 +184,13 @@ export const BoardComp = observer(() => {
     //   velocity: { x: 0.01, y: 0 },
     //   viaMerge: false,
     // }
-    rapierTilesToCreate['fresh'] = {
+    // rapierTilesToCreate['fresh'] = {
+    //   size: state$.activeTile.peek(),
+    //   position: { x: dropX.value, y: 0 },
+    //   velocity: { x: 0.01, y: 0 },
+    //   viaMerge: false,
+    // }
+    kineticsTilesToCreate['fresh'] = {
       size: state$.activeTile.peek(),
       position: { x: dropX.value, y: 0 },
       velocity: { x: 0.01, y: 0 },
@@ -187,8 +209,9 @@ export const BoardComp = observer(() => {
       w={width * scale}
       h={height * scale}
     >
-      {/* <GameBox2D /> */}
-      <GameRapier />
+      <GameBox2D />
+      {/* <GameRapier /> */}
+      {/* <GameKinetics /> */}
 
       <TileDropPositioner dropX={dropX}>
         <Tile size={state$.activeTile} />
