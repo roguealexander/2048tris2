@@ -16,8 +16,8 @@ import { appActions$, appState$ } from 'app/appState'
 import React from 'react'
 import PhysicsWorld, { b2dTiles$, b2dTilesToCreate, worldContext } from './b2d/PhysicsWorld'
 import { GameTile } from './GameTile'
-import { RapierWorld, rapierTiles$, rapierTilesToCreate } from './rapier/RapierWorld'
-import { KineticsWorld, kineticsTiles$, kineticsTilesToCreate } from './kinetics/KineticsWorld'
+// import { RapierWorld, rapierTiles$, rapierTilesToCreate } from './rapier/RapierWorld'
+// import { KineticsWorld, kineticsTiles$, kineticsTilesToCreate } from './kinetics/KineticsWorld'
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -133,36 +133,36 @@ const GameBox2D = () => {
   )
 }
 
-const GameRapier = () => {
-  return (
-    <Suspense>
-      <RapierWorld>
-        <For each={rapierTiles$} optimized>
-          {(tile$) => {
-            const tile = tile$.peek()
-            if (tile == null) return <></>
-            return <GameTile tile={tile} />
-          }}
-        </For>
-      </RapierWorld>
-    </Suspense>
-  )
-}
+// const GameRapier = () => {
+//   return (
+//     <Suspense>
+//       <RapierWorld>
+//         <For each={rapierTiles$} optimized>
+//           {(tile$) => {
+//             const tile = tile$.peek()
+//             if (tile == null) return <></>
+//             return <GameTile tile={tile} />
+//           }}
+//         </For>
+//       </RapierWorld>
+//     </Suspense>
+//   )
+// }
 
-const GameKinetics = () => {
-  return (
-    <>
-      <KineticsWorld />
-      <For each={kineticsTiles$} optimized>
-        {(tile$) => {
-          const tile = tile$.peek()
-          if (tile == null) return <></>
-          return <GameTile tile={tile} />
-        }}
-      </For>
-    </>
-  )
-}
+// const GameKinetics = () => {
+//   return (
+//     <>
+//       <KineticsWorld />
+//       <For each={kineticsTiles$} optimized>
+//         {(tile$) => {
+//           const tile = tile$.peek()
+//           if (tile == null) return <></>
+//           return <GameTile tile={tile} />
+//         }}
+//       </For>
+//     </>
+//   )
+// }
 
 export const BoardComp = observer(() => {
   const scale = appState$.scale.get()
@@ -178,24 +178,24 @@ export const BoardComp = observer(() => {
   const releaseBall = () => {
     if (state$.gameInteractionPaused.get()) return
 
-    // b2dTilesToCreate['fresh'] = {
-    //   size: state$.activeTile.peek(),
-    //   position: { x: dropX.value, y: 0 },
-    //   velocity: { x: 0.01, y: 0 },
-    //   viaMerge: false,
-    // }
+    b2dTilesToCreate['fresh'] = {
+      size: state$.activeTile.peek(),
+      position: { x: dropX.value, y: 0 },
+      velocity: { x: 0.01, y: 0 },
+      viaMerge: false,
+    }
     // rapierTilesToCreate['fresh'] = {
     //   size: state$.activeTile.peek(),
     //   position: { x: dropX.value, y: 0 },
     //   velocity: { x: 0.01, y: 0 },
     //   viaMerge: false,
     // }
-    kineticsTilesToCreate['fresh'] = {
-      size: state$.activeTile.peek(),
-      position: { x: dropX.value, y: 0 },
-      velocity: { x: 0.01, y: 0 },
-      viaMerge: false,
-    }
+    // kineticsTilesToCreate['fresh'] = {
+    //   size: state$.activeTile.peek(),
+    //   position: { x: dropX.value, y: 0 },
+    //   velocity: { x: 0.01, y: 0 },
+    //   viaMerge: false,
+    // }
 
     actions$.drop()
   }
