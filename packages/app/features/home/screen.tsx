@@ -2,7 +2,7 @@ import { Memo, Show, observer } from '@legendapp/state/react'
 import { AnimatePresence, Stack, TSizableText, XStack, YStack } from '@my/ui'
 import { ActiveTilesHistogram } from 'app/components/active-tile-histogram'
 import { Board } from 'app/components/board'
-import { HighEfficiencyPanel } from 'app/components/high-efficiency-panel'
+import { MilestoneImprovementPanel } from 'app/components/milestone-improvement-panel'
 import { Hold } from 'app/components/hold'
 import { GameplayHoldListener } from 'app/components/hold-listener'
 import { LeaderboardTab } from 'app/components/leaderboard-tab'
@@ -25,15 +25,13 @@ import { useSafeAreaFrame } from 'app/utils/useSafeAreaFrame'
 import { batch } from '@legendapp/state'
 import { DebugTab } from 'app/components/debug-tab'
 import { Interstitial } from 'app/components/interstitial'
-import '../../persistedStates'
 
 const ActiveLeftPanel = observer(() => {
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
   const vertical = !horizontal
   const scale = appState$.scale.get()
 
-  if (vertical || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null)
-    return null
+  if (vertical || state$.toppedOut.get() || state$.activeMilestonePanel.get() != null) return null
 
   return (
     <YStack w={144 * scale} gap={16 * scale} mt={23}>
@@ -53,8 +51,7 @@ const ActiveRightPanel = observer(() => {
   const vertical = !horizontal
   const scale = appState$.scale.get()
 
-  if (vertical || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null)
-    return null
+  if (vertical || state$.toppedOut.get() || state$.activeMilestonePanel.get() != null) return null
 
   return (
     <YStack gap={8 * scale} ai="flex-start">
@@ -79,8 +76,7 @@ const ActiveBottomPanel = observer(() => {
 const ActiveTopPanel = observer(() => {
   const scale = appState$.scale.get()
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
-  if (horizontal || state$.toppedOut.get() || state$.activeHighEfficiencyPanel.get() != null)
-    return null
+  if (horizontal || state$.toppedOut.get() || state$.activeMilestonePanel.get() != null) return null
 
   return (
     <XStack zi={3} height={44} gap="$2" w={450 * scale} jc="space-between" ai="center">
@@ -424,7 +420,7 @@ export const HomeScreen = observer(() => {
             {/* LEFT */}
             <TopOutPanel />
             <StatsPanel />
-            <HighEfficiencyPanel />
+            <MilestoneImprovementPanel />
             <ActiveLeftPanel />
 
             {/* TOP */}

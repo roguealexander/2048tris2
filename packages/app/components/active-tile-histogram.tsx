@@ -10,7 +10,7 @@ export const ActiveTilesHistogram = observer(
     const maxTilesCountRaw = state$.maxTilesCount.get()
     const maxTilesCount = Math.max(1, maxTilesCountRaw)
     const activeTileCount = state$.activeTileCount.get()
-    const targetEfficiency = state$.targetEfficiency.get()
+    const targetEfficiency = state$.targetMilestone.get()
     const scale = appState$.scale.get()
     return (
       <>

@@ -35,4 +35,4 @@ export type TileData = {
 export type LeaderboardType = z.infer<typeof LeaderboardTypeSchema>
 
 export type TileQueue = [TileSize, TileSize, TileSize, TileSize, TileSize, TileSize]
-export type EfficiencyTile = '2048' | '4096' | '8192'
+export type MilestoneTile = '2048' | '4096' | '8192'

@@ -1,7 +1,13 @@
 import { batch, computed, observable } from '@legendapp/state'
-import { EfficiencyTile, TileList, TileQueue, TileRecord, TileSize } from './types'
+import { MilestoneTile, TileList, TileQueue, TileRecord, TileSize } from './types'
 import { rand } from '@ngneat/falso'
 import { stats$ } from './statsState'
+
+type MilestonePanelProps = {
+  tile: MilestoneTile
+  efficiency: number | null
+  time: number | null
+}
 
 type GameState = {
   started: boolean
@@ -18,8 +24,8 @@ type GameState = {
   ballsDropped: number
 
   activeTileCount: TileRecord<number>
-  targetEfficiency: EfficiencyTile
-  activeHighEfficiencyPanel: EfficiencyTile | null
+  targetMilestone: MilestoneTile
+  activeMilestonePanel: MilestonePanelProps | null
 }
 type GameStateComputed = {
   score: number
@@ -30,8 +36,8 @@ type GameStateComputed = {
 
   maxTilesCount: number
   largestTile: TileSize
-  targetHighEfficiency: number
-  activeHighEfficiencyValue: number | null
+  targetMilestoneEfficiency: number
+  targetMilestoneBestTime: number
 }
 
 type GameActions = {
@@ -39,13 +45,13 @@ type GameActions = {
   drop: () => void
   hold: () => void
   reset: () => void
-  topOut: (invalidateTRPC: () => void) => void
-  triggerHighEfficiencyCheck: (size: EfficiencyTile, invalidateTRPC: () => void) => void
-  closeActiveHighEfficiencyPanel: () => void
+  topOut: () => void
+  triggerMilestoneCheck: (size: MilestoneTile) => void
+  closeMilestonePanel: () => void
 }
 
 export const getQueueTile = (): TileSize => {
-  // return '128'
+  return '128'
   return rand(['2', '2', '2', '4', '4', '4', '8', '8', '8', '16', '16', '32'])
 }
 const constructInitialQueue = (): TileQueue => {
@@ -85,8 +91,8 @@ const getInitGameState = (): Omit<GameState, 'started' | 'resetCount' | 'holdSha
     '8192': 0,
   },
 
-  targetEfficiency: '2048',
-  activeHighEfficiencyPanel: null,
+  targetMilestone: '2048',
+  activeMilestonePanel: null,
 })
 
 const getScoreFromTiles = (activeTiles: TileRecord<number>) => {
@@ -111,7 +117,7 @@ export const state$ = observable<GameState & GameStateComputed>({
       !state$.started.get() ||
       state$.toppedOut.get() ||
       state$.resetting.get() ||
-      state$.activeHighEfficiencyPanel.get() !== null
+      state$.activeMilestonePanel.get() !== null
     )
   }),
 
@@ -148,8 +154,8 @@ export const state$ = observable<GameState & GameStateComputed>({
 
     return Math.round(10000 * (largestTilePoints / score)) / 100
   }),
-  targetHighEfficiency: computed((): number => {
-    switch (state$.targetEfficiency.get()) {
+  targetMilestoneEfficiency: computed((): number => {
+    switch (state$.targetMilestone.get()) {
       case '2048':
         return stats$.efficiency2048.get()
       case '4096':
@@ -158,19 +164,14 @@ export const state$ = observable<GameState & GameStateComputed>({
         return stats$.efficiency8192.get()
     }
   }),
-
-  activeHighEfficiencyValue: computed((): number | null => {
-    const activeHighEfficiencyPanel = state$.activeHighEfficiencyPanel.get()
-
-    switch (activeHighEfficiencyPanel) {
-      case null:
-        return null
+  targetMilestoneBestTime: computed((): number => {
+    switch (state$.targetMilestone.get()) {
       case '2048':
-        return stats$.efficiency2048.peek()
+        return stats$.bestTime2048.get()
       case '4096':
-        return stats$.efficiency4096.peek()
+        return stats$.bestTime4096.get()
       case '8192':
-        return stats$.efficiency8192.peek()
+        return stats$.bestTime8192.get()
     }
   }),
 })
@@ -249,16 +250,14 @@ export const actions$ = observable<GameActions>({
       resetCount: currState.resetCount + 1,
     }))
   },
-  topOut: (invalidateTRPC: () => void) => {
+  topOut: () => {
     batch(() => {
       // Update high scores
       if (state$.score.peek() < (stats$.scoreLow.peek() ?? Infinity)) {
         stats$.scoreLow.set(state$.score.peek())
-        invalidateTRPC()
       }
       if (state$.score.peek() > (stats$.scoreHigh.peek() ?? 0)) {
         stats$.scoreHigh.set(state$.score.peek())
-        invalidateTRPC()
       }
       state$.toppedOut.set(true)
 
@@ -266,69 +265,118 @@ export const actions$ = observable<GameActions>({
       stats$.gamesPlayed.set((count) => count + 1)
 
       // Update time played
-      stats$.timePlayed.set((time) => time + state$.gameDuration.peek())
+      stats$.timePlayed.set((time) => time + Math.round(state$.gameDuration.peek()))
 
       // Update balls dropped
       stats$.ballsDropped.set((ballsDropped) => ballsDropped + state$.ballsDropped.peek())
+
+      // Increment Persistor
+      stats$.persistCount.set((count) => count + 1)
     })
   },
-  triggerHighEfficiencyCheck: (size: EfficiencyTile, invalidateTRPC: () => void) => {
+  triggerMilestoneCheck: (size: MilestoneTile) => {
     const efficiency = state$.efficiency.peek()
+    const gameDuration = state$.gameDuration.peek()
     batch(() => {
       switch (size) {
         case '2048': {
-          if (efficiency > stats$.efficiency2048.peek()) {
-            stats$.efficiency2048.set(efficiency)
-            state$.activeHighEfficiencyPanel.set('2048')
-            invalidateTRPC()
+          const timeImprovement = gameDuration < stats$.bestTime2048.peek()
+          const efficiencyImprovement = efficiency > stats$.efficiency2048.peek()
+
+          if (timeImprovement || efficiencyImprovement) {
+            // OPEN PANEL
+            state$.activeMilestonePanel.set({
+              tile: '2048',
+              efficiency: efficiencyImprovement ? efficiency : null,
+              time: timeImprovement ? gameDuration : null,
+            })
+
+            // UPDATE STATS
+            stats$.persistCount.set((count) => count + 1)
+            if (timeImprovement) {
+              stats$.bestTime2048.set(Math.round(gameDuration))
+            }
+            if (efficiencyImprovement) {
+              stats$.efficiency2048.set(efficiency)
+            }
           } else {
-            state$.targetEfficiency.set('4096')
+            state$.targetMilestone.set('4096')
           }
           break
         }
         case '4096': {
-          if (efficiency > stats$.efficiency4096.peek()) {
-            stats$.efficiency4096.set(efficiency)
-            state$.activeHighEfficiencyPanel.set('4096')
-            invalidateTRPC()
+          const timeImprovement = gameDuration < stats$.bestTime4096.peek()
+          const efficiencyImprovement = efficiency > stats$.efficiency4096.peek()
+
+          if (timeImprovement || efficiencyImprovement) {
+            // OPEN PANEL
+            state$.activeMilestonePanel.set({
+              tile: '4096',
+              efficiency: efficiencyImprovement ? efficiency : null,
+              time: timeImprovement ? gameDuration : null,
+            })
+
+            // UPDATE STATS
+            stats$.persistCount.set((count) => count + 1)
+            if (timeImprovement) {
+              stats$.bestTime4096.set(Math.round(gameDuration))
+            }
+            if (efficiencyImprovement) {
+              stats$.efficiency4096.set(efficiency)
+            }
           } else {
-            state$.targetEfficiency.set('8192')
+            state$.targetMilestone.set('8192')
           }
           break
         }
         case '8192': {
-          if (efficiency > stats$.efficiency8192.peek()) {
-            stats$.efficiency8192.set(efficiency)
-            state$.activeHighEfficiencyPanel.set('8192')
-            invalidateTRPC()
+          const timeImprovement = gameDuration < stats$.bestTime8192.peek()
+          const efficiencyImprovement = efficiency > stats$.efficiency8192.peek()
+
+          if (timeImprovement || efficiencyImprovement) {
+            // OPEN PANEL
+            state$.activeMilestonePanel.set({
+              tile: '8192',
+              efficiency: efficiencyImprovement ? efficiency : null,
+              time: timeImprovement ? gameDuration : null,
+            })
+
+            // UPDATE STATS
+            stats$.persistCount.set((count) => count + 1)
+            if (timeImprovement) {
+              stats$.bestTime8192.set(Math.round(gameDuration))
+            }
+            if (efficiencyImprovement) {
+              stats$.efficiency8192.set(efficiency)
+            }
           } else {
-            state$.targetEfficiency.set('8192')
+            state$.targetMilestone.set('8192')
           }
           break
         }
       }
     })
   },
-  closeActiveHighEfficiencyPanel: () => {
-    const activeHighEfficiencyPanel = state$.activeHighEfficiencyPanel.get()
-    if (activeHighEfficiencyPanel == null) return
+  closeMilestonePanel: () => {
+    const activeMilestonePanel = state$.activeMilestonePanel.get()
+    if (activeMilestonePanel == null) return
 
     batch(() => {
       // Increment target efficiency
-      switch (activeHighEfficiencyPanel) {
+      switch (activeMilestonePanel.tile) {
         case '2048':
-          state$.targetEfficiency.set('4096')
+          state$.targetMilestone.set('4096')
           break
         case '4096':
-          state$.targetEfficiency.set('8192')
+          state$.targetMilestone.set('8192')
           break
         case '8192':
-          state$.targetEfficiency.set('8192')
+          state$.targetMilestone.set('8192')
           break
       }
 
       // Close panel
-      state$.activeHighEfficiencyPanel.set(null)
+      state$.activeMilestonePanel.set(null)
     })
   },
 })

@@ -5,12 +5,13 @@ import { TabContainer } from './tab-container'
 import { useUser } from 'app/utils/useUser'
 import { useSupabase } from 'app/utils/supabase/useSupabase'
 import { AuthComponent } from 'app/features/auth/auth-component'
-import { stats$, statsActions$ } from 'app/statsState'
+import { DefaultBestTime, DefaultLowScore, stats$, statsActions$ } from 'app/statsState'
 import { User } from '@supabase/supabase-js'
 import { api } from 'app/utils/api'
 import { ChevronLeft } from '@tamagui/lucide-icons'
 import { appState$ } from 'app/appState'
 import { batch } from '@legendapp/state'
+import { getMinutesAndSeconds } from 'app/utils/time'
 
 const Header = observer(() => {
   const scale = appState$.scale.get()
@@ -66,6 +67,9 @@ const LeaderboardStatsTable = observer(() => {
   const efficiency2048 = stats$.efficiency2048.get()
   const efficiency4096 = stats$.efficiency4096.get()
   const efficiency8192 = stats$.efficiency8192.get()
+  const bestTime2048 = stats$.bestTime2048.get()
+  const bestTime4096 = stats$.bestTime4096.get()
+  const bestTime8192 = stats$.bestTime8192.get()
 
   return (
     <YStack w="100%" pl="$2">
@@ -82,7 +86,7 @@ const LeaderboardStatsTable = observer(() => {
         key={1}
         rank={leaderboards?.scoreLow?.rank}
         leaderboard="LOW SCORE"
-        score={scoreLow === 100000 ? '--' : `${scoreLow}`}
+        score={scoreLow === DefaultLowScore ? '--' : `${scoreLow}`}
         highlight
       />
       <Spacer />
@@ -106,6 +110,27 @@ const LeaderboardStatsTable = observer(() => {
         leaderboard="8192 EFFICIENCY"
         score={efficiency8192 === 0 ? '--' : `${efficiency8192}%`}
       />
+      <Spacer />
+      <TSizableText size="$3">BEST TIME:</TSizableText>
+      <Row
+        key={5}
+        rank={leaderboards?.bestTime2048?.rank}
+        leaderboard="2048 BEST TIME"
+        score={bestTime2048 === DefaultBestTime ? '--' : `${getMinutesAndSeconds(bestTime2048)}`}
+      />
+      <Row
+        key={6}
+        rank={leaderboards?.bestTime4096?.rank}
+        leaderboard="4096 BEST TIME"
+        score={bestTime4096 === DefaultBestTime ? '--' : `${getMinutesAndSeconds(bestTime4096)}`}
+        highlight
+      />
+      <Row
+        key={7}
+        rank={leaderboards?.bestTime8192?.rank}
+        leaderboard="8192 BEST TIME"
+        score={bestTime8192 === DefaultBestTime ? '--' : `${getMinutesAndSeconds(bestTime8192)}`}
+      />
     </YStack>
   )
 })
@@ -116,7 +141,11 @@ const ResetStatsButton = observer(() => {
 
   const resetStats = async () => {
     resetting.set(true)
-    await resetStatsMutation.mutateAsync()
+    try {
+      await resetStatsMutation.mutateAsync()
+    } catch (error) {
+      console.log('ERROR RESETTING STATS REMOTELY', error)
+    }
     statsActions$.resetStats()
     resetting.set(false)
   }

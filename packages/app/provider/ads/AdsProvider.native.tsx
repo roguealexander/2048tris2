@@ -1,9 +1,4 @@
-import mobileAds, {
-  InterstitialAd,
-  MaxAdContentRating,
-  TestIds,
-} from 'react-native-google-mobile-ads'
-// import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions'
+import mobileAds, { MaxAdContentRating } from 'react-native-google-mobile-ads'
 
 const setup = async () => {
   // const result = await check(PERMISSIONS.IOS.APP_TRACKING_TRANSPARENCY)

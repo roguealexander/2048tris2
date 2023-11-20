@@ -1,5 +1,6 @@
 import { observable } from '@legendapp/state'
 import { TileSize } from './types'
+import { persistObservable } from '@legendapp/state/persist'
 
 export type Tab = '2048tris' | 'how-to-play' | 'leaderboard' | 'user' | 'debug'
 export type LayoutDimension = 'vertical' | 'horizontal'
@@ -58,4 +59,8 @@ export const appActions$ = observable<AppActions>({
       appState$.adAvailable.set(true)
     }
   },
+})
+
+persistObservable(appState$, {
+  local: 'appState',
 })

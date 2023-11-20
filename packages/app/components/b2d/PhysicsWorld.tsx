@@ -51,7 +51,11 @@ export const b2dTiles$ = observable<Array<{ id: number; size: TileSize }>>([])
 const PhysicsSystem = (world: b2World, deltaTime: number) => {
   if (state$.gamePhysicsPaused.peek()) return
 
-  state$.gameDuration.set((duration) => duration + deltaTime)
+  // Only increase playing time while game is running and user can interact
+  if (!state$.gameInteractionPaused.peek()) {
+    state$.gameDuration.set((duration) => duration + deltaTime)
+  }
+
   const iterations = Math.min(4, Math.round(deltaTime / (1000 / 120)))
   for (let i = 0; i < iterations; i++) {
     world.Step(
@@ -96,7 +100,7 @@ const createTile = (world: b2World, data: CreateTileData): b2Body => {
   return fixt.m_body
 }
 
-const CollisionSystem = (world: b2World, invalidateTRPC: () => void) => {
+const CollisionSystem = (world: b2World) => {
   // Exit if physics not running
   if (state$.gamePhysicsPaused.peek()) return
 
@@ -115,51 +119,9 @@ const CollisionSystem = (world: b2World, invalidateTRPC: () => void) => {
       const overlapBody = m_bodyA.m_userData['category'] === '_TOP_OUT_SENSOR_' ? m_bodyB : m_bodyA
       const overlapDuration = time - (overlapBody.m_userData['top_out_overlap_start_time'] ?? time)
       if (overlapDuration > 2000) {
-        actions$.topOut(invalidateTRPC)
+        actions$.topOut()
       }
     }
-
-    // if (
-    //   m_touchingFlag &&
-    //   m_bodyA.m_userData['size'] != null &&
-    //   m_bodyA.m_userData['size'] === m_bodyB.m_userData['size'] &&
-    //   m_bodyA.m_userData.removed !== true &&
-    //   m_bodyB.m_userData.removed !== true
-    // ) {
-    //   // Remove bodies
-    //   m_bodyA.m_userData.removed = true
-    //   m_bodyB.m_userData.removed = true
-
-    //   // Update state
-    //   const size = m_bodyA.m_userData['size'] as TileSize
-    //   const mergedSize = getMergedTileSize(size)
-
-    //   // Create merged tile
-    //   const aVel = m_bodyA.GetLinearVelocity()
-    //   const bVel = m_bodyB.GetLinearVelocity()
-    //   const mergedVel = {
-    //     x: fromPhysicsToCanvas((aVel.x + bVel.x) / 2, SCALE),
-    //     y: fromPhysicsToCanvas((aVel.y + bVel.y) / 2, SCALE),
-    //   }
-    //   const aVelComponent = (aVel.Length() / (aVel.Length() + bVel.Length())) * 0.8
-
-    //   const aPos = m_bodyA.GetPosition()
-    //   const bPos = m_bodyB.GetPosition()
-    //   const lerpedX = aPos.x * (0.8 - aVelComponent) + bPos.x * (0.2 + aVelComponent)
-    //   const lerpedY = aPos.y * (0.8 - aVelComponent) + bPos.y * (0.2 + aVelComponent)
-    //   const mergedPos = {
-    //     x: fromPhysicsToCanvas(lerpedX, SCALE),
-    //     y: fromPhysicsToCanvas(lerpedY, SCALE),
-    //   }
-
-    //   b2dTilesToCreate[`${m_bodyA.m_userData['id']}-${m_bodyB.m_userData['id']}`] = {
-    //     size: mergedSize,
-    //     position: mergedPos,
-    //     velocity: mergedVel,
-    //     viaMerge: true,
-    //     unmergedSize: size,
-    //   }
-    // }
   }
 }
 
@@ -198,7 +160,7 @@ const UpdateTilePositionsSystem = (world: b2World) => {
   }
 }
 
-const CreateTileSystem = (world: b2World, invalidateTRPC: () => void) => {
+const CreateTileSystem = (world: b2World) => {
   const createdTileIds: Array<{ id: number; size: TileSize }> = []
 
   Object.entries(b2dTilesToCreate).forEach(([collisionId, createTileData]) => {
@@ -211,8 +173,8 @@ const CreateTileSystem = (world: b2World, invalidateTRPC: () => void) => {
     }
 
     // Update efficiency score
-    if (createTileData.viaMerge && createTileData.size === state$.targetEfficiency.peek()) {
-      actions$.triggerHighEfficiencyCheck(createTileData.size, invalidateTRPC)
+    if (createTileData.viaMerge && createTileData.size === state$.targetMilestone.peek()) {
+      actions$.triggerMilestoneCheck(createTileData.size)
     }
 
     // Index in state by sensor
@@ -242,7 +204,6 @@ const RemoveTileSystem = (world: b2World) => {
 
 export function UsePhysicsWorld() {
   const world = useRef(new b2World(new b2Vec2(0, 20)))
-  const utils = api.useContext()
 
   // @ts-ignore
   world.current.scaleFactor = SCALE
@@ -326,10 +287,10 @@ export function UsePhysicsWorld() {
     RemoveTileSystem(world.current)
 
     // CREATE TILE SYSTEM
-    CreateTileSystem(world.current, utils.invalidate)
+    CreateTileSystem(world.current)
 
     // COLLISION SYSTEM
-    CollisionSystem(world.current, utils.invalidate)
+    CollisionSystem(world.current)
 
     // UPDATE POSITION SYSTEM
     UpdateTilePositionsSystem(world.current)

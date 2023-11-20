@@ -169,8 +169,8 @@ const CreateTileSystem = (system: System, invalidateTRPC: () => void) => {
     }
 
     // Update efficiency score
-    if (createTileData.viaMerge && createTileData.size === state$.targetEfficiency.peek()) {
-      actions$.triggerHighEfficiencyCheck(createTileData.size, invalidateTRPC)
+    if (createTileData.viaMerge && createTileData.size === state$.targetMilestone.peek()) {
+      actions$.triggerMilestoneCheck(createTileData.size, invalidateTRPC)
     }
 
     // Index in state by sensor

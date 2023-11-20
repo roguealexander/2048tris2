@@ -6,9 +6,10 @@ import { colors } from 'app/colors'
 import { TabContainer } from './tab-container'
 import { api } from 'app/utils/api'
 import { RouterOutputs } from '@my/api'
-import { stats$ } from 'app/statsState'
+import { DefaultBestTime, DefaultLowScore, stats$ } from 'app/statsState'
 import { useUser } from 'app/utils/useUser'
 import { appState$ } from 'app/appState'
+import { getMinutesAndSeconds } from 'app/utils/time'
 
 const leaderboard$ = observable<LeaderboardType>('scoreHigh')
 const leaderboardTitle$ = computed(() => {
@@ -244,8 +245,12 @@ const filterValue = (type: LeaderboardType, value: number): boolean => {
     case 'efficiency4096':
     case 'efficiency8192':
       return value !== 0
+    case 'bestTime2048':
+    case 'bestTime4096':
+    case 'bestTime8192':
+      return value !== DefaultBestTime
     case 'scoreLow':
-      return value !== 100000
+      return value !== DefaultLowScore
   }
 }
 const extractRowData = (type: LeaderboardType, row: LeaderboardQueryData[0]): RowData => {
@@ -265,6 +270,10 @@ const rowValueString = (type: LeaderboardType, value: number): string => {
     case 'scoreHigh':
     case 'scoreLow':
       return `${value}`
+    case 'bestTime2048':
+    case 'bestTime4096':
+    case 'bestTime8192':
+      return getMinutesAndSeconds(value)
     case 'efficiency2048':
     case 'efficiency4096':
     case 'efficiency8192':

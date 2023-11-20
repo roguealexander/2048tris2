@@ -1,25 +1,18 @@
 import { Memo, observer } from '@legendapp/state/react'
 import { state$ } from '../state'
 import { TSizableText, YStack } from '@my/ui'
-import { stats$ } from 'app/statsState'
+import { DefaultBestTime, stats$ } from 'app/statsState'
 import { appState$ } from 'app/appState'
 import { colors } from 'app/colors'
+import { getMinutesAndSeconds } from 'app/utils/time'
 
 const HighScoreValue = observer(() => {
   const score = stats$.scoreHigh.get()
   return score == null ? '-' : score
 })
 
-const getGameDurationDisplay = (duration: number) => {
-  let inSecs = Math.round(duration / 1000)
-  const minutes = Math.floor(inSecs / 60) % 60
-  inSecs -= minutes * 60
-  const seconds = inSecs
-  return `${minutes}m ${seconds < 10 ? `0${seconds}` : seconds}s`
-}
-
 const GameTimeValue = observer(() => {
-  return getGameDurationDisplay(state$.gameDuration.get())
+  return getMinutesAndSeconds(state$.gameDuration.get())
 })
 
 export const Score = observer(() => {
@@ -50,8 +43,14 @@ export const Score = observer(() => {
 })
 
 const HighEfficiencyValue = observer(() => {
-  const efficiency = state$.targetHighEfficiency.get()
-  return efficiency == null ? '-' : `${efficiency}%`
+  const efficiency = state$.targetMilestoneEfficiency.get()
+  return efficiency == null || efficiency === 0 ? '-' : `${efficiency}%`
+})
+const BestTimeValue = observer(() => {
+  const bestTime = state$.targetMilestoneBestTime.get()
+  return bestTime == null || bestTime === DefaultBestTime
+    ? '-'
+    : `${getMinutesAndSeconds(bestTime)}`
 })
 
 export const Milestone = observer(() => {
@@ -66,21 +65,22 @@ export const Milestone = observer(() => {
         </TSizableText>
       </TSizableText>
       <YStack bg={colors.tile['2048']} w="100%" ai="center" jc="center" px={2} py={4}>
-        <TSizableText size="$2" mb={4}>
+        <TSizableText size="$2" mb={4} color="$background">
           <TSizableText fontWeight="bold" color="$background">
-            <Memo>{state$.targetEfficiency}</Memo>
-          </TSizableText>
+            <Memo>{state$.targetMilestone}</Memo>
+          </TSizableText>{' '}
+          RECORDS:
         </TSizableText>
         <TSizableText size="$2" color="$background">
-          Best Eff:{' '}
+          Eff.:{' '}
           <TSizableText fontWeight="bold" color="$background">
             <HighEfficiencyValue />
           </TSizableText>
         </TSizableText>
         <TSizableText size="$2" color="$background">
-          Best Time:{' '}
+          Time:{' '}
           <TSizableText fontWeight="bold" color="$background">
-            <HighEfficiencyValue />
+            <BestTimeValue />
           </TSizableText>
         </TSizableText>
       </YStack>

@@ -6,6 +6,7 @@ import { useUser } from 'app/utils/useUser'
 import { appState$ } from 'app/appState'
 import { PanelOrOverlayContainer } from './panel-or-overlay-container'
 import { batch } from '@legendapp/state'
+import { getMinutesAndSeconds } from 'app/utils/time'
 
 const JoinLeaderboardButton = observer(() => {
   const { user } = useUser()
@@ -24,25 +25,30 @@ const JoinLeaderboardButton = observer(() => {
   )
 })
 
-export const HighEfficiencyPanel = observer(() => {
-  const activeHighEfficiencyPanel = state$.activeHighEfficiencyPanel.get()
-  const activeHighEfficiencyValue = state$.activeHighEfficiencyValue.get()
+export const MilestoneImprovementPanel = observer(() => {
+  const activeMilestonePanel = state$.activeMilestonePanel.get()
 
-  if (activeHighEfficiencyPanel == null) return null
+  if (activeMilestonePanel == null) return null
 
   return (
     <PanelOrOverlayContainer>
       <YStack ai="center">
         <TSizableText size="$9" zi={1} textAlign="center">
-          NEW{'\n'}EFFICIENCY{'\n'}RECORD
+          NEW{'\n'}
+          {activeMilestonePanel.tile}
+          {'\n'}RECORD
         </TSizableText>
         <Spacer />
-        <TSizableText size="$8" fontStyle="italic">
-          Size: {activeHighEfficiencyPanel}
-        </TSizableText>
-        <TSizableText size="$8" fontStyle="italic">
-          Efficiency: {activeHighEfficiencyValue}%
-        </TSizableText>
+        {activeMilestonePanel.efficiency != null && (
+          <TSizableText size="$8" fontStyle="italic">
+            Efficiency: {activeMilestonePanel.efficiency}%
+          </TSizableText>
+        )}
+        {activeMilestonePanel.time != null && (
+          <TSizableText size="$8" fontStyle="italic">
+            Best Time: {getMinutesAndSeconds(activeMilestonePanel.time)}
+          </TSizableText>
+        )}
       </YStack>
 
       <JoinLeaderboardButton />
@@ -55,7 +61,7 @@ export const HighEfficiencyPanel = observer(() => {
 
       <XStack w="100%" h={2} bg="$border" />
 
-      <TButton zi={1} onPress={() => actions$.closeActiveHighEfficiencyPanel()}>
+      <TButton zi={1} onPress={() => actions$.closeMilestonePanel()}>
         Continue Game
       </TButton>
     </PanelOrOverlayContainer>

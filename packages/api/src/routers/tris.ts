@@ -2,6 +2,9 @@ import { TRPCError } from '@trpc/server'
 import { createTRPCRouter, protectedProcedure, publicProcedure } from '../trpc'
 import { z } from 'zod'
 
+const DefaultLowScore = 100000
+const DefaultBestTime = 10000000000
+
 export const StatsSchema = z.object({
   gamesPlayed: z.number(),
   ballsDropped: z.number(),
@@ -18,6 +21,13 @@ export const StatsSchema = z.object({
   bestTime4096: z.number(),
   bestTime8192: z.number(),
 })
+const PartialStatsSchema = StatsSchema.partial({
+  timePlayed: true,
+
+  bestTime2048: true,
+  bestTime4096: true,
+  bestTime8192: true,
+})
 type Stats = z.infer<typeof StatsSchema>
 
 export const LeaderboardTypeSchema = z.union([
@@ -32,9 +42,19 @@ export const LeaderboardTypeSchema = z.union([
 ])
 
 const statsSelect =
-  'scoreHigh, scoreLow, efficiency2048, efficiency4096, efficiency8192, gamesPlayed, ballsDropped' as const
+  'scoreHigh, scoreLow, efficiency2048, efficiency4096, efficiency8192, bestTime2048, bestTime4096, bestTime8192, gamesPlayed, ballsDropped, timePlayed' as const
 
 export type LeaderboardType = z.infer<typeof LeaderboardTypeSchema>
+
+const dePartialStats = (stats: z.infer<typeof PartialStatsSchema>): Stats => {
+  return {
+    ...stats,
+    timePlayed: stats.timePlayed ?? 0,
+    bestTime2048: stats.bestTime2048 ?? DefaultBestTime,
+    bestTime4096: stats.bestTime4096 ?? DefaultBestTime,
+    bestTime8192: stats.bestTime8192 ?? DefaultBestTime,
+  }
+}
 
 const mergeStats = (a: Stats, b: Stats): Stats => {
   return {
@@ -49,9 +69,9 @@ const mergeStats = (a: Stats, b: Stats): Stats => {
     efficiency4096: Math.max(a.efficiency4096, b.efficiency4096),
     efficiency8192: Math.max(a.efficiency8192, b.efficiency8192),
 
-    bestTime2048: Math.max(a.bestTime2048, b.bestTime2048),
-    bestTime4096: Math.max(a.bestTime4096, b.bestTime4096),
-    bestTime8192: Math.max(a.bestTime8192, b.bestTime8192),
+    bestTime2048: Math.min(a.bestTime2048, b.bestTime2048),
+    bestTime4096: Math.min(a.bestTime4096, b.bestTime4096),
+    bestTime8192: Math.min(a.bestTime8192, b.bestTime8192),
   }
 }
 
@@ -80,13 +100,13 @@ export const trisRouter = createTRPCRouter({
         ballsDropped: 0,
         timePlayed: 0,
         scoreHigh: 0,
-        scoreLow: 100000,
+        scoreLow: DefaultLowScore,
         efficiency2048: 0,
         efficiency4096: 0,
         efficiency8192: 0,
-        bestTime2048: 0,
-        bestTime4096: 0,
-        bestTime8192: 0,
+        bestTime2048: DefaultBestTime,
+        bestTime4096: DefaultBestTime,
+        bestTime8192: DefaultBestTime,
       })
       .eq('id', session.user.id)
 
@@ -95,8 +115,9 @@ export const trisRouter = createTRPCRouter({
     }
   }),
   updateUserStats: protectedProcedure
-    .input(StatsSchema)
+    .input(PartialStatsSchema)
     .mutation(async ({ ctx: { supabase, session }, input }) => {
+      const stats = dePartialStats(input)
       const { data: existingStats, error: existingStatsError } = await supabase
         .from('users')
         .select('*')
@@ -110,7 +131,7 @@ export const trisRouter = createTRPCRouter({
 
       const { data, error } = await supabase
         .from('users')
-        .update(mergeStats(existingStats, input))
+        .update(mergeStats(existingStats, stats))
         .eq('id', session.user.id)
         .select(statsSelect)
         .single()
