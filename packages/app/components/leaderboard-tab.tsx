@@ -12,6 +12,7 @@ import { appState$ } from 'app/appState'
 import { getMinutesAndSeconds } from 'app/utils/time'
 
 const leaderboard$ = observable<LeaderboardType>('scoreHigh')
+
 const leaderboardTitle$ = computed(() => {
   switch (leaderboard$.get()) {
     case 'scoreHigh':
@@ -24,19 +25,53 @@ const leaderboardTitle$ = computed(() => {
       return '4096 EFFICIENCY'
     case 'efficiency8192':
       return '8192 EFFICIENCY'
+    case 'bestTime2048':
+      return '2048 TIME'
+    case 'bestTime4096':
+      return '4096 TIME'
+    case 'bestTime8192':
+      return '8192 TIME'
   }
 })
 
 const LeaderboardSelect = observer(() => {
   const scale = appState$.scale.get()
   const optionWidth = scale < 0 ? 100 : 70 * scale
+  const leaderboard = leaderboard$.get()
+
+  const milestone: '2048' | '4096' | '8192' | null =
+    leaderboard === 'efficiency2048' || leaderboard === 'bestTime2048'
+      ? '2048'
+      : leaderboard === 'efficiency4096' || leaderboard === 'bestTime4096'
+      ? '4096'
+      : leaderboard === 'efficiency8192' || leaderboard === 'bestTime8192'
+      ? '8192'
+      : null
+  const milestoneType: 'efficiency' | 'bestTime' | null =
+    leaderboard === 'efficiency2048' ||
+    leaderboard === 'efficiency4096' ||
+    leaderboard === 'efficiency8192'
+      ? 'efficiency'
+      : leaderboard === 'bestTime2048' ||
+        leaderboard === 'bestTime4096' ||
+        leaderboard === 'bestTime8192'
+      ? 'bestTime'
+      : null
+
+  const setMilestoneLeaderboard = (
+    milestone: '2048' | '4096' | '8192' | null,
+    milestoneType: 'efficiency' | 'bestTime' | null
+  ) => {
+    leaderboard$.set(`${milestoneType ?? 'efficiency'}${milestone ?? '2048'}`)
+  }
+
   return (
     <XStack w="100%" jc="center" gap={18 * scale}>
       <YStack ai="center">
         <TSizableText size="$3">Score:</TSizableText>
-        <XStack gap={8 * scale}>
+        <XStack gap={8 * scale} h={28 * 2 + 8} ai="center">
           <XStack
-            h="$3"
+            h={64}
             w={optionWidth}
             ai="center"
             jc="center"
@@ -45,7 +80,7 @@ const LeaderboardSelect = observer(() => {
             onPress={() => leaderboard$.set('scoreHigh')}
           >
             <Show if={leaderboard$.get() === 'scoreHigh'}>
-              <XStack fullscreen h="$3" bg={colors.tile['2048']} />
+              <XStack fullscreen h={64} bg={colors.tile['2048']} />
             </Show>
             <TSizableText
               zi={2}
@@ -55,7 +90,7 @@ const LeaderboardSelect = observer(() => {
             </TSizableText>
           </XStack>
           <XStack
-            h="$3"
+            h={64}
             w={optionWidth}
             ai="center"
             jc="center"
@@ -64,7 +99,7 @@ const LeaderboardSelect = observer(() => {
             onPress={() => leaderboard$.set('scoreLow')}
           >
             <Show if={leaderboard$.get() === 'scoreLow'}>
-              <XStack fullscreen h="$3" bg={colors.tile['4096']} />
+              <XStack fullscreen h={64} bg={colors.tile['4096']} />
             </Show>
             <TSizableText
               zi={2}
@@ -80,60 +115,95 @@ const LeaderboardSelect = observer(() => {
         <TSizableText size="$3">Efficiency:</TSizableText>
         <XStack gap={8 * scale}>
           <XStack
-            h="$3"
+            h="$2"
             w={optionWidth}
             ai="center"
             jc="center"
             pos="relative"
             cursor="pointer"
-            onPress={() => leaderboard$.set('efficiency2048')}
+            onPress={() => setMilestoneLeaderboard('2048', milestoneType)}
           >
-            <Show if={leaderboard$.get() === 'efficiency2048'}>
-              <XStack fullscreen h="$3" bg={colors.tile[64]} />
+            <Show if={milestone === '2048'}>
+              <XStack fullscreen h="$2" bg={colors.tile[64]} />
             </Show>
-            <TSizableText
-              zi={2}
-              color={leaderboard$.get() === 'efficiency2048' ? colors.background : colors.text}
-            >
+            <TSizableText zi={2} color={milestone === '2048' ? colors.background : colors.text}>
               2048
             </TSizableText>
           </XStack>
           <XStack
-            h="$3"
+            h="$2"
             w={optionWidth}
             ai="center"
             jc="center"
             pos="relative"
             cursor="pointer"
-            onPress={() => leaderboard$.set('efficiency4096')}
+            onPress={() => setMilestoneLeaderboard('4096', milestoneType)}
           >
-            <Show if={leaderboard$.get() === 'efficiency4096'}>
-              <XStack fullscreen h="$3" bg={colors.tile[32]} />
+            <Show if={milestone === '4096'}>
+              <XStack fullscreen h="$2" bg={colors.tile[32]} />
             </Show>
-            <TSizableText
-              zi={2}
-              color={leaderboard$.get() === 'efficiency4096' ? colors.background : colors.text}
-            >
+            <TSizableText zi={2} color={milestone === '4096' ? colors.background : colors.text}>
               4096
             </TSizableText>
           </XStack>
           <XStack
-            h="$3"
+            h="$2"
             w={optionWidth}
             ai="center"
             jc="center"
             pos="relative"
             cursor="pointer"
-            onPress={() => leaderboard$.set('efficiency8192')}
+            onPress={() => setMilestoneLeaderboard('8192', milestoneType)}
           >
-            <Show if={leaderboard$.get() === 'efficiency8192'}>
-              <XStack fullscreen h="$3" bg={colors.tile[16]} />
+            <Show if={milestone === '8192'}>
+              <XStack fullscreen h="$2" bg={colors.tile[16]} />
+            </Show>
+            <TSizableText zi={2} color={milestone === '8192' ? colors.background : colors.text}>
+              8192
+            </TSizableText>
+          </XStack>
+        </XStack>
+        <XStack gap={8 * scale} mt={4}>
+          <XStack
+            h="$2"
+            w={optionWidth * 2 + 8 * scale}
+            ai="center"
+            jc="center"
+            pos="relative"
+            cursor="pointer"
+            onPress={() => {
+              setMilestoneLeaderboard(milestone, 'efficiency')
+            }}
+          >
+            <Show if={milestoneType === 'efficiency'}>
+              <XStack fullscreen h="$2" bg={colors.tile[64]} />
             </Show>
             <TSizableText
               zi={2}
-              color={leaderboard$.get() === 'efficiency8192' ? colors.background : colors.text}
+              color={milestoneType === 'efficiency' ? colors.background : colors.text}
             >
-              8192
+              Efficiency
+            </TSizableText>
+          </XStack>
+          <XStack
+            h="$2"
+            w={optionWidth}
+            ai="center"
+            jc="center"
+            pos="relative"
+            cursor="pointer"
+            onPress={() => {
+              setMilestoneLeaderboard(milestone, 'bestTime')
+            }}
+          >
+            <Show if={milestoneType === 'bestTime'}>
+              <XStack fullscreen h="$2" bg={colors.tile[16]} />
+            </Show>
+            <TSizableText
+              zi={2}
+              color={milestoneType === 'bestTime' ? colors.background : colors.text}
+            >
+              Time
             </TSizableText>
           </XStack>
         </XStack>
@@ -194,6 +264,9 @@ type LeaderboardQueryData =
   | RouterOutputs['tris']['getEfficiency2048Leaderboard']
   | RouterOutputs['tris']['getEfficiency4096Leaderboard']
   | RouterOutputs['tris']['getEfficiency8192Leaderboard']
+  | RouterOutputs['tris']['getBestTime2048Leaderboard']
+  | RouterOutputs['tris']['getBestTime4096Leaderboard']
+  | RouterOutputs['tris']['getBestTime8192Leaderboard']
 
 const Leaderboard = observer(() => {
   const leaderboardType = leaderboard$.get()
@@ -208,6 +281,12 @@ const Leaderboard = observer(() => {
       return <Efficiency4096Leaderboard />
     case 'efficiency8192':
       return <Efficiency8192Leaderboard />
+    case 'bestTime2048':
+      return <BestTime2048Leaderboard />
+    case 'bestTime4096':
+      return <BestTime4096Leaderboard />
+    case 'bestTime8192':
+      return <BestTime8192Leaderboard />
   }
 })
 
@@ -229,6 +308,18 @@ const Efficiency4096Leaderboard = observer(() => {
 })
 const Efficiency8192Leaderboard = observer(() => {
   const { data, error, isLoading } = api.tris.getEfficiency8192Leaderboard.useQuery()
+  return <Table data={data} error={error?.message} isLoading={isLoading} />
+})
+const BestTime2048Leaderboard = observer(() => {
+  const { data, error, isLoading } = api.tris.getBestTime2048Leaderboard.useQuery()
+  return <Table data={data} error={error?.message} isLoading={isLoading} />
+})
+const BestTime4096Leaderboard = observer(() => {
+  const { data, error, isLoading } = api.tris.getBestTime4096Leaderboard.useQuery()
+  return <Table data={data} error={error?.message} isLoading={isLoading} />
+})
+const BestTime8192Leaderboard = observer(() => {
+  const { data, error, isLoading } = api.tris.getBestTime8192Leaderboard.useQuery()
   return <Table data={data} error={error?.message} isLoading={isLoading} />
 })
 
@@ -253,6 +344,22 @@ const filterValue = (type: LeaderboardType, value: number): boolean => {
       return value !== DefaultLowScore
   }
 }
+const typeDataColumn = (type: LeaderboardType): string => {
+  switch (type) {
+    case 'bestTime2048':
+      return 'besttime2048'
+    case 'bestTime4096':
+      return 'besttime4096'
+    case 'bestTime8192':
+      return 'besttime8192'
+    case 'scoreHigh':
+    case 'efficiency2048':
+    case 'efficiency4096':
+    case 'efficiency8192':
+    case 'scoreLow':
+      return type
+  }
+}
 const extractRowData = (type: LeaderboardType, row: LeaderboardQueryData[0]): RowData => {
   return {
     id: row.id,
@@ -262,7 +369,7 @@ const extractRowData = (type: LeaderboardType, row: LeaderboardQueryData[0]): Ro
   }
 }
 const extractRowValue = (type: LeaderboardType, row: LeaderboardQueryData[0]): string => {
-  const value = (row as any)[type] as number
+  const value = (row as any)[typeDataColumn(type)] as number
   return rowValueString(type, value)
 }
 const rowValueString = (type: LeaderboardType, value: number): string => {
