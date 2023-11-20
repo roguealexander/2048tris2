@@ -6,6 +6,8 @@ export type Tab = '2048tris' | 'how-to-play' | 'leaderboard' | 'user' | 'debug'
 export type LayoutDimension = 'vertical' | 'horizontal'
 
 type AppState = {
+  onboarded: boolean
+
   tab: Tab
   backTab: Tab | null
   layoutDimension: LayoutDimension
@@ -25,6 +27,7 @@ type AppState = {
 }
 
 export const appState$ = observable<AppState>({
+  onboarded: false,
   tab: '2048tris',
   backTab: null,
   layoutDimension: 'horizontal',

@@ -10,6 +10,7 @@ import { observable } from '@legendapp/state'
 import { observer } from '@legendapp/state/react'
 import { stats$ } from 'app/statsState'
 import { api } from 'app/utils/api'
+import { appState$ } from 'app/appState'
 
 const SignInSchema = z.object({
   name: formFields.text.min(4).describe('Name // Scoreboard name'),
@@ -59,6 +60,7 @@ export const AuthComponent = observer(() => {
       return
     }
 
+    appState$.onboarded.set(true)
     await persistExistingStats()
   }
 
@@ -78,6 +80,7 @@ export const AuthComponent = observer(() => {
       return
     }
 
+    appState$.onboarded.set(true)
     await persistExistingStats()
   }
 

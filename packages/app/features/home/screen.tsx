@@ -25,6 +25,8 @@ import { useSafeAreaFrame } from 'app/utils/useSafeAreaFrame'
 import { batch } from '@legendapp/state'
 import { DebugTab } from 'app/components/debug-tab'
 import { Interstitial } from 'app/components/interstitial'
+import { OnboardingFlow } from 'app/components/onboarding-flow'
+import { TextBreak } from 'app/components/TextBreak'
 
 const ActiveLeftPanel = observer(() => {
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
@@ -399,7 +401,7 @@ export const HappyBirthday = () => {
       opacity={0.8}
     >
       HAPPY BIRTHDAY
-      {'\n'}
+      <TextBreak />
       {birthday.toUpperCase()}!!1!
     </TSizableText>
   )
@@ -441,6 +443,9 @@ export const HomeScreen = observer(() => {
             <UserTab />
             <DebugTab />
             {/* <HappyBirthday /> */}
+
+            {/* ONBOARDING */}
+            <OnboardingFlow />
           </Container>
         )}
       </AnimatePresence>

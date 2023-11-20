@@ -34,7 +34,7 @@ const leaderboardTitle$ = computed(() => {
   }
 })
 
-const LeaderboardSelect = observer(() => {
+export const LeaderboardSelect = observer(() => {
   const scale = appState$.scale.get()
   const optionWidth = scale < 0 ? 100 : 70 * scale
   const leaderboard = leaderboard$.get()
@@ -268,7 +268,7 @@ type LeaderboardQueryData =
   | RouterOutputs['tris']['getBestTime4096Leaderboard']
   | RouterOutputs['tris']['getBestTime8192Leaderboard']
 
-const Leaderboard = observer(() => {
+export const Leaderboard = observer(() => {
   const leaderboardType = leaderboard$.get()
   switch (leaderboardType) {
     case 'scoreHigh':

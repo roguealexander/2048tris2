@@ -10898,6 +10898,7 @@ __metadata:
     react-native-google-mobile-ads: "npm:^12.4.0"
     react-native-permissions: "npm:^3.10.1"
     react-native-safe-area-context: "npm:4.6.3"
+    react-native-svg: "npm:13.9.0"
     react-native-url-polyfill: "npm:^2.0.0"
     react-native-use-sound: "npm:^1.2.2"
     react-native-webassembly: "npm:^0.3.3"

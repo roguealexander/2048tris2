@@ -8,6 +8,7 @@ import { appState$ } from 'app/appState'
 import { useUser } from 'app/utils/useUser'
 import { PanelOrOverlayContainer } from './panel-or-overlay-container'
 import { batch } from '@legendapp/state'
+import { TextBreak } from './TextBreak'
 
 const TopOutTitle = observer(
   ({ isHighScore, isLowScore }: { isHighScore: boolean; isLowScore: boolean }) => {
@@ -15,7 +16,7 @@ const TopOutTitle = observer(
       return (
         <>
           NEW HIGH
-          {'\n'}
+          <TextBreak />
           SCORE
         </>
       )
@@ -23,7 +24,7 @@ const TopOutTitle = observer(
       return (
         <>
           NEW LOW
-          {'\n'}
+          <TextBreak />
           SCORE
         </>
       )

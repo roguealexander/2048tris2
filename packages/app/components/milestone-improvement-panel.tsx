@@ -7,6 +7,7 @@ import { appState$ } from 'app/appState'
 import { PanelOrOverlayContainer } from './panel-or-overlay-container'
 import { batch } from '@legendapp/state'
 import { getMinutesAndSeconds } from 'app/utils/time'
+import { TextBreak } from './TextBreak'
 
 const JoinLeaderboardButton = observer(() => {
   const { user } = useUser()
@@ -34,9 +35,11 @@ export const MilestoneImprovementPanel = observer(() => {
     <PanelOrOverlayContainer>
       <YStack ai="center">
         <TSizableText size="$9" zi={1} textAlign="center">
-          NEW{'\n'}
+          NEW
+          <TextBreak />
           {activeMilestonePanel.tile}
-          {'\n'}RECORD
+          <TextBreak />
+          RECORD
         </TSizableText>
         <Spacer />
         {activeMilestonePanel.efficiency != null && (

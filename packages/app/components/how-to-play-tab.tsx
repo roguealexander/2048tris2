@@ -13,12 +13,14 @@ import Animated, {
   SharedValue,
   runOnJS,
 } from 'react-native-reanimated'
+import { LinearGradient } from '@tamagui/linear-gradient'
 import { getQueueTile } from 'app/state'
 import { BaseHoldListener } from './hold-listener'
 import { ArrowDownLeft, ArrowLeftRight, Merge } from '@tamagui/lucide-icons'
 import { TabContainer } from './tab-container'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import { appState$ } from 'app/appState'
+import { TextBreak } from './TextBreak'
 
 // Rule drop state
 const activeTile$ = observable<TileSize>('4')
@@ -55,7 +57,7 @@ const TileDropPositioner = observer(
   }
 )
 
-const TilePositionDetector = observer(
+export const TilePositionDetector = observer(
   ({
     mouseX,
     release,
@@ -95,9 +97,31 @@ const TilePositionDetector = observer(
   }
 )
 
-const DropExample = observer(() => {
-  const scale = appState$.scale.get()
+export const DropExampleText = () => {
   const isTouchDevice = useIsTouchDevice()
+
+  return (
+    <TSizableText>
+      {isTouchDevice ? (
+        <>
+          <TSizableText fontWeight="bold">Press</TSizableText> and{' '}
+          <TSizableText fontWeight="bold">Drag</TSizableText> to position,{' '}
+          <TSizableText fontWeight="bold">Release</TSizableText> to drop.
+          <TextBreak />- or -<TextBreak />
+          <TSizableText fontWeight="bold">Tap</TSizableText> to both position and drop.
+        </>
+      ) : (
+        <>
+          <TSizableText fontWeight="bold">Hover</TSizableText> to position,{' '}
+          <TSizableText fontWeight="bold">Click</TSizableText> to drop
+        </>
+      )}
+    </TSizableText>
+  )
+}
+
+export const DropExample = observer(() => {
+  const scale = appState$.scale.get()
   const dropProgress = useSharedValue(1)
   const releaseX = useSharedValue(0)
 
@@ -129,24 +153,8 @@ const DropExample = observer(() => {
 
   return (
     <>
-      <TSizableText>
-        {isTouchDevice ? (
-          <>
-            <TSizableText fontWeight="bold">Press</TSizableText> and{' '}
-            <TSizableText fontWeight="bold">Drag</TSizableText> to position,{' '}
-            <TSizableText fontWeight="bold">Release</TSizableText> to drop.
-            {'\n'}- or -{'\n'}
-            <TSizableText fontWeight="bold">Tap</TSizableText> to both position and drop.
-          </>
-        ) : (
-          <>
-            <TSizableText fontWeight="bold">Hover</TSizableText> to position,{' '}
-            <TSizableText fontWeight="bold">Click</TSizableText> to drop
-          </>
-        )}
-      </TSizableText>
       <TilePositionDetector mouseX={mouseX} release={releaseBall}>
-        <YStack w={450 * scale} h={128}>
+        <YStack w={450 * scale} h={192}>
           <Animated.View
             style={[
               {
@@ -164,13 +172,23 @@ const DropExample = observer(() => {
             <Tile size={releasedTile$} />
           </Animated.View>
           <XStack
+            pos="absolute"
+            t={64}
             w="100%"
-            h="50%"
-            mt="auto"
+            h={128}
             bg="$playarea"
             blw={4 * scale}
             brw={4 * scale}
             boc="$border"
+          />
+          <LinearGradient
+            pos="absolute"
+            t={64}
+            w="100%"
+            h={128}
+            colors={['transparent', '$background']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
           />
           <TileDropPositioner dropX={dropX}>
             <Tile size={activeTile$} />
@@ -185,7 +203,24 @@ const DropExample = observer(() => {
 const heldTile = observable<TileSize>('16')
 const holdPressed = observable(false)
 
-const HoldExample = observer(() => {
+export const HoldExampleText = observer(() => {
+  const isTouchDevice = useIsTouchDevice()
+
+  return (
+    <TSizableText>
+      <TSizableText fontWeight="bold">Click</TSizableText> the hold area
+      {!isTouchDevice && (
+        <>
+          <TextBreak />- or -<TextBreak />
+          Press <TSizableText fontWeight="bold">Space</TSizableText>
+        </>
+      )}{' '}
+      to put a tile in the hold
+    </TSizableText>
+  )
+})
+
+export const HoldExample = observer(() => {
   const scale = appState$.scale.get()
   const isTouchDevice = useIsTouchDevice()
 
@@ -206,16 +241,6 @@ const HoldExample = observer(() => {
 
   return (
     <>
-      <TSizableText>
-        <TSizableText fontWeight="bold">Click</TSizableText> the hold area
-        {!isTouchDevice && (
-          <>
-            {'\n'}- or -{'\n'}
-            Press <TSizableText fontWeight="bold">Space</TSizableText>
-          </>
-        )}{' '}
-        to put a tile in the hold
-      </TSizableText>
       <XStack ai="center" jc="space-between" pt="$4" w="100%">
         <BaseHoldListener onHold={onHold} onHoldDown={onHoldDown} />
         <XStack
@@ -266,11 +291,14 @@ const HoldExample = observer(() => {
   )
 })
 
-const CombineExample = observer(() => {
+const CombineExampleText = () => {
+  return <TSizableText>Combine tiles</TSizableText>
+}
+
+export const CombineExample = observer(() => {
   const scale = appState$.scale.get()
   return (
     <>
-      <TSizableText>Combine tiles</TSizableText>
       <XStack ai="center" w="100%" jc="space-between">
         <YStack h={250 * scale} w={125 * scale} gap={8 * scale} jc="space-around" ai="center">
           <Tile size={activeTile$} />
@@ -292,12 +320,15 @@ export const HowToPlayTab = observer(() => {
     <TabContainer tab="how-to-play">
       <TSizableText size="$5">HOW TO PLAY:</TSizableText>
       <Spacer />
+      <DropExampleText />
       <DropExample />
       <Spacer />
       <Spacer />
+      <HoldExampleText />
       <HoldExample />
       <Spacer />
       <Spacer />
+      <CombineExampleText />
       <CombineExample />
     </TabContainer>
   )
