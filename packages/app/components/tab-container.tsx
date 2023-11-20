@@ -16,7 +16,7 @@ export const TabContainer = observer(({ tab, children }: { tab: Tab; children: R
       bg="$background"
       zi={5}
       height={frame.height}
-      w={appState$.layoutDimension.get() === 'horizontal' ? 906 : frame.width}
+      w={appState$.layoutDimension.get() === 'horizontal' ? '100%' : frame.width}
       contentContainerStyle={{
         alignSelf: 'center',
         alignItems: 'flex-start',

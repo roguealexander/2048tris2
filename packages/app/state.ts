@@ -8,6 +8,7 @@ type GameState = {
   toppedOut: boolean
   resetting: boolean
   resetCount: number
+  gameDuration: number
 
   activeTile: TileSize
   heldTile: TileSize | null
@@ -63,6 +64,7 @@ const getInitGameState = (): Omit<GameState, 'started' | 'resetCount' | 'holdSha
   resetting: false,
   activeTile: getQueueTile(),
   heldTile: null,
+  gameDuration: 0,
   queue: constructInitialQueue(),
   holdAvailable: true,
   ballsDropped: 0,
@@ -262,6 +264,9 @@ export const actions$ = observable<GameActions>({
 
       // Update games played
       stats$.gamesPlayed.set((count) => count + 1)
+
+      // Update time played
+      stats$.timePlayed.set((time) => time + state$.gameDuration.peek())
 
       // Update balls dropped
       stats$.ballsDropped.set((ballsDropped) => ballsDropped + state$.ballsDropped.peek())

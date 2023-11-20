@@ -14,7 +14,7 @@ export const ActiveTilesHistogram = observer(
     const scale = appState$.scale.get()
     return (
       <>
-        <TSizableText>Histogram:</TSizableText>
+        <TSizableText size="$2">Histogram:</TSizableText>
         <YStack w="100%" ai="center" jc="flex-start">
           {TileList.map((size) => {
             return (

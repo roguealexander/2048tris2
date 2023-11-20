@@ -3,7 +3,7 @@ import { appState$ } from 'app/appState'
 import { PanelOrOverlayContainer } from './panel-or-overlay-container'
 import { TButton, TSizableText, XStack, YStack } from '@my/ui'
 import { ActiveTilesHistogram } from './active-tile-histogram'
-import { Score, Efficiency } from './stats'
+import { Score, Milestone } from './stats'
 
 export const StatsPanel = observer(() => {
   if (!appState$.statsPanelOpen.get()) return null
@@ -20,7 +20,7 @@ export const StatsPanel = observer(() => {
         <YStack w="$12" gap="$6" ai="flex-start">
           <Score />
           <XStack w="100%" h={2} bg="$border" />
-          <Efficiency />
+          <Milestone />
         </YStack>
         <YStack w="$12" gap="$2" ai="flex-start">
           <ActiveTilesHistogram />

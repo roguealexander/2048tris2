@@ -12,6 +12,9 @@ export interface Database {
       users: {
         Row: {
           ballsDropped: number
+          bestTime2048: number
+          bestTime4096: number
+          bestTime8192: number
           efficiency2048: number
           efficiency4096: number
           efficiency8192: number
@@ -21,9 +24,13 @@ export interface Database {
           name: string
           scoreHigh: number
           scoreLow: number
+          timePlayed: number
         }
         Insert: {
           ballsDropped?: number
+          bestTime2048?: number
+          bestTime4096?: number
+          bestTime8192?: number
           efficiency2048?: number
           efficiency4096?: number
           efficiency8192?: number
@@ -33,9 +40,13 @@ export interface Database {
           name: string
           scoreHigh?: number
           scoreLow?: number
+          timePlayed?: number
         }
         Update: {
           ballsDropped?: number
+          bestTime2048?: number
+          bestTime4096?: number
+          bestTime8192?: number
           efficiency2048?: number
           efficiency4096?: number
           efficiency8192?: number
@@ -45,11 +56,13 @@ export interface Database {
           name?: string
           scoreHigh?: number
           scoreLow?: number
+          timePlayed?: number
         }
         Relationships: [
           {
             foreignKeyName: "users_id_fkey"
             columns: ["id"]
+            isOneToOne: true
             referencedRelation: "users"
             referencedColumns: ["id"]
           }
@@ -60,6 +73,33 @@ export interface Database {
       [_ in never]: never
     }
     Functions: {
+      get_best_time_2048_leaderboard: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+          besttime2048: number
+          rank: number
+        }[]
+      }
+      get_best_time_4096_leaderboard: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+          besttime4096: number
+          rank: number
+        }[]
+      }
+      get_best_time_8192_leaderboard: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          id: string
+          name: string
+          besttime8192: number
+          rank: number
+        }[]
+      }
       get_efficiency_2048_leaderboard: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -102,6 +142,39 @@ export interface Database {
           id: string
           name: string
           scoreLow: number
+          rank: number
+        }[]
+      }
+      get_user_best_time_2048_leaderboard: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          id: string
+          name: string
+          besttime2048: number
+          rank: number
+        }[]
+      }
+      get_user_best_time_4096_leaderboard: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          id: string
+          name: string
+          besttime4096: number
+          rank: number
+        }[]
+      }
+      get_user_best_time_8192_leaderboard: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          id: string
+          name: string
+          besttime8192: number
           rank: number
         }[]
       }

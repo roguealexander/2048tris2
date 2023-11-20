@@ -51,6 +51,7 @@ export const b2dTiles$ = observable<Array<{ id: number; size: TileSize }>>([])
 const PhysicsSystem = (world: b2World, deltaTime: number) => {
   if (state$.gamePhysicsPaused.peek()) return
 
+  state$.gameDuration.set((duration) => duration + deltaTime)
   const iterations = Math.min(4, Math.round(deltaTime / (1000 / 120)))
   for (let i = 0; i < iterations; i++) {
     world.Step(

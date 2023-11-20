@@ -2,7 +2,7 @@ import { observer } from '@legendapp/state/react'
 import { TButton, TSizableText, XStack, YStack } from '@my/ui'
 import { state$, actions$ } from 'app/state'
 import { ActiveTilesHistogram } from './active-tile-histogram'
-import { Score, Efficiency } from './stats'
+import { Score, Milestone } from './stats'
 import { stats$ } from 'app/statsState'
 import { appState$ } from 'app/appState'
 import { useUser } from 'app/utils/useUser'
@@ -88,7 +88,7 @@ export const TopOutPanel = observer(() => {
         <YStack w="$12" gap="$6" ai="flex-start">
           <Score />
           <XStack w="100%" h={2} bg="$border" />
-          <Efficiency />
+          <Milestone />
         </YStack>
         <YStack w="$12" gap="$2" ai="flex-start">
           <ActiveTilesHistogram noTargetEfficiency />

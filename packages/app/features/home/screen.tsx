@@ -9,7 +9,7 @@ import { LeaderboardTab } from 'app/components/leaderboard-tab'
 import { NewGameButton } from 'app/components/new-game-button'
 import { Queue } from 'app/components/queue'
 import { HowToPlayTab } from 'app/components/how-to-play-tab'
-import { Efficiency, Score } from 'app/components/stats'
+import { Milestone, Score } from 'app/components/stats'
 import { StatsPersistor } from 'app/components/stats-persistor'
 import { TopOutPanel } from 'app/components/top-out-panel'
 import { UserTab } from 'app/components/user-tab'
@@ -41,7 +41,7 @@ const ActiveLeftPanel = observer(() => {
       <XStack w="100%" h={2} bg="$border" />
       <Score />
       <XStack w="100%" h={2} bg="$border" />
-      <Efficiency />
+      <Milestone />
       <XStack w="100%" h={2} bg="$border" />
       <ActiveTilesHistogram />
     </YStack>

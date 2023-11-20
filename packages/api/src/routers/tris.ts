@@ -5,6 +5,7 @@ import { z } from 'zod'
 export const StatsSchema = z.object({
   gamesPlayed: z.number(),
   ballsDropped: z.number(),
+  timePlayed: z.number(),
 
   scoreHigh: z.number(),
   scoreLow: z.number(),
@@ -12,6 +13,10 @@ export const StatsSchema = z.object({
   efficiency2048: z.number(),
   efficiency4096: z.number(),
   efficiency8192: z.number(),
+
+  bestTime2048: z.number(),
+  bestTime4096: z.number(),
+  bestTime8192: z.number(),
 })
 type Stats = z.infer<typeof StatsSchema>
 
@@ -21,6 +26,9 @@ export const LeaderboardTypeSchema = z.union([
   z.literal('efficiency2048'),
   z.literal('efficiency4096'),
   z.literal('efficiency8192'),
+  z.literal('bestTime2048'),
+  z.literal('bestTime4096'),
+  z.literal('bestTime8192'),
 ])
 
 const statsSelect =
@@ -32,6 +40,7 @@ const mergeStats = (a: Stats, b: Stats): Stats => {
   return {
     gamesPlayed: Math.max(a.gamesPlayed, b.gamesPlayed),
     ballsDropped: Math.max(a.ballsDropped, b.ballsDropped),
+    timePlayed: Math.max(a.timePlayed, b.timePlayed),
 
     scoreHigh: Math.max(a.scoreHigh, b.scoreHigh),
     scoreLow: Math.min(a.scoreLow, b.scoreLow),
@@ -39,6 +48,10 @@ const mergeStats = (a: Stats, b: Stats): Stats => {
     efficiency2048: Math.max(a.efficiency2048, b.efficiency2048),
     efficiency4096: Math.max(a.efficiency4096, b.efficiency4096),
     efficiency8192: Math.max(a.efficiency8192, b.efficiency8192),
+
+    bestTime2048: Math.max(a.bestTime2048, b.bestTime2048),
+    bestTime4096: Math.max(a.bestTime4096, b.bestTime4096),
+    bestTime8192: Math.max(a.bestTime8192, b.bestTime8192),
   }
 }
 
@@ -65,11 +78,15 @@ export const trisRouter = createTRPCRouter({
       .update({
         gamesPlayed: 0,
         ballsDropped: 0,
+        timePlayed: 0,
         scoreHigh: 0,
         scoreLow: 100000,
         efficiency2048: 0,
         efficiency4096: 0,
         efficiency8192: 0,
+        bestTime2048: 0,
+        bestTime4096: 0,
+        bestTime8192: 0,
       })
       .eq('id', session.user.id)
 
@@ -153,13 +170,30 @@ export const trisRouter = createTRPCRouter({
     }
     return data
   }),
+  getBestTime2048Leaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
+    const { data, error } = await supabase.rpc('get_best_time_2048_leaderboard')
+    if (error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    }
+    return data
+  }),
+  getBestTime4096Leaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
+    const { data, error } = await supabase.rpc('get_best_time_4096_leaderboard')
+    if (error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    }
+    return data
+  }),
+  getBestTime8192Leaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
+    const { data, error } = await supabase.rpc('get_best_time_8192_leaderboard')
+    if (error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
+    }
+    return data
+  }),
   getUserScoreHighRank: protectedProcedure.query(async ({ ctx: { supabase, session } }) => {
     const { data, error } = await supabase.rpc('get_user_high_score_leaderboard', {
       user_id: session.user.id,
-    })
-    console.log({
-      data,
-      error,
     })
     if (error != null) {
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
@@ -176,12 +210,18 @@ export const trisRouter = createTRPCRouter({
       { data: efficiency2048Data, error: efficiency2048Error },
       { data: efficiency4096Data, error: efficiency4096Error },
       { data: efficiency8192Data, error: efficiency8192Error },
+      { data: bestTime2048Data, error: bestTime2048Error },
+      { data: bestTime4096Data, error: bestTime4096Error },
+      { data: bestTime8192Data, error: bestTime8192Error },
     ] = await Promise.all([
       supabase.rpc('get_user_high_score_leaderboard', { user_id }).limit(1).single(),
       supabase.rpc('get_user_low_score_leaderboard', { user_id }).limit(1).single(),
       supabase.rpc('get_user_efficiency_2048_leaderboard', { user_id }).limit(1).single(),
       supabase.rpc('get_user_efficiency_4096_leaderboard', { user_id }).limit(1).single(),
       supabase.rpc('get_user_efficiency_8192_leaderboard', { user_id }).limit(1).single(),
+      supabase.rpc('get_user_best_time_2048_leaderboard', { user_id }).limit(1).single(),
+      supabase.rpc('get_user_best_time_4096_leaderboard', { user_id }).limit(1).single(),
+      supabase.rpc('get_user_best_time_8192_leaderboard', { user_id }).limit(1).single(),
     ])
 
     if (highScoreError != null) {
@@ -199,6 +239,15 @@ export const trisRouter = createTRPCRouter({
     if (efficiency8192Error != null) {
       throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: efficiency8192Error.message })
     }
+    if (bestTime2048Error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: bestTime2048Error.message })
+    }
+    if (bestTime4096Error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: bestTime4096Error.message })
+    }
+    if (bestTime8192Error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: bestTime8192Error.message })
+    }
 
     return {
       scoreHigh: highScoreData,
@@ -206,6 +255,9 @@ export const trisRouter = createTRPCRouter({
       efficiency2048: efficiency2048Data,
       efficiency4096: efficiency4096Data,
       efficiency8192: efficiency8192Data,
+      bestTime2048: bestTime2048Data,
+      bestTime4096: bestTime4096Data,
+      bestTime8192: bestTime8192Data,
     }
   }),
 })
