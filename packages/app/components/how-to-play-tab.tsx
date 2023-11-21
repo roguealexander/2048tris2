@@ -2,6 +2,7 @@ import { observer } from '@legendapp/state/react'
 import { Spacer, TSizableText, XStack, YStack, useIsTouchDevice } from '@my/ui'
 import { TileSize } from 'app/types'
 import { Tile } from './tile'
+import chroma from 'chroma-js'
 import { computed, observable } from '@legendapp/state'
 import { ReactNode } from 'react'
 import { getMergedTileSize, getTileRadius } from 'app/tiles'
@@ -21,6 +22,7 @@ import { TabContainer } from './tab-container'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler'
 import { appState$ } from 'app/appState'
 import { TextBreak } from './TextBreak'
+import { colors } from 'app/colors'
 
 // Rule drop state
 const activeTile$ = observable<TileSize>('4')
@@ -186,7 +188,7 @@ export const DropExample = observer(() => {
             t={64}
             w="100%"
             h={128}
-            colors={['transparent', '$background']}
+            colors={[chroma(colors.background).alpha(0).css(), colors.background]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
           />

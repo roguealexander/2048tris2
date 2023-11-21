@@ -12,6 +12,6 @@ export const TButton = styled(Button, {
     backgroundColor: '$border',
   },
   focusStyle: {
-    backgroundColor: '$border',
+    backgroundColor: '$btn',
   },
 })

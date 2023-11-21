@@ -38,6 +38,7 @@
     "@vonovak/react-native-theme-control": "^5.0.1",
     "base64-arraybuffer": "^1.0.2",
     "burnt": "^0.12.1",
+    "chroma-js": "^2.4.2",
     "expo-audio-hooks": "^1.0.3",
     "expo-constants": "~14.4.2",
     "expo-haptics": "~12.4.0",
@@ -66,6 +67,7 @@
     "zod": "^3.22.2"
   },
   "devDependencies": {
+    "@types/chroma-js": "^2",
     "@types/lodash": "^4",
     "@types/react": "^18.0.27",
     "@types/text-encoding": "^0",

@@ -85,7 +85,7 @@ export const AuthComponent = observer(() => {
   }
 
   return (
-    <XStack bw={4} f={1} w="100%" boc="$border">
+    <XStack bw={4} w="100%" boc="$border">
       <FormProvider {...form}>
         <SchemaForm
           form={form}
@@ -106,7 +106,7 @@ export const AuthComponent = observer(() => {
                 <SubmitButton onPress={() => submit()} w={150}>
                   Sign {signingIn ? 'In' : 'Up'}
                 </SubmitButton>
-                <TSizableText size="$1">
+                <TSizableText size="$1" mt="$-2">
                   {signingIn ? 'Dont have an account? ' : 'Already have an account? '}
                   <TSizableText
                     cur="pointer"
@@ -125,8 +125,8 @@ export const AuthComponent = observer(() => {
         >
           {(fields) => (
             <>
-              <YStack gap="$3">
-                <H2 mb="$-4" color="$text">
+              <YStack gap="$2">
+                <H2 mb="$-3" color="$text">
                   Sign {signingIn ? 'In' : 'Up'}
                 </H2>
                 <TSizableText>to join the leaderboards</TSizableText>

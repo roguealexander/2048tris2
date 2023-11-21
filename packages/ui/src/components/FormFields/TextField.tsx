@@ -19,7 +19,7 @@ export const TextField = (props: Pick<InputProps, 'size' | 'autoFocus' | 'secure
     <Theme name={error ? 'red' : themeName} forceClassName>
       <Fieldset>
         {!!label && (
-          <Label theme="alt1" size={props.size || '$3'} htmlFor={id} color="$text">
+          <Label theme="alt1" size={props.size || '$3'} htmlFor={id} color="$text" lineHeight={24}>
             {label} {isOptional && `(Optional)`}
           </Label>
         )}
