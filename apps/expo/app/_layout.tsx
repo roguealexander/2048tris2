@@ -5,7 +5,7 @@ import { supabase } from 'app/utils/supabase/client.native'
 import { useFonts } from 'expo-font'
 import { SplashScreen, Stack, useSegments } from 'expo-router'
 import React, { useCallback, useEffect, useState } from 'react'
-import { SafeAreaView, StyleSheet, Text, View } from 'react-native'
+import { KeyboardAvoidingView, SafeAreaView, StyleSheet, Text, View } from 'react-native'
 import { connectToDevTools } from 'react-devtools-core'
 import { colors } from 'app/colors'
 
