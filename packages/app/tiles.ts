@@ -156,11 +156,6 @@ export const getTileDensityLog = () => {
   const densities = TileList.map(
     (tile) => tiles[tile].mass / (tiles[tile].radius * tiles[tile].radius * Math.PI)
   )
-  console.log({
-    areas,
-    masses,
-    densities,
-  })
 }
 
 export const getTileData = (size: TileSize | null): TileData | null => {

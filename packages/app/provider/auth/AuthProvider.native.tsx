@@ -17,7 +17,7 @@ export const AuthProvider = ({ children, initialSession }: AuthProviderProps) =>
   const [session, setSession] = useState<Session | null>(initialSession || null)
   const [error, setError] = useState<AuthError | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  // useProtectedRoute(session?.user ?? null)
+
   useEffect(() => {
     setIsLoading(true)
     supabase.auth
@@ -28,6 +28,22 @@ export const AuthProvider = ({ children, initialSession }: AuthProviderProps) =>
       .catch((error) => setError(new AuthError(error.message)))
       .finally(() => setIsLoading(false))
   }, [])
+
+  useEffect(() => {
+    const authChangeListener = supabase.auth.onAuthStateChange(() => {
+      setIsLoading(true)
+      supabase.auth
+        .getSession()
+        .then(({ data: { session } }) => {
+          setSession(session)
+        })
+        .catch((error) => setError(new AuthError(error.message)))
+        .finally(() => setIsLoading(false))
+    })
+    return () => {
+      authChangeListener.data.subscription.unsubscribe()
+    }
+  }, [supabase])
 
   return (
     <SessionContext.Provider
@@ -86,7 +102,6 @@ export function useProtectedRoute(user: User | null) {
  * see https://github.com/expo/router/issues/745
  *  */
 const replaceRoute = (href: string) => {
-  console.log('replace route', href)
   if (Platform.OS === 'ios') {
     setTimeout(() => {
       router.replace(href)

@@ -35,7 +35,6 @@ const statsInit: Stats = {
 export const stats$ = observable<Stats>({ ...statsInit })
 export const statsActions$ = observable<StatsActions>({
   resetStats: () => {
-    console.log('reset stats')
     stats$.set({ ...statsInit })
   },
 })

@@ -212,15 +212,6 @@ export const trisRouter = createTRPCRouter({
     }
     return data
   }),
-  getUserScoreHighRank: protectedProcedure.query(async ({ ctx: { supabase, session } }) => {
-    const { data, error } = await supabase.rpc('get_user_high_score_leaderboard', {
-      user_id: session.user.id,
-    })
-    if (error != null) {
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
-    }
-    return data
-  }),
   getUserLeaderboards: publicProcedure.query(async ({ ctx: { supabase, session } }) => {
     const user_id = session?.user.id
     if (user_id == null) return null

@@ -25,7 +25,6 @@ import { appActions$, appState$ } from 'app/appState'
 import { actions$, state$ } from 'app/state'
 import { batch, observable } from '@legendapp/state'
 import { View } from 'react-native'
-import { api } from 'app/utils/api'
 const { Provider } = worldContext
 
 const width = 450

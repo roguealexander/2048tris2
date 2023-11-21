@@ -205,6 +205,7 @@ const OnboardingFlowComponent = observer(() => {
                 jc={Platform.OS === 'web' ? 'center' : 'space-between'}
                 ai="center"
                 pb={24}
+                gap={24}
               >
                 <Spacer />
                 <TSizableText>

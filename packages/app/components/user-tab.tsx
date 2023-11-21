@@ -217,7 +217,7 @@ const SettingsSection = observer(() => {
 })
 
 export const UserTab = observer(() => {
-  const { user } = useUser()
+  const { user, session } = useUser()
   return (
     <TabContainer tab="user">
       {appState$.backTab.get() != null && (

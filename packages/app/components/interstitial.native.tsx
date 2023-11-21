@@ -5,8 +5,6 @@ import { memo, useEffect, useRef } from 'react'
 import { useInterstitialAd, TestIds } from 'react-native-google-mobile-ads'
 import { AppState, Platform } from 'react-native'
 
-console.log('Platform', Platform.OS)
-
 const adUnitId = __DEV__
   ? TestIds.INTERSTITIAL
   : Platform.OS === 'ios'
