@@ -13,14 +13,16 @@
         "buildConfiguration": "Debug"
       },
       "env": {
-        "TAMAGUI_TARGET": "native"
+        "TAMAGUI_TARGET": "native",
+        "URL": "2048tris.vercel.app"
       },
       "channel": "development"
     },
     "preview": {
       "node": "18.14.0",
       "env": {
-        "TAMAGUI_TARGET": "native"
+        "TAMAGUI_TARGET": "native",
+        "URL": "2048tris.vercel.app"
       },
       "distribution": "internal",
       "channel": "preview"
@@ -28,7 +30,8 @@
     "production": {
       "node": "18.14.0",
       "env": {
-        "TAMAGUI_TARGET": "native"
+        "TAMAGUI_TARGET": "native",
+        "URL": "2048tris.vercel.app"
       },
       "channel": "production",
       "distribution": "internal"

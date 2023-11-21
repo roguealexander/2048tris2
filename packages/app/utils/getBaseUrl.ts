@@ -29,6 +29,7 @@ export function _getBaseUrl() {
 
 export function getBaseUrl() {
   let url = _getBaseUrl()
+  console.log('base url: ', url)
   if (!isWeb) {
     url = replaceLocalhost(url)
   }
