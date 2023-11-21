@@ -32,8 +32,13 @@ const AnimatedYStack = styled(YStack, {
 })
 
 export const OnboardingFlow = observer(() => {
-  const { user } = useUser()
   const onboarded = appState$.onboarded.get()
+  if (onboarded) return null
+  return <OnboardingFlowComponent />
+})
+
+const OnboardingFlowComponent = observer(() => {
+  const { user } = useUser()
   const step = onboardingStep.get()
   const scale = appState$.scale.get()
   const dir = direction.get()
@@ -102,8 +107,6 @@ export const OnboardingFlow = observer(() => {
         break
     }
   }
-
-  if (onboarded) return null
 
   return (
     <YStack fullscreen bg="$background" zi={50} ai="center" padding={24 * scale} gap={24}>
