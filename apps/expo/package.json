@@ -10,7 +10,8 @@
     "ios": "TAMAGUI_TARGET=native URL=2048tris.vercel.app yarn expo run:ios",
     "lint": "eslint ./app",
     "lint:fix": "eslint ./app --fix",
-    "eject": "expo eject"
+    "eject": "expo eject",
+    "build:ios:production:local": "eas build --platform ios --profile production --local --non-interactive"
   },
   "dependencies": {
     "@babel/runtime": "^7.18.9",

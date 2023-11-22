@@ -1,7 +1,8 @@
 import { observable } from '@legendapp/state'
 import { z } from 'zod'
 import { StatsSchema } from '../api/src/routers/tris'
-import { persistObservable } from '@legendapp/state/persist'
+import { configureObservablePersistence, persistObservable } from '@legendapp/state/persist'
+import { persistenceConfig } from './persistance'
 
 type Stats = z.infer<typeof StatsSchema> & {
   persistCount?: number
@@ -38,6 +39,8 @@ export const statsActions$ = observable<StatsActions>({
     stats$.set({ ...statsInit })
   },
 })
+
+configureObservablePersistence(persistenceConfig)
 
 persistObservable(stats$, {
   local: 'highScores_V3',

@@ -169,9 +169,11 @@ const ScaleAndOrientationCalculator = () => {
 
   const scale = layoutDimension === 'horizontal' ? horizontalScale : verticalScale
 
-  batch(() => {
-    appState$.layoutDimension.set(layoutDimension)
-    appState$.scale.set(scale)
+  setTimeout(() => {
+    batch(() => {
+      appState$.layoutDimension.set(layoutDimension)
+      appState$.scale.set(scale)
+    })
   })
 
   return null

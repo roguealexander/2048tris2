@@ -8,7 +8,6 @@ import { UniversalThemeProvider } from './theme'
 import { ToastProvider } from './toast'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { AdsProvider } from './ads'
-import { PersistenceProvider } from './persistence'
 
 export function Provider({
   initialSession,
@@ -44,5 +43,4 @@ const Providers = compose([
   QueryClientProvider,
   GestureHandlerRootView,
   AdsProvider,
-  PersistenceProvider,
 ])

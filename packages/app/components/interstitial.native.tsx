@@ -14,10 +14,9 @@ const adUnitId = __DEV__
   : null
 
 // eslint-disable-next-line react/display-name
-const InterstitialInner = memo(() => {
+const InterstitialComp = memo(() => {
   const { isLoaded, load, show } = useInterstitialAd(adUnitId, {
     requestNonPersonalizedAdsOnly: true,
-    keywords: ['gaming', 'games'],
   })
 
   useEffect(() => {
@@ -54,5 +53,5 @@ export const Interstitial = observer(() => {
 
   if (!adAvailable) return null
 
-  return <InterstitialInner />
+  return <InterstitialComp />
 })

@@ -1,6 +1,7 @@
 import { observable } from '@legendapp/state'
 import { TileSize } from './types'
-import { persistObservable } from '@legendapp/state/persist'
+import { configureObservablePersistence, persistObservable } from '@legendapp/state/persist'
+import { persistenceConfig } from './persistance'
 
 export type Tab = '2048tris' | 'how-to-play' | 'leaderboard' | 'user' | 'debug'
 export type LayoutDimension = 'vertical' | 'horizontal'
@@ -63,6 +64,8 @@ export const appActions$ = observable<AppActions>({
     }
   },
 })
+
+configureObservablePersistence(persistenceConfig)
 
 persistObservable(appState$, {
   local: 'appState',
