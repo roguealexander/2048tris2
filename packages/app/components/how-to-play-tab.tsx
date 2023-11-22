@@ -181,7 +181,7 @@ export const DropExample = observer(() => {
             bg="$playarea"
             blw={4 * scale}
             brw={4 * scale}
-            boc="$border"
+            boc="$playarea"
           />
           <LinearGradient
             pos="absolute"
@@ -251,8 +251,6 @@ export const HoldExample = observer(() => {
           jc="center"
           ai="center"
           bg="$playarea"
-          bw={4 * scale}
-          boc="$border"
           pos="relative"
           cur="pointer"
           onPress={swapActiveAndHoldTile}

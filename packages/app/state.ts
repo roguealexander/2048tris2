@@ -2,6 +2,7 @@ import { batch, computed, observable } from '@legendapp/state'
 import { MilestoneTile, TileList, TileQueue, TileRecord, TileSize } from './types'
 import { rand } from '@ngneat/falso'
 import { stats$ } from './statsState'
+import { appState$ } from './appState'
 
 type MilestonePanelProps = {
   tile: MilestoneTile
@@ -117,7 +118,8 @@ export const state$ = observable<GameState & GameStateComputed>({
       !state$.started.get() ||
       state$.toppedOut.get() ||
       state$.resetting.get() ||
-      state$.activeMilestonePanel.get() !== null
+      state$.activeMilestonePanel.get() !== null ||
+      appState$.statsPanelOpen.get()
     )
   }),
 

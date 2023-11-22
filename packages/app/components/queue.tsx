@@ -35,12 +35,10 @@ export const Queue = observer(() => {
         <YStack
           w={(horizontal ? horizontalScale : verticalScale) * scale}
           h={(horizontal ? horizontalScale : verticalScale) * scale}
-          bw={4 * scale}
-          boc="$border"
           ai="center"
           jc="center"
         >
-          <Tile size={state$.queue[0]} fixedSize={vertical ? '4' : undefined} />
+          <Tile size={state$.queue[0]} fixedSize={vertical ? '8' : undefined} />
         </YStack>
         {[1, 2, 3].map((index) => {
           return (

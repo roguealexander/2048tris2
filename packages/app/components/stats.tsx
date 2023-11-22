@@ -5,7 +5,6 @@ import { DefaultBestTime, stats$ } from 'app/statsState'
 import { appState$ } from 'app/appState'
 import { colors } from 'app/colors'
 import { getMinutesAndSeconds } from 'app/utils/time'
-import { TextBreak } from './TextBreak'
 
 const HighScoreValue = observer(() => {
   const score = stats$.scoreHigh.get()
@@ -59,8 +58,7 @@ export const Milestone = observer(() => {
   return (
     <YStack gap={8 * scale} w="100%" ai="center">
       <TSizableText size="$2">
-        High Score:
-        <TextBreak />
+        Record:{' '}
         <TSizableText fontWeight="bold">
           <HighScoreValue />
         </TSizableText>

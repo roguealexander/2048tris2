@@ -316,7 +316,7 @@ const extractRowData = (type: LeaderboardType, row: LeaderboardValues[0]): RowDa
   }
 }
 const extractRowValue = (type: LeaderboardType, row: LeaderboardValues[0]): string => {
-  const value = row[typeDataColumn(type)] as number
+  const value = (row as any)[typeDataColumn(type)] as number
   return rowValueString(type, value)
 }
 const rowValueString = (type: LeaderboardType, value: number): string => {

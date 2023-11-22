@@ -230,7 +230,6 @@ const OnboardingFlowComponent = observer(() => {
               animation="200ms"
               w={16}
               h={8}
-              bw={0}
               bg="$btn"
             />
           </XStack>

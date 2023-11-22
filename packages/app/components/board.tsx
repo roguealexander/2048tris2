@@ -160,7 +160,7 @@ export const BoardComp = observer(() => {
       bg="$playarea"
       bw={4 * scale}
       btw={0}
-      boc="$border"
+      boc="$playarea"
       w={width * scale}
       h={height * scale}
     >
