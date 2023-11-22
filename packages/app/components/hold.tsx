@@ -16,7 +16,7 @@ export const Hold = observer(() => {
   const opacitySV = useSharedValue(0)
 
   useObserve(state$.holdShakeKey, ({ previous, value }) => {
-    if (value !== previous) {
+    if (value != null && value !== previous) {
       opacitySV.value = 0.6
       opacitySV.value = withTiming(0, { duration: 400 })
     }
