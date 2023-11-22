@@ -147,71 +147,6 @@ export const trisRouter = createTRPCRouter({
 
       return parsed.data as Stats
     }),
-  getLeaderboard: publicProcedure
-    .input(LeaderboardTypeSchema)
-    .query(async ({ ctx: { supabase }, input }) => {
-      const { data, error } = await supabase.from('users').select(`id, name, ${input}`).limit(10)
-      if (error != null) {
-        throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
-      }
-      return data
-    }),
-  getHighScoreLeaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
-    const { data, error } = await supabase.rpc('get_score_high_leaderboard')
-    if (error != null) {
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
-    }
-    return data
-  }),
-  getLowScoreLeaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
-    const { data, error } = await supabase.rpc('get_score_low_leaderboard')
-    if (error != null) {
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
-    }
-    return data
-  }),
-  getEfficiency2048Leaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
-    const { data, error } = await supabase.rpc('get_efficiency_2048_leaderboard')
-    if (error != null) {
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
-    }
-    return data
-  }),
-  getEfficiency4096Leaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
-    const { data, error } = await supabase.rpc('get_efficiency_4096_leaderboard')
-    if (error != null) {
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
-    }
-    return data
-  }),
-  getEfficiency8192Leaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
-    const { data, error } = await supabase.rpc('get_efficiency_8192_leaderboard')
-    if (error != null) {
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
-    }
-    return data
-  }),
-  getBestTime2048Leaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
-    const { data, error } = await supabase.rpc('get_best_time_2048_leaderboard')
-    if (error != null) {
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
-    }
-    return data
-  }),
-  getBestTime4096Leaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
-    const { data, error } = await supabase.rpc('get_best_time_4096_leaderboard')
-    if (error != null) {
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
-    }
-    return data
-  }),
-  getBestTime8192Leaderboard: publicProcedure.query(async ({ ctx: { supabase } }) => {
-    const { data, error } = await supabase.rpc('get_best_time_8192_leaderboard')
-    if (error != null) {
-      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
-    }
-    return data
-  }),
   getUserLeaderboards: publicProcedure.query(async ({ ctx: { supabase, session } }) => {
     const user_id = session?.user.id
     if (user_id == null) return null
@@ -234,6 +169,63 @@ export const trisRouter = createTRPCRouter({
       supabase.rpc('get_user_best_time_2048_leaderboard', { user_id }).limit(1).single(),
       supabase.rpc('get_user_best_time_4096_leaderboard', { user_id }).limit(1).single(),
       supabase.rpc('get_user_best_time_8192_leaderboard', { user_id }).limit(1).single(),
+    ])
+
+    if (highScoreError != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: highScoreError.message })
+    }
+    if (lowScoreError != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: lowScoreError.message })
+    }
+    if (efficiency2048Error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: efficiency2048Error.message })
+    }
+    if (efficiency4096Error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: efficiency4096Error.message })
+    }
+    if (efficiency8192Error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: efficiency8192Error.message })
+    }
+    if (bestTime2048Error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: bestTime2048Error.message })
+    }
+    if (bestTime4096Error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: bestTime4096Error.message })
+    }
+    if (bestTime8192Error != null) {
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: bestTime8192Error.message })
+    }
+
+    return {
+      scoreHigh: highScoreData,
+      scoreLow: lowScoreData,
+      efficiency2048: efficiency2048Data,
+      efficiency4096: efficiency4096Data,
+      efficiency8192: efficiency8192Data,
+      bestTime2048: bestTime2048Data,
+      bestTime4096: bestTime4096Data,
+      bestTime8192: bestTime8192Data,
+    }
+  }),
+  getLeaderboards: publicProcedure.query(async ({ ctx: { supabase } }) => {
+    const [
+      { data: highScoreData, error: highScoreError },
+      { data: lowScoreData, error: lowScoreError },
+      { data: efficiency2048Data, error: efficiency2048Error },
+      { data: efficiency4096Data, error: efficiency4096Error },
+      { data: efficiency8192Data, error: efficiency8192Error },
+      { data: bestTime2048Data, error: bestTime2048Error },
+      { data: bestTime4096Data, error: bestTime4096Error },
+      { data: bestTime8192Data, error: bestTime8192Error },
+    ] = await Promise.all([
+      supabase.rpc('get_score_high_leaderboard'),
+      supabase.rpc('get_score_low_leaderboard'),
+      supabase.rpc('get_efficiency_2048_leaderboard'),
+      supabase.rpc('get_efficiency_4096_leaderboard'),
+      supabase.rpc('get_efficiency_8192_leaderboard'),
+      supabase.rpc('get_best_time_2048_leaderboard'),
+      supabase.rpc('get_best_time_4096_leaderboard'),
+      supabase.rpc('get_best_time_8192_leaderboard'),
     ])
 
     if (highScoreError != null) {

@@ -258,74 +258,21 @@ const Row = observer(
   }
 )
 
-type LeaderboardQueryData =
-  | RouterOutputs['tris']['getHighScoreLeaderboard']
-  | RouterOutputs['tris']['getLowScoreLeaderboard']
-  | RouterOutputs['tris']['getEfficiency2048Leaderboard']
-  | RouterOutputs['tris']['getEfficiency4096Leaderboard']
-  | RouterOutputs['tris']['getEfficiency8192Leaderboard']
-  | RouterOutputs['tris']['getBestTime2048Leaderboard']
-  | RouterOutputs['tris']['getBestTime4096Leaderboard']
-  | RouterOutputs['tris']['getBestTime8192Leaderboard']
+type LeaderboardQueryData = RouterOutputs['tris']['getLeaderboards']
+type LeaderboardsKeys = keyof LeaderboardQueryData
+type LeaderboardValues = NonNullable<LeaderboardQueryData[LeaderboardsKeys]>
 
 export const Leaderboard = observer(() => {
+  const { data: leaderboards, error, isLoading } = api.tris.getLeaderboards.useQuery()
   const leaderboardType = leaderboard$.get()
-  switch (leaderboardType) {
-    case 'scoreHigh':
-      return <ScoreHighLeaderboard />
-    case 'scoreLow':
-      return <ScoreLowLeaderboard />
-    case 'efficiency2048':
-      return <Efficiency2048Leaderboard />
-    case 'efficiency4096':
-      return <Efficiency4096Leaderboard />
-    case 'efficiency8192':
-      return <Efficiency8192Leaderboard />
-    case 'bestTime2048':
-      return <BestTime2048Leaderboard />
-    case 'bestTime4096':
-      return <BestTime4096Leaderboard />
-    case 'bestTime8192':
-      return <BestTime8192Leaderboard />
-  }
-})
+  const leaderboard = leaderboards?.[leaderboardType]
 
-const ScoreHighLeaderboard = observer(() => {
-  const { data, error, isLoading } = api.tris.getHighScoreLeaderboard.useQuery()
-  return <Table data={data} error={error?.message} isLoading={isLoading} />
-})
-const ScoreLowLeaderboard = observer(() => {
-  const { data, error, isLoading } = api.tris.getLowScoreLeaderboard.useQuery()
-  return <Table data={data} error={error?.message} isLoading={isLoading} />
-})
-const Efficiency2048Leaderboard = observer(() => {
-  const { data, error, isLoading } = api.tris.getEfficiency2048Leaderboard.useQuery()
-  return <Table data={data} error={error?.message} isLoading={isLoading} />
-})
-const Efficiency4096Leaderboard = observer(() => {
-  const { data, error, isLoading } = api.tris.getEfficiency4096Leaderboard.useQuery()
-  return <Table data={data} error={error?.message} isLoading={isLoading} />
-})
-const Efficiency8192Leaderboard = observer(() => {
-  const { data, error, isLoading } = api.tris.getEfficiency8192Leaderboard.useQuery()
-  return <Table data={data} error={error?.message} isLoading={isLoading} />
-})
-const BestTime2048Leaderboard = observer(() => {
-  const { data, error, isLoading } = api.tris.getBestTime2048Leaderboard.useQuery()
-  return <Table data={data} error={error?.message} isLoading={isLoading} />
-})
-const BestTime4096Leaderboard = observer(() => {
-  const { data, error, isLoading } = api.tris.getBestTime4096Leaderboard.useQuery()
-  return <Table data={data} error={error?.message} isLoading={isLoading} />
-})
-const BestTime8192Leaderboard = observer(() => {
-  const { data, error, isLoading } = api.tris.getBestTime8192Leaderboard.useQuery()
-  return <Table data={data} error={error?.message} isLoading={isLoading} />
+  return <Table data={leaderboard} error={error?.message} isLoading={isLoading} />
 })
 
 type RowData = { id: string; rank: number; name: string; value: string }
 
-const extractRows = (type: LeaderboardType, data: LeaderboardQueryData | undefined) => {
+const extractRows = (type: LeaderboardType, data: LeaderboardValues | null | undefined) => {
   if (data == null) return []
   return data.map((row) => extractRowData(type, row))
 }
@@ -360,7 +307,7 @@ const typeDataColumn = (type: LeaderboardType): string => {
       return type
   }
 }
-const extractRowData = (type: LeaderboardType, row: LeaderboardQueryData[0]): RowData => {
+const extractRowData = (type: LeaderboardType, row: LeaderboardValues[0]): RowData => {
   return {
     id: row.id,
     name: row.name,
@@ -368,8 +315,8 @@ const extractRowData = (type: LeaderboardType, row: LeaderboardQueryData[0]): Ro
     value: extractRowValue(type, row),
   }
 }
-const extractRowValue = (type: LeaderboardType, row: LeaderboardQueryData[0]): string => {
-  const value = (row as any)[typeDataColumn(type)] as number
+const extractRowValue = (type: LeaderboardType, row: LeaderboardValues[0]): string => {
+  const value = row[typeDataColumn(type)] as number
   return rowValueString(type, value)
 }
 const rowValueString = (type: LeaderboardType, value: number): string => {
@@ -394,7 +341,7 @@ const Table = observer(
     error,
     isLoading,
   }: {
-    data: LeaderboardQueryData | undefined
+    data: LeaderboardValues | undefined | null
     error: string | undefined
     isLoading: boolean
   }) => {
