@@ -4,6 +4,7 @@ import { TileSize } from '../types'
 import { Observable, ObservableComputed } from '@legendapp/state'
 import { observer } from '@legendapp/state/react'
 import { appState$ } from 'app/appState'
+import chroma from 'chroma-js'
 
 export const PlaceholderTile = ({ fixedSize, scale }: { fixedSize?: TileSize; scale: number }) => {
   const fixedRadius = fixedSize ? getTileRadius(fixedSize) : undefined
@@ -23,10 +24,12 @@ export const Tile = observer(
     size,
     fixedSize,
     stackProps,
+    grayscale,
   }: {
     size?: Observable<TileSize | null> | ObservableComputed<TileSize | null>
     fixedSize?: TileSize
     stackProps?: StackProps
+    grayscale?: boolean
   }) => {
     const scale = appState$.scale.get()
     const tileSize = size?.get()
@@ -40,7 +43,7 @@ export const Tile = observer(
         w={tileRadius}
         h={tileRadius}
         br={tileRadius}
-        bg={tileData.color}
+        bg={grayscale ? chroma(tileData.color).desaturate(1).css() : tileData.color}
         jc="center"
         ai="center"
         pe="none"

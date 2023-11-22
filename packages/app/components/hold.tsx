@@ -5,6 +5,7 @@ import { Shake, TSizableText, XStack, YStack } from '@my/ui'
 import { appState$ } from 'app/appState'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { colors } from 'app/colors'
+import chroma from 'chroma-js'
 
 const horizontalSize = 144
 const verticalSize = 104
@@ -12,6 +13,7 @@ const verticalSize = 104
 export const Hold = observer(() => {
   const scale = appState$.scale.get()
   const horizontal = appState$.layoutDimension.get() === 'horizontal'
+  const holdAvailable = state$.holdAvailable.get()
 
   const opacitySV = useSharedValue(0)
 
@@ -36,7 +38,9 @@ export const Hold = observer(() => {
         h={(horizontal ? horizontalSize : verticalSize) * scale}
         jc="center"
         ai="center"
-        bg="$playarea"
+        bg={
+          holdAvailable ? '$playarea' : chroma(colors.playarea).desaturate(1).brighten(0.25).css()
+        }
         cur="pointer"
         onPress={() => actions$.hold()}
       >
@@ -49,14 +53,17 @@ export const Hold = observer(() => {
               right: 0,
               bottom: 0,
               backgroundColor: colors.tile['32'],
+              zIndex: 2,
             },
             animatedStyle,
           ]}
         />
         <Shake shakeKey={state$.holdShakeKey.get()} shakeDistance={12} shakeTimes={5}>
-          <XStack o={state$.holdAvailable.get() ? 1 : 0.5}>
-            <Tile size={state$.heldTile} fixedSize={horizontal ? undefined : '8'} />
-          </XStack>
+          <Tile
+            size={state$.heldTile}
+            fixedSize={horizontal ? undefined : '8'}
+            grayscale={!holdAvailable}
+          />
         </Shake>
       </XStack>
     </YStack>
