@@ -13,7 +13,9 @@ export const StatsPersistor = observer(() => {
   useObserve(stats$.persistCount, async ({ value }) => {
     const stats = stats$.peek()
     if (value == null || user == null || stats == null) return null
-    await mutation.mutateAsync(stats)
+    await mutation.mutateAsync(stats).catch((error) => {
+      console.error('Error updating userStats', error)
+    })
     utils.invalidate()
   })
 

@@ -28,12 +28,14 @@ export const AuthComponent = observer(() => {
   const supabase = useSupabase()
   const form = useForm<z.infer<typeof SignInSchema>>()
   const updateStatsMutation = api.tris.updateUserStats.useMutation()
+  const utils = api.useContext()
 
   const signingIn = signUpSignIn$.get() === 'sign-in'
 
   const persistExistingStats = async () => {
     const updatedStats = await updateStatsMutation.mutateAsync(stats$.get())
     stats$.set(updatedStats)
+    utils.invalidate()
   }
 
   const handleError = (errorMessage: string) => {

@@ -239,9 +239,9 @@ const Tabs = observer(() => {
       ai="center"
       jc="space-between"
       pos="absolute"
+      bg="$background"
       t={0}
     >
-      <XStack fullscreen o={0.9} bg="$background" />
       <XStack>
         <XStack
           h="$3"

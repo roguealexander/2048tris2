@@ -216,11 +216,13 @@ const Header = observer(() => {
     <>
       <XStack h="$4" w="100%" ai="center" jc="space-between" px="$4" pos="relative">
         <XStack fullscreen bg={colors.tile['2']} zi={-1} />
-        <XStack ai="center" jc="center" gap="$4">
-          <TSizableText w={50}>RANK</TSizableText>
-          <TSizableText fontWeight="bold">PLAYER</TSizableText>
-        </XStack>
-        <TSizableText fontWeight="bold" textAlign="right">
+        <TSizableText size="$2" w={40} mr={4}>
+          RANK
+        </TSizableText>
+        <TSizableText size="$2" f={1} mr={4} fontWeight="bold">
+          PLAYER
+        </TSizableText>
+        <TSizableText size="$2" fontWeight="bold" textAlign="right">
           <Memo>{leaderboardTitle$}</Memo>
         </TSizableText>
       </XStack>
@@ -240,16 +242,18 @@ const Row = observer(
     highlight?: boolean
   }) => {
     return (
-      <XStack pos="relative" h="$3" w="100%" ai="center" jc="space-between" px="$4">
+      <XStack pos="relative" h="$3" w="100%" maw="100%" ai="center" jc="flex-start" px="$4">
         {(highlight || index % 2 === 0) && (
           <XStack fullscreen bg={colors.tile['2']} o={0.5} zi={-1} />
         )}
         {data != null && (
           <>
-            <XStack ai="center" jc="center" gap="$4">
-              <TSizableText w={40}>{data.rank ?? '--'}</TSizableText>
-              <TSizableText fontWeight="bold">{data.name ?? ''}</TSizableText>
-            </XStack>
+            <TSizableText w={40} mr={4}>
+              {data.rank ?? '--'}
+            </TSizableText>
+            <TSizableText f={1} mr={4} numberOfLines={1} fontWeight="bold" textOverflow="ellipsis">
+              {data.name ?? ''}
+            </TSizableText>
             <TSizableText>{data.value ?? ''}</TSizableText>
           </>
         )}

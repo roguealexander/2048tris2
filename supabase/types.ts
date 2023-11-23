@@ -20,6 +20,7 @@ export interface Database {
           efficiency8192: number
           gamesPlayed: number
           id: string
+          isSeed: boolean
           muted: boolean
           name: string
           scoreHigh: number
@@ -36,6 +37,7 @@ export interface Database {
           efficiency8192?: number
           gamesPlayed?: number
           id: string
+          isSeed?: boolean
           muted?: boolean
           name: string
           scoreHigh?: number
@@ -52,6 +54,7 @@ export interface Database {
           efficiency8192?: number
           gamesPlayed?: number
           id?: string
+          isSeed?: boolean
           muted?: boolean
           name?: string
           scoreHigh?: number

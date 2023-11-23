@@ -19,10 +19,14 @@
     "reset": "npx supabase db reset && npx supabase start",
     "status": "npx supabase status",
     "_deploy": "yarn link-project && npx supabase db push",
-    "deploy": "yarn _with-env yarn _deploy"
+    "deploy": "yarn _with-env yarn _deploy",
+    "seed": "yarn"
   },
   "devDependencies": {
+    "@types/uuid": "^9",
     "dotenv-cli": "^6.0.0",
-    "supabase": "^1.99.0"
+    "supabase": "^1.99.0",
+    "ts-node": "^10.9.1",
+    "uuid": "^9.0.1"
   }
 }

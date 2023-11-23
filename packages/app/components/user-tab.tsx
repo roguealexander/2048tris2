@@ -19,10 +19,14 @@ const Header = observer(() => {
     <>
       <XStack h="$4" w="100%" ai="center" jc="space-between" px={18 * scale} pos="relative">
         <XStack fullscreen bg={colors.tile['2']} zi={-1} />
-        <TSizableText fontWeight="bold">LEADERBOARD</TSizableText>
+        <TSizableText size="$1" fontWeight="bold">
+          LEADERBOARD
+        </TSizableText>
         <XStack ai="center" jc="center" gap={18 * scale}>
-          <TSizableText fontWeight="bold">RANK</TSizableText>
-          <TSizableText fontWeight="bold" textAlign="right" w={80 * scale}>
+          <TSizableText size="$1" fontWeight="bold">
+            RANK
+          </TSizableText>
+          <TSizableText size="$1" fontWeight="bold" textAlign="right" w={80 * scale}>
             SCORE
           </TSizableText>
         </XStack>
@@ -61,6 +65,7 @@ const Row = observer(
 )
 
 const LeaderboardStatsTable = observer(() => {
+  const { user } = useUser()
   const { data: leaderboards } = api.tris.getUserLeaderboards.useQuery()
   const scoreHigh = stats$.scoreHigh.get()
   const scoreLow = stats$.scoreLow.get()
@@ -78,13 +83,13 @@ const LeaderboardStatsTable = observer(() => {
       <TSizableText size="$3">POINTS:</TSizableText>
       <Row
         key={0}
-        rank={leaderboards?.scoreHigh?.rank}
+        rank={user == null ? undefined : leaderboards?.scoreHigh?.rank}
         leaderboard="HIGH SCORE"
         score={scoreHigh === 0 ? '--' : `${scoreHigh}`}
       />
       <Row
         key={1}
-        rank={leaderboards?.scoreLow?.rank}
+        rank={user == null ? undefined : leaderboards?.scoreLow?.rank}
         leaderboard="LOW SCORE"
         score={scoreLow === DefaultLowScore ? '--' : `${scoreLow}`}
         highlight
@@ -93,20 +98,20 @@ const LeaderboardStatsTable = observer(() => {
       <TSizableText size="$3">EFFICIENCY:</TSizableText>
       <Row
         key={2}
-        rank={leaderboards?.efficiency2048?.rank}
+        rank={user == null ? undefined : leaderboards?.efficiency2048?.rank}
         leaderboard="2048 EFFICIENCY"
         score={efficiency2048 === 0 ? '--' : `${efficiency2048}%`}
       />
       <Row
         key={3}
-        rank={leaderboards?.efficiency4096?.rank}
+        rank={user == null ? undefined : leaderboards?.efficiency4096?.rank}
         leaderboard="4096 EFFICIENCY"
         score={efficiency4096 === 0 ? '--' : `${efficiency4096}%`}
         highlight
       />
       <Row
         key={4}
-        rank={leaderboards?.efficiency8192?.rank}
+        rank={user == null ? undefined : leaderboards?.efficiency8192?.rank}
         leaderboard="8192 EFFICIENCY"
         score={efficiency8192 === 0 ? '--' : `${efficiency8192}%`}
       />
@@ -114,20 +119,20 @@ const LeaderboardStatsTable = observer(() => {
       <TSizableText size="$3">BEST TIME:</TSizableText>
       <Row
         key={5}
-        rank={leaderboards?.bestTime2048?.rank}
+        rank={user == null ? undefined : leaderboards?.bestTime2048?.rank}
         leaderboard="2048 BEST TIME"
         score={bestTime2048 === DefaultBestTime ? '--' : `${getMinutesAndSeconds(bestTime2048)}`}
       />
       <Row
         key={6}
-        rank={leaderboards?.bestTime4096?.rank}
+        rank={user == null ? undefined : leaderboards?.bestTime4096?.rank}
         leaderboard="4096 BEST TIME"
         score={bestTime4096 === DefaultBestTime ? '--' : `${getMinutesAndSeconds(bestTime4096)}`}
         highlight
       />
       <Row
         key={7}
-        rank={leaderboards?.bestTime8192?.rank}
+        rank={user == null ? undefined : leaderboards?.bestTime8192?.rank}
         leaderboard="8192 BEST TIME"
         score={bestTime8192 === DefaultBestTime ? '--' : `${getMinutesAndSeconds(bestTime8192)}`}
       />
@@ -141,11 +146,9 @@ const ResetStatsButton = observer(() => {
 
   const resetStats = async () => {
     resetting.set(true)
-    try {
-      await resetStatsMutation.mutateAsync()
-    } catch (error) {
-      console.log('ERROR RESETTING STATS REMOTELY', error)
-    }
+    await resetStatsMutation.mutateAsync().catch((error) => {
+      console.log('ERROR RESETTING STATS', error)
+    })
     statsActions$.resetStats()
     resetting.set(false)
   }
